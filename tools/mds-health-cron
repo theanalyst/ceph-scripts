@@ -1,4 +1,13 @@
 #!/usr/bin/env bash
 
-MAX_CAPS=$(ceph daemon mds.`hostname -s` config show | jq -r .mds_max_caps_per_client)
-ceph daemon mds.`hostname -s` session ls | jq ".[]|select(.num_caps>$((5*MAX_CAPS)))"
+# Exit immediately if a command exits with a non-zero status.
+set -e
+
+# Exit if inactive
+HOSTNAME=$(hostname -s)
+ceph daemon mds.${HOSTNAME} status 2>/dev/null | jq -e '.state == "up:active"' &> /dev/null
+
+
+# Get current mds_max_caps_per_client
+MAX_CAPS=$(ceph daemon mds.${HOSTNAME} config show | jq -r .mds_max_caps_per_client)
+ceph daemon mds.${HOSTNAME} session ls | jq ".[]|select(.num_caps>$((5*MAX_CAPS)))"
