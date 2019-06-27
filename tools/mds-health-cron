@@ -8,6 +8,6 @@ HOSTNAME=$(hostname -s)
 ceph daemon mds.${HOSTNAME} status 2>/dev/null | jq -e '.state == "up:active"' &> /dev/null
 
 
-# Get current mds_max_caps_per_client
-MAX_CAPS=$(ceph daemon mds.${HOSTNAME} config show | jq -r .mds_max_caps_per_client)
+# Get current mds_max_caps_per_client (or 20000 if not defined)
+MAX_CAPS=$(ceph daemon mds.${HOSTNAME} config show | jq -r '[.mds_max_caps_per_client + 0, 20000]|max')
 ceph daemon mds.${HOSTNAME} session ls | jq ".[]|select(.num_caps>$((5*MAX_CAPS)))"
