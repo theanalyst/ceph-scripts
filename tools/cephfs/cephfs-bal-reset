@@ -1,0 +1,14 @@
+#!/bin/bash
+
+target=$1
+
+# cd to the dir to shard
+cd $target
+
+# iterate over the subdirs and pin them
+for dir in `find . -mindepth 1 -maxdepth 1 -type d`
+do
+    # pin the dir
+    echo Pinning ${dir} to -1
+    setfattr -n ceph.dir.pin -v -1 ${dir}
+done

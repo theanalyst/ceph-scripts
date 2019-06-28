@@ -1,12 +1,21 @@
 #!/bin/bash
 
-/root/cephfs-bal-shard dwight /cephfs-dwight/
-/root/cephfs-bal-shard dwight /cephfs-dwight/k8s/
-/root/cephfs-bal-shard dwight /cephfs-dwight/volumes/
-/root/cephfs-bal-shard dwight /cephfs-dwight/volumes/_nogroup/
+#./cephfs-bal-shard dwight /cephfs-dwight/
+#./cephfs-bal-shard dwight /cephfs-dwight/k8s/
+#./cephfs-bal-shard dwight /cephfs-dwight/volumes/
+#./cephfs-bal-shard dwight /cephfs-dwight/volumes/_nogroup/
 
-/root/cephfs-bal-shard flax /cephfs-flax/
-/root/cephfs-bal-shard flax /cephfs-flax/hpcqcd/
-/root/cephfs-bal-shard flax /cephfs-flax/hpcqcd/user/
-/root/cephfs-bal-shard flax /cephfs-flax/volumes/
-/root/cephfs-bal-shard flax /cephfs-flax/volumes/_nogroup/
+# Flax:
+
+echo Pinning /cephfs-flax/volumes to mds.0
+setfattr -n ceph.dir.pin -v 0 /cephfs-flax/volumes
+echo Pinning /cephfs-flax/volumes/_nogroup to mds.0
+setfattr -n ceph.dir.pin -v 0 /cephfs-flax/volumes/_nogroup
+echo Pinning /cephfs-flax/volumes/_deleting to mds.0
+setfattr -n ceph.dir.pin -v 0 /cephfs-flax/volumes/_deleting
+
+#echo Pinning /cephfs-flax/hpcqcd to mds.0
+#setfattr -n ceph.dir.pin -v 0 /cephfs-flax/volumes
+
+./cephfs-bal-shard flax /cephfs-flax/hpcqcd/user/
+./cephfs-bal-shard flax /cephfs-flax/volumes/_nogroup/

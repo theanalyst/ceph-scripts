@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#./cephfs-bal-reset /cephfs-dwight/
+#./cephfs-bal-reset /cephfs-dwight/k8s/
+#./cephfs-bal-reset /cephfs-dwight/volumes/
+#./cephfs-bal-reset /cephfs-dwight/volumes/_nogroup/
+
+#./cephfs-bal-reset /cephfs-flax/
+#./cephfs-bal-reset /cephfs-flax/hpcqcd/
+#./cephfs-bal-reset /cephfs-flax/hpcqcd/user/
+#./cephfs-bal-reset /cephfs-flax/volumes/
+#./cephfs-bal-reset /cephfs-flax/volumes/_nogroup/
