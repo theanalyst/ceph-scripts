@@ -7,6 +7,17 @@ set -e
 HOSTNAME=$(hostname -s)
 ceph daemon mds.${HOSTNAME} status 2>/dev/null | jq -e '.state == "up:active"' &> /dev/null
 
+# Check RSS vs Physical Mem
+RSS=$(ceph daemon mds.${HOSTNAME} perf dump mds_mem | jq -r .mds_mem.rss)
+MEM=$(cat /proc/meminfo | grep MemTotal | awk '{print $2}')
+
+LIMIT=$( echo "${MEM}*0.75" | bc -l)
+
+if (( $(echo "${RSS} > ${LIMIT}" |bc -l) ))
+then
+  echo ceph-mds using too much memory: rss ${RSS} limit ${LIMIT}
+  free -m
+fi
 
 # Get current mds_max_caps_per_client (or 20000 if not defined)
 # TODO this is not working on mimic because the option is not available
