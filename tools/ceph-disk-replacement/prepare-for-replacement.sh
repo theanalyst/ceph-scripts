@@ -90,7 +90,7 @@ NUM=`lvs -o +devices,tags | grep type=block | grep $OSD | grep -oE "/dev/.* " | 
 if [[ $NUM -gt 1 ]];
 then
   draw "osd.$OSD has $NUM drives"
-  echo "echo \"Please note that the OSD was using the following drives: `lvs -o +devices,tags | grep type=block | grep  $OSD | grep -oE "/dev/.* " | sed 's/([0-9])//g'` \""
+  echo "echo \"Please note that the OSD was using the following drives: `lvs -o +devices,tags | grep type=block | grep osd_id=$OSD | grep -oE "/dev/.* " | sed 's/([0-9])//g'`\""
 fi
 
 
