@@ -102,7 +102,7 @@ if [[ $retval -eq 0 ]];
 then
   echo "systemctl stop ceph-osd@$OSD"
   echo "umount /var/lib/ceph/osd/ceph-$OSD"
-  echo "ceph-volume lvm zap $DEV --destroy"
+  echo "ceph-volume lvm zap --destroy --osd-id $OSD"
 else
   echo "echo \"osd.$OSD still unsafe to destroy\"" 
 fi
