@@ -1,10 +1,10 @@
 #! /bin/bash
 
-#if [[ `cat /etc/motd | grep hostgroup | grep -Eo "ceph/[a-Z0-9/]+" | grep -c castor` -eq 1 ]];
-#then
-#  echo "echo \"Castor nodes need special handling: contact ceph-admins\""
-#  exit
-#fi
+if [[ `cat /etc/motd | grep hostgroup | grep -Eo "ceph/[a-Z0-9/]+" | grep -c castor` -eq 1 ]];
+then
+  echo "#castor mode ON"
+  CASTOR=1
+fi
 
 
 INITSTATE=`ceph health`
@@ -115,20 +115,31 @@ then
   fi
 fi
 
-
-echo "ceph-volume lvm zap $DEV"
-
-
-if [[ -z $DBD ]];
-then 
-  echo "ceph osd destroy $OSD --yes-i-really-mean-it"
-  echo "ceph-volume lvm create --osd-id $OSD --data $DEV"
+if [[ $CASTOR -eq 1 ]];
+then
+  for i in `lsscsi | grep -Eo "/dev/sd[c-z][a-z]|/dev/sda[a-z]" | grep -vE "$DEV"`; 
+  do 
+    lvs -o +devices,tags | grep -q $i; 
+    if [[ $? -eq 1 ]];
+    then
+      MOREDEV=`echo $i`; 
+    fi;
+  done
+  CMDS=`../../ceph-volume/striped-osd-prepare.sh $DEV $MOREDEV`
+  echo "$CMDS --osd-id $OSD"
 else
-  echo "ceph-volume lvm zap $DBD"
-  echo "ceph osd destroy $OSD --yes-i-really-mean-it"
-  echo "ceph-volume lvm create --osd-id $OSD --data $DEV --block.db $DBD"
-fi
+  echo "ceph-volume lvm zap $DEV"
 
+  if [[ -z $DBD ]];
+  then 
+    echo "ceph osd destroy $OSD --yes-i-really-mean-it"
+    echo "ceph-volume lvm create --osd-id $OSD --data $DEV"
+  else
+    echo "ceph-volume lvm zap $DBD"
+    echo "ceph osd destroy $OSD --yes-i-really-mean-it"
+    echo "ceph-volume lvm create --osd-id $OSD --data $DEV --block.db $DBD"
+  fi
+fi
 
 ## TODO
 #
