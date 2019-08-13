@@ -1,12 +1,5 @@
 #! /bin/bash
 
-#if [[ `cat /etc/motd | grep hostgroup | grep -Eo "ceph/[a-Z0-9/]+" | grep -c castor` -eq 1 ]];
-#then
-#  echo "echo \"Castor nodes need special handling: contact ceph-admins\""
-#  exit
-#fi
-
-
 INITSTATE=`ceph health`
 FORCEMODE=0;
 VERBOSE=0
@@ -64,7 +57,7 @@ then
   if [[ $FORCEMODE -eq 0 ]];
   then
     echo "echo \"Ceph is $INITSTATE, aborting\""
-    echo "echo \"Use -f to force execution\""
+    echo "echo \"Please retry in a while\""
     exit
   else
     draw "Ceph is $INITSTATE"

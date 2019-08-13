@@ -76,7 +76,7 @@ then
   if [[ $FORCEMODE -eq 0 ]];
   then
     echo "echo \"Ceph is $INITSTATE, aborting\""
-    echo "echo \"Use -f to force execution\""
+    echo "echo \"Please retry in a while\""
     exit
   else
     draw "# Ceph is $INITSTATE"
