@@ -115,6 +115,17 @@ then
   fi
 fi
 
+
+
+ceph osd safe-to-destroy osd.$OSD &> /dev/null
+retval=`echo $?`
+
+if [[ $retval -ne 0 ]];
+then
+  echo "echo \"osd.$OSD still unsafe to destroy\"" 
+  exit
+fi
+
 if [[ $CASTOR -eq 1 ]];
 then
   for i in `lsscsi | grep -Eo "/dev/sd[c-z][a-z]|/dev/sda[a-z]" | grep -vE "$DEV"`; 
@@ -125,6 +136,11 @@ then
       MOREDEV=`echo $i`; 
     fi;
   done
+  if [ -z $MOREDEV ]; then
+    echo "cannot go further"
+    exit
+  fi
+  echo "ceph osd destroy $OSD --yes-i-really-mean-it"
   CMDS=`../../ceph-volume/striped-osd-prepare.sh $DEV $MOREDEV`
   echo "$CMDS --osd-id $OSD"
 else
