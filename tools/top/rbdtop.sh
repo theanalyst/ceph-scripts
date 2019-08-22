@@ -115,7 +115,7 @@ else
   mkdir /tmp/rbdtop/ 
   for id in `ls /var/run/ceph/ceph-osd.*.asok | tr -d '[a-zA-Z/\.\-]'`; 
   do
-    ./logfilter.awk "$start" "$end" /var/log/ceph/ceph-osd.$id.log > /tmp/rbdtop/ceph-osd.$id.log
+    /root/ceph-scripts/tools/top/logfilter.awk "$start" "$end" /var/log/ceph/ceph-osd.$id.log > /tmp/rbdtop/ceph-osd.$id.log
   done
   
   # gather some logs
