@@ -17,7 +17,9 @@ where:
 full_osd=0
 len=30
 
-while getopts 'ho:l:' opt; do
+VERBOSE=1
+
+while getopts 'qho:l:' opt; do
   case "$opt" in
     h) echo "$usage"
        exit
@@ -26,7 +28,7 @@ while getopts 'ho:l:' opt; do
        ;;
     l) len=$OPTARG
        ;;
-    v) VERBOSE=1
+    q) VERBOSE=0
        ;;
     :) printf "missing argument for -%s\n" "$OPTARG" >&2
        echo "$usage" >&2
@@ -48,6 +50,7 @@ function draw(){
 }
 
 
+host=`hostname -s`;
 start=`date '+%F %T'`;
 end=`date -d "$start today + 30 second" +'%F %T'`;
 
@@ -55,8 +58,7 @@ end=`date -d "$start today + 30 second" +'%F %T'`;
 if [ -z "$osd_id" ];
 then
  draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m Going full osd mode"
- draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m Generate list of OSDs in `hostname -s`"
- host=`hostname -s`;
+ draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m Generate list of OSDs in $host"
  ceph osd tree | awk -v HN=$host 'BEGIN{toggle=0}  { if( $0 ~ HN ) {toggle=1}; if(toggle) { if( ($0 ~ /host/ || $0 ~ /rack/) && !($0 ~ HN)) {toggle=0} else { print $0; }}}' | grep -E "^[0-9]+"
  full_osd=1; 
  osd_id=0;
@@ -123,7 +125,7 @@ else
   done
   
   # extract files
-  mkdir /tmp/rbdtop/ 
+  mkdir -p /tmp/rbdtop/ 
   for id in `ls /var/run/ceph/ceph-osd.*.asok | tr -d '[a-zA-Z/\.\-]'`; 
   do
     /root/ceph-scripts/tools/top/logfilter.awk "$start" "$end" /var/log/ceph/ceph-osd.$id.log > /tmp/rbdtop/ceph-osd.$id.log
@@ -152,6 +154,19 @@ else
   
   draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m   - sparse-read: "
   grep -E "\[sparse-read" /tmp/rbdtop/ceph-osd.[0-9]*.log | grep -Eo "rbd_data\.[0-9a-f]+" | sort -h | uniq -c | sort -k1gr | head -n 5
+
+
+  #test:
+  draw "Computing bytes"
+  time for i in `cat /tmp/rbdtop/ceph-osd.[0-9]*.log | grep -E "\[[acrsw][a-z-]+" | grep -Eo "rbd_data\.[0-9a-f]+" | sort -h | uniq`; 
+  do
+    echo -n "$i "
+    grep $i -R /tmp/rbdtop/ | grep -Eo "\[write.*\]" | tr -d "[]a-z " | grep -Eo "~[0-9]+" | tr -d "~" | awk 'BEGIN { sum = 0} { sum += $1 } END { print sum }' | tr -d "\n"; echo -n " "
+    grep $i -R /tmp/rbdtop/ | grep -Eo "\[read*\]" | tr -d "[]a-z " | grep -Eo "~[0-9]+" | tr -d "~" | awk 'BEGIN { sum = 0} { sum += $1 } END { print sum }' | tr -d "\n"; echo -n " "
+    grep $i -R /tmp/rbdtop/ | grep -Eo "\[writefull.*\]" | tr -d "[]a-z " | grep -Eo "~[0-9]+" | tr -d "~" | awk 'BEGIN { sum = 0} { sum += $1 } END { print sum }' | tr -d "\n"; echo -n " "
+    grep $i -R /tmp/rbdtop/ | grep -Eo "\[sparse-read.*\]" | tr -d "[]a-z " | grep -Eo "~[0-9]+" | tr -d "~" | awk 'BEGIN { sum = 0} { sum += $1 } END { print sum }' | tr -d "\n"; echo -n " "
+    echo ""
+  done
 fi
 
 #cleanup
