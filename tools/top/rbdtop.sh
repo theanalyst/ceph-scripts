@@ -157,16 +157,29 @@ else
 
 
   #test:
-  draw "Computing bytes"
-  time for i in `cat /tmp/rbdtop/ceph-osd.[0-9]*.log | grep -E "\[[acrsw][a-z-]+" | grep -Eo "rbd_data\.[0-9a-f]+" | sort -h | uniq`; 
+  timestamp=`date '+%F_%T' | sed -e 's/:/-/g'` 
+  draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m Computing bytes (output in /tmp/report-rbdtop"
+  mkdir -p "/tmp/report-rbdtop/"
+  for i in `cat /tmp/rbdtop/ceph-osd.[0-9]*.log | grep -E "\[[acrsw][a-z-]+" | grep -Eo "rbd_data\.[0-9a-f]+" | sort -h | uniq`; 
   do
-    echo -n "$i "
-    grep $i -R /tmp/rbdtop/ | grep -Eo "\[write.*\]" | tr -d "[]a-z " | grep -Eo "~[0-9]+" | tr -d "~" | awk 'BEGIN { sum = 0} { sum += $1 } END { print sum }' | tr -d "\n"; echo -n " "
-    grep $i -R /tmp/rbdtop/ | grep -Eo "\[read*\]" | tr -d "[]a-z " | grep -Eo "~[0-9]+" | tr -d "~" | awk 'BEGIN { sum = 0} { sum += $1 } END { print sum }' | tr -d "\n"; echo -n " "
-    grep $i -R /tmp/rbdtop/ | grep -Eo "\[writefull.*\]" | tr -d "[]a-z " | grep -Eo "~[0-9]+" | tr -d "~" | awk 'BEGIN { sum = 0} { sum += $1 } END { print sum }' | tr -d "\n"; echo -n " "
-    grep $i -R /tmp/rbdtop/ | grep -Eo "\[sparse-read.*\]" | tr -d "[]a-z " | grep -Eo "~[0-9]+" | tr -d "~" | awk 'BEGIN { sum = 0} { sum += $1 } END { print sum }' | tr -d "\n"; echo -n " "
-    echo ""
+    echo -n "$i " >> /tmp/report-rbdtop/"$timestamp".log
+    grep $i -R /tmp/rbdtop/ | grep -Eo "\[write.*\]" | tr -d "[]a-z " | grep -Eo "~[0-9]+" | tr -d "~" | awk 'BEGIN { sum = 0} { sum += $1 } END { print sum" " }' | tr -d "\n" >> /tmp/report-rbdtop/"$timestamp".log
+    grep $i -R /tmp/rbdtop/ | grep -Eo "\[read.*\]" | tr -d "[]a-z " | grep -Eo "~[0-9]+" | tr -d "~" | awk 'BEGIN { sum = 0} { sum += $1 } END { print sum" " }' | tr -d "\n" >> /tmp/report-rbdtop/"$timestamp".log 
+    grep $i -R /tmp/rbdtop/ | grep -Eo "\[writefull.*\]" | tr -d "[]a-z " | grep -Eo "~[0-9]+" | tr -d "~" | awk 'BEGIN { sum = 0} { sum += $1 } END { print sum" " }' | tr -d "\n" >> /tmp/report-rbdtop/"$timestamp".log
+    grep $i -R /tmp/rbdtop/ | grep -Eo "\[sparse-read.*\]" | tr -d "[]a-z " | grep -Eo "~[0-9]+" | tr -d "~" | awk 'BEGIN { sum = 0} { sum += $1 } END { print sum" " }' | tr -d "\n" >> /tmp/report-rbdtop/"$timestamp".log
+    echo "" >> /tmp/report-rbdtop/"$timestamp".log
   done
+
+  draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m Image statistics (byte usage)"
+  draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m   - write: "
+  cat /tmp/report-rbdtop/"$timestamp".log | sort -k2gr | head -n 5 | awk '{print $1" "$2}'
+  draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m   - read: "
+  cat /tmp/report-rbdtop/"$timestamp".log | sort -k3gr | head -n 5 | awk '{print $1" "$3}'
+  draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m   - writefull: "
+  cat /tmp/report-rbdtop/"$timestamp".log | sort -k4gr | head -n 5 | awk '{print $1" "$4}'
+  draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m   - sparse-read: "
+  cat /tmp/report-rbdtop/"$timestamp".log | sort -k5gr | head -n 5 | awk '{print $1" "$5}'
+
 fi
 
 #cleanup
