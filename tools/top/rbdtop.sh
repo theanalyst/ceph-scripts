@@ -81,14 +81,14 @@ then
     # activate appropriate debug level 
     draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m Adjusting debug level to osd.$osd_id"
     ceph tell osd.$osd_id injectargs --debug_ms 1
-  
+   
     draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m Gathering logs for $len secs"
     sleep $len;
   
     # deactivate logging before exit
     draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m Deactivate logging"
     ceph tell osd.$osd_id injectargs --debug_ms 0
-  
+ 
   else  # read old logs
     draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m Collecting $len secs of logs"
   fi
@@ -122,7 +122,6 @@ else
     echo -n $f" ";
     ceph tell osd.$f injectargs --debug_ms 1
   done
-
 
   draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m Gathering logs for $len secs"
   sleep $len;
@@ -181,7 +180,7 @@ else
 
   draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m Image statistics (byte usage)"
   draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m   - write: "
-  cat /tmp/report-rbdtop/"$timestamp".log | sort -k2gr | head -n 5 | awk '{print "echo cernback.restic.'$host'."$1".byte_write "$2" '$timestamp' | nc '$MONITORING_HOST' '$MONITORING_PORT'" }';
+  cat /tmp/report-rbdtop/"$timestamp".log | sort -k2gr | head -n 5 | awk '{print "echo cernback.restic.'$host'."$1".byte_write "$2" '$timestamp' | nc '$MONITORING_HOST' '$MONITORING_PORT'" }'; #pipe this to sh 
   draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m   - read: "
   cat /tmp/report-rbdtop/"$timestamp".log | sort -k3gr | head -n 5 | awk '{print "echo cernback.restic.'$host'."$1".byte_read  "$3" '$timestamp' | nc '$MONITORING_HOST' '$MONITORING_PORT'" }';
   draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m   - writefull: "
