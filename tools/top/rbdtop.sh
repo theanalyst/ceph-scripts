@@ -16,8 +16,18 @@ where:
 
 full_osd=0
 len=30
+host=`hostname -s`;
 
 VERBOSE=1
+
+#Monitoring configuration
+MONITORING_SEND=True
+MONITORING_HOST="filer-carbon.cern.ch"
+MONITORING_PORT="2003"
+METRIC_PREFIX="cernback"
+
+METRIC=`echo "$METRIC_PREFIX"".restic.""$host"".""bytetotal"`
+
 
 while getopts 'qho:l:' opt; do
   case "$opt" in
@@ -50,7 +60,6 @@ function draw(){
 }
 
 
-host=`hostname -s`;
 start=`date '+%F %T'`;
 end=`date -d "$start today + 30 second" +'%F %T'`;
 
@@ -172,15 +181,18 @@ else
 
   draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m Image statistics (byte usage)"
   draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m   - write: "
-  cat /tmp/report-rbdtop/"$timestamp".log | sort -k2gr | head -n 5 | awk '{print $1" "$2}'
+  cat /tmp/report-rbdtop/"$timestamp".log | sort -k2gr | head -n 5 | awk '{print "echo cernback.restic.'$host'."$1".byte_write "$2" '$timestamp' | nc '$MONITORING_HOST' '$MONITORING_PORT'" }';
   draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m   - read: "
-  cat /tmp/report-rbdtop/"$timestamp".log | sort -k3gr | head -n 5 | awk '{print $1" "$3}'
+  cat /tmp/report-rbdtop/"$timestamp".log | sort -k3gr | head -n 5 | awk '{print "echo cernback.restic.'$host'."$1".byte_read  "$3" '$timestamp' | nc '$MONITORING_HOST' '$MONITORING_PORT'" }';
   draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m   - writefull: "
-  cat /tmp/report-rbdtop/"$timestamp".log | sort -k4gr | head -n 5 | awk '{print $1" "$4}'
+  cat /tmp/report-rbdtop/"$timestamp".log | sort -k4gr | head -n 5 | awk '{print "echo cernback.restic.'$host'."$1".byte_writefull "$4" '$timestamp' | nc '$MONITORING_HOST' '$MONITORING_PORT'" }';
   draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m   - sparse-read: "
-  cat /tmp/report-rbdtop/"$timestamp".log | sort -k5gr | head -n 5 | awk '{print $1" "$5}'
-
+  cat /tmp/report-rbdtop/"$timestamp".log | sort -k5gr | head -n 5 | awk '{print "echo cernback.restic.'$host'."$1".byte_sparseread "$5" '$timestamp' | nc '$MONITORING_HOST' '$MONITORING_PORT'" }';
 fi
+
+
+#echo "echo $METRIC 10 | nc $MONITORING_HOST $MONITORING_PORT"
+
 
 #cleanup
 #rm -rf /tmp/rbdtop/
