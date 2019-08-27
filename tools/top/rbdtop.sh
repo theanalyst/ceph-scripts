@@ -141,29 +141,33 @@ else
   
   # gather some logs
   active_image_count=`cat /tmp/rbdtop/ceph-osd.[0-9]*.log | grep -E "\[[acrsw][a-z-]+" | grep -Eo "rbd_data\.[0-9a-f]+" | sort -h | uniq -c | wc -l`;
+  timestamp_a=`date +%s`;
   
   draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m Logs collected, parsing"
   draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m logfile is /tmp/rbdtop/ceph-osd.[0-9]*.log"
   draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m OSD operation summary ($active_image_count active images):"
-  grep -Eo "\[write " /tmp/rbdtop/ceph-osd.[0-9]*.log | sort -h | uniq -c | tr -d '[' | sed 's/:/ /' | sort -k1gr | head -n 50
-  grep -Eo "\[writefull" /tmp/rbdtop/ceph-osd.[0-9]*.log | sort -h | uniq -c | tr -d '[' | sed 's/:/ /' | sort -k1gr | head -n 50
-  grep -Eo "\[read" /tmp/rbdtop/ceph-osd.[0-9]*.log | sort -h | uniq -c | tr -d '[' | sed 's/:/ /' | sort -k1gr | head -n 50
-  grep -Eo "\[sparse-read" /tmp/rbdtop/ceph-osd.[0-9]*.log | sort -h | uniq -c | tr -d '[' | sed 's/:/ /' | sort -k1gr | head -n 50
+  #grep -Eo "\[write " /tmp/rbdtop/ceph-osd.[0-9]*.log | sort -h | uniq -c | tr -d '[' | sed 's/:/ /' | sort -k1gr | head -n 50 | awk '{print "echo cephtop.test.'$host'."$2".osd_write "$1" '$timestamp_a' | nc '$MONITORING_HOST' '$MONITORING_PORT'" }'; 
+  #grep -Eo "\[writefull" /tmp/rbdtop/ceph-osd.[0-9]*.log | sort -h | uniq -c | tr -d '[' | sed 's/:/ /' | sort -k1gr | head -n 50 | awk '{print "echo cephtop.test.'$host'."$2".osd_writefull "$1" '$timestamp_a' | nc '$MONITORING_HOST' '$MONITORING_PORT'" }'; 
+  #grep -Eo "\[read" /tmp/rbdtop/ceph-osd.[0-9]*.log | sort -h | uniq -c | tr -d '[' | sed 's/:/ /' | sort -k1gr | head -n 50 | awk '{print "echo cephtop.test.'$host'."$2".osd_read "$1" '$timestamp_a' | nc '$MONITORING_HOST' '$MONITORING_PORT'" }'; 
+  #grep -Eo "\[sparse-read" /tmp/rbdtop/ceph-osd.[0-9]*.log | sort -h | uniq -c | tr -d '[' | sed 's/:/ /' | sort -k1gr | head -n 50  | awk '{print "echo cephtop.test.'$host'."$2".osd_sparseread "$1" '$timestamp_a' | nc '$MONITORING_HOST' '$MONITORING_PORT'" }'; 
   
   draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m Image statistics:"
   draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m   - write: "
-  grep -E "\[write " /tmp/rbdtop/ceph-osd.[0-9]*.log | grep -Eo "rbd_data\.[0-9a-f]+" | sort -h | uniq -c | sort -k1gr | head -n 50
+  grep -E "\[write " /tmp/rbdtop/ceph-osd.[0-9]*.log | grep -Eo "rbd_data\.[0-9a-f]+" | sort -h | uniq -c | sort -k1gr | head -n 5 | awk '{print "echo cephtop.test.'$host'."$2".op_write "$1" '$timestamp_a' | nc '$MONITORING_HOST' '$MONITORING_PORT'" }'; 
+  grep -E "\[write " /tmp/rbdtop/ceph-osd.[0-9]*.log | grep -Eo "rbd_data\.[0-9a-f]+" | sort -h | uniq -c | sort -k1gr | head -n 50 | awk '{print "echo cephtop.test.'$host'."$2".op_write "$1" '$timestamp_a' | nc '$MONITORING_HOST' '$MONITORING_PORT'" }' | sh; 
   
   draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m   - writefull: "
-  grep -E "\[writefull" /tmp/rbdtop/ceph-osd.[0-9]*.log | grep -Eo "rbd_data\.[0-9a-f]+" | sort -h | uniq -c | sort -k1gr | head -n 50
+  grep -E "\[writefull" /tmp/rbdtop/ceph-osd.[0-9]*.log | grep -Eo "rbd_data\.[0-9a-f]+" | sort -h | uniq -c | sort -k1gr | head -n 5 | awk '{print "echo cephtop.test.'$host'."$2".op_writefull "$1" '$timestamp_a' | nc '$MONITORING_HOST' '$MONITORING_PORT'" }' ; 
+  grep -E "\[writefull" /tmp/rbdtop/ceph-osd.[0-9]*.log | grep -Eo "rbd_data\.[0-9a-f]+" | sort -h | uniq -c | sort -k1gr | head -n 50 | awk '{print "echo cephtop.test.'$host'."$2".op_writefull "$1" '$timestamp_a' | nc '$MONITORING_HOST' '$MONITORING_PORT'" }' | sh; 
   
   draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m   - read: "
-  grep -E "\[read" /tmp/rbdtop/ceph-osd.[0-9]*.log | grep -Eo "rbd_data\.[0-9a-f]+" | sort -h | uniq -c | sort -k1gr | head -n 50
+  grep -E "\[read" /tmp/rbdtop/ceph-osd.[0-9]*.log | grep -Eo "rbd_data\.[0-9a-f]+" | sort -h | uniq -c | sort -k1gr | head -n 5 | awk '{print "echo cephtop.test.'$host'."$2".op_read "$1" '$timestamp_a' | nc '$MONITORING_HOST' '$MONITORING_PORT'" }'; 
+  grep -E "\[read" /tmp/rbdtop/ceph-osd.[0-9]*.log | grep -Eo "rbd_data\.[0-9a-f]+" | sort -h | uniq -c | sort -k1gr | head -n 50 | awk '{print "echo cephtop.test.'$host'."$2".op_read "$1" '$timestamp_a' | nc '$MONITORING_HOST' '$MONITORING_PORT'" }' | sh; 
   
   draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m   - sparse-read: "
-  grep -E "\[sparse-read" /tmp/rbdtop/ceph-osd.[0-9]*.log | grep -Eo "rbd_data\.[0-9a-f]+" | sort -h | uniq -c | sort -k1gr | head -n 50
+  grep -E "\[sparse-read" /tmp/rbdtop/ceph-osd.[0-9]*.log | grep -Eo "rbd_data\.[0-9a-f]+" | sort -h | uniq -c | sort -k1gr | head -n 5 | awk '{print "echo cephtop.test.'$host'."$2".op_sparseread "$1" '$timestamp_a' | nc '$MONITORING_HOST' '$MONITORING_PORT'" }' ; 
+  grep -E "\[sparse-read" /tmp/rbdtop/ceph-osd.[0-9]*.log | grep -Eo "rbd_data\.[0-9a-f]+" | sort -h | uniq -c | sort -k1gr | head -n 50 | awk '{print "echo cephtop.test.'$host'."$2".op_sparseread "$1" '$timestamp_a' | nc '$MONITORING_HOST' '$MONITORING_PORT'" }' | sh; 
 
-  #test:
   timestamp=`date '+%F_%T' | sed -e 's/:/-/g'` 
   draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m Computing bytes (output in /tmp/report-rbdtop"
   mkdir -p "/tmp/report-rbdtop/"
@@ -177,7 +181,6 @@ else
     echo "" >> /tmp/report-rbdtop/"$timestamp".log
   done
 
-  timestamp_a=`date +%s`;
 
   draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m Image statistics (byte usage)"
   draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m   - write: "
