@@ -24,9 +24,9 @@ VERBOSE=1
 MONITORING_SEND=True
 MONITORING_HOST="filer-carbon.cern.ch"
 MONITORING_PORT="2003"
-METRIC_PREFIX="cernback"
+METRIC_PREFIX="cephtop"
 
-METRIC=`echo "$METRIC_PREFIX"".restic.""$host"".""bytetotal"`
+METRIC=`echo "$METRIC_PREFIX"".test""$host"".""bytetotal"`
 
 
 while getopts 'qho:l:' opt; do
@@ -178,15 +178,21 @@ else
     echo "" >> /tmp/report-rbdtop/"$timestamp".log
   done
 
+  timestamp_a=`date +%s`;
+
   draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m Image statistics (byte usage)"
   draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m   - write: "
-  cat /tmp/report-rbdtop/"$timestamp".log | sort -k2gr | head -n 5 | awk '{print "echo cernback.restic.'$host'."$1".byte_write "$2" '$timestamp' | nc '$MONITORING_HOST' '$MONITORING_PORT'" }'; #pipe this to sh 
+  cat /tmp/report-rbdtop/"$timestamp".log | sort -k2gr | head -n 5 | awk '{print "echo cephtop.test.'$host'."$1".byte_write "$2" '$timestamp_a' | nc '$MONITORING_HOST' '$MONITORING_PORT'" }'; 
+  cat /tmp/report-rbdtop/"$timestamp".log | sort -k2gr | head -n 5 | awk '{print "echo cephtop.test.'$host'."$1".byte_write "$2" '$timestamp_a' | nc '$MONITORING_HOST' '$MONITORING_PORT'" }' | sh; #pipe this to sh 
   draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m   - read: "
-  cat /tmp/report-rbdtop/"$timestamp".log | sort -k3gr | head -n 5 | awk '{print "echo cernback.restic.'$host'."$1".byte_read  "$3" '$timestamp' | nc '$MONITORING_HOST' '$MONITORING_PORT'" }';
+  cat /tmp/report-rbdtop/"$timestamp".log | sort -k3gr | head -n 5 | awk '{print "echo cephtop.test.'$host'."$1".byte_read  "$3" '$timestamp_a' | nc '$MONITORING_HOST' '$MONITORING_PORT'" }';
+  cat /tmp/report-rbdtop/"$timestamp".log | sort -k3gr | head -n 5 | awk '{print "echo cephtop.test.'$host'."$1".byte_read  "$3" '$timestamp_a' | nc '$MONITORING_HOST' '$MONITORING_PORT'" }' | sh;
   draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m   - writefull: "
-  cat /tmp/report-rbdtop/"$timestamp".log | sort -k4gr | head -n 5 | awk '{print "echo cernback.restic.'$host'."$1".byte_writefull "$4" '$timestamp' | nc '$MONITORING_HOST' '$MONITORING_PORT'" }';
+  cat /tmp/report-rbdtop/"$timestamp".log | sort -k4gr | head -n 5 | awk '{print "echo cephtop.test.'$host'."$1".byte_writefull "$4" '$timestamp_a' | nc '$MONITORING_HOST' '$MONITORING_PORT'" }';
+  cat /tmp/report-rbdtop/"$timestamp".log | sort -k4gr | head -n 5 | awk '{print "echo cephtop.test.'$host'."$1".byte_writefull "$4" '$timestamp_a' | nc '$MONITORING_HOST' '$MONITORING_PORT'" }' | sh;
   draw "\033[1;31m\033[40m[`date '+%F %T'`/rbdtop]\033[0m   - sparse-read: "
-  cat /tmp/report-rbdtop/"$timestamp".log | sort -k5gr | head -n 5 | awk '{print "echo cernback.restic.'$host'."$1".byte_sparseread "$5" '$timestamp' | nc '$MONITORING_HOST' '$MONITORING_PORT'" }';
+  cat /tmp/report-rbdtop/"$timestamp".log | sort -k5gr | head -n 5 | awk '{print "echo cephtop.test.'$host'."$1".byte_sparseread "$5" '$timestamp_a' | nc '$MONITORING_HOST' '$MONITORING_PORT'" }';
+  cat /tmp/report-rbdtop/"$timestamp".log | sort -k5gr | head -n 5 | awk '{print "echo cephtop.test.'$host'."$1".byte_sparseread "$5" '$timestamp_a' | nc '$MONITORING_HOST' '$MONITORING_PORT'" }' | sh;
 fi
 
 
