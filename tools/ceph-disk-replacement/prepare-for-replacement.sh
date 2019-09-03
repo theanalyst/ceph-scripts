@@ -79,7 +79,7 @@ then
 fi 
 
 # How many drives per OSD?
-NUM=`lvs -o +devices,tags | grep type=block | grep $OSD | grep -oE "/dev/.* " | grep  "dev/sd[a-z]*" -o | wc -l`
+NUM=`lvs -o +devices,tags | grep type=block | grep osd_id=$OSD | grep -oE "/dev/.* " | grep  "dev/sd[a-z]*" -o | wc -l`
 if [[ $NUM -gt 1 ]];
 then
   draw "osd.$OSD has $NUM drives"
