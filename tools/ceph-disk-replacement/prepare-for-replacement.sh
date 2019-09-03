@@ -1,5 +1,13 @@
 #! /bin/bash
 
+if [[ `cat /etc/motd | grep hostgroup | grep -Eo "ceph/[a-Z0-9/]+" | grep -c beesly` -eq 1 ]];
+then
+  echo "beesly: contact ceph-admins"
+  exit
+fi
+
+
+
 INITSTATE=`ceph health`
 FORCEMODE=0;
 VERBOSE=0
