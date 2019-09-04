@@ -5,14 +5,6 @@ FORCEMODE=0;
 VERBOSE=0
 BLUESTORE=0;
 
-if [[ `cat /etc/motd | grep hostgroup | grep -Eo "ceph/[a-Z0-9/]+" | grep -c beesly` -eq 1 ]];
-then
-  echo "beesly: contact ceph-admins"
-  exit
-fi
-
-
-
 while [[ $# -gt 0 ]]
 do
   key="$1"

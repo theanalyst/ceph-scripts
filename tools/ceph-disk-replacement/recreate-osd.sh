@@ -6,13 +6,6 @@ then
   CASTOR=1
 fi
 
-if [[ `cat /etc/motd | grep hostgroup | grep -Eo "ceph/[a-Z0-9/]+" | grep -c beesly` -eq 1 ]];
-then
-  echo "beesly: contact ceph-admins"
-  exit
-fi
-
-
 INITSTATE=`ceph health`
 FORCEMODE=0;
 VERBOSE=0
@@ -117,11 +110,9 @@ then
   if [[ -z $DBD ]];
   then
     draw "No block device found, switching to ceph-volume"
-    DBD=`ceph-volume lvm list | awk -v awkosdid=osd.$OSD 'BEGIN { out=0 } { if($0 ~ /====/) {out=0} if(out) {print $0;} if($0 ~ awkosdid) {out=1}; }'  | grep -Eo "db device.*$" | sed 's/db device.*\/dev\///';`
+    DBD=`ceph-volume lvm list | awk -v awkosdid=osd.$OSD 'BEGIN { out=0 } { if($0 ~ /====/) {out=0} if(out) {print $0;} if($0 ~ awkosdid) {out=1}; }'  | grep -Eo "db device.*$" | sed 's/db device.*\/dev\///' | sort | uniq;`
   fi
 fi
-
-
 
 ceph osd safe-to-destroy osd.$OSD &> /dev/null
 retval=`echo $?`

@@ -1,11 +1,10 @@
 #! /bin/bash
 
-if [[ `cat /etc/motd | grep hostgroup | grep -Eo "ceph/[a-Z0-9/]+" | grep -c beesly` -eq 1 ]];
+if [[ `cat /etc/motd | grep hostgroup | grep -Eo "ceph/[a-Z0-9/]+" | grep -c castor` -eq 1 ]];
 then
-  echo "beesly: contact ceph-admins"
-  exit
+  echo "#castor mode ON"
+  CASTOR=1
 fi
-
 
 
 INITSTATE=`ceph health`
@@ -103,7 +102,11 @@ if [[ $retval -eq 0 ]];
 then
   echo "systemctl stop ceph-osd@$OSD"
   echo "umount /var/lib/ceph/osd/ceph-$OSD"
-  echo "ceph-volume lvm zap --destroy --osd-id $OSD"
+  if [[ $CASTOR -eq 1 ]]; then
+    echo "ceph-volume lvm zap --destroy --osd-id $OSD"
+  else
+    echo "ceph-volume lvm zap $DEV --destroy"
+  fi
 else
   echo "echo \"osd.$OSD still unsafe to destroy\"" 
 fi
