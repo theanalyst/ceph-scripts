@@ -13,10 +13,20 @@ cd $target
 # iterate over the subdirs and pin them
 for dir in `find . -mindepth 1 -maxdepth 1 -type d`
 do
-    # do some hash(subdir name) mod max_mds
+
+    # wait for health ok
+    until ceph --cluster=${cluster} health | grep -q HEALTH_OK
+    do
+       echo Waiting 10s for HEALTH_OK...
+       sleep 10
+    done
+    
+    # do a consistent hash(${dir}) modulo max_mds
     pin=`echo ${dir} | cksum | awk -v m=${max_mds} '{ print $1 % m }'`
 
     # pin the dir
     echo Pinning ${dir} to ${pin}
     setfattr -n ceph.dir.pin -v ${pin} ${dir}
+
+    sleep 1
 done
