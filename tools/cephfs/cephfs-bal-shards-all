@@ -14,15 +14,14 @@
 echo Remounting /cephfs-flax rw
 mount -oremount,rw /cephfs-flax
 
-echo Pinning /cephfs-flax/volumes to mds.0
-setfattr -n ceph.dir.pin -v 0 /cephfs-flax/volumes
-echo Pinning /cephfs-flax/volumes/_nogroup to mds.0
-setfattr -n ceph.dir.pin -v 0 /cephfs-flax/volumes/_nogroup
-echo Pinning /cephfs-flax/volumes/_deleting to mds.0
-setfattr -n ceph.dir.pin -v 0 /cephfs-flax/volumes/_deleting
+echo Pinning /cephfs-flax/volumes to mds.3
+setfattr -n ceph.dir.pin -v 3 /cephfs-flax/volumes
 
-#echo Pinning /cephfs-flax/hpcqcd to mds.0
-#setfattr -n ceph.dir.pin -v 0 /cephfs-flax/volumes
+echo Pinning /cephfs-flax/volumes/_deleting to mds.3
+setfattr -n ceph.dir.pin -v 3 /cephfs-flax/volumes/_deleting
+
+echo Pinning /cephfs-flax/volumes/_nogroup to mds.3
+setfattr -n ceph.dir.pin -v 3 /cephfs-flax/volumes/_nogroup
 
 ./cephfs-bal-shard flax /cephfs-flax/hpcqcd/user/
 ./cephfs-bal-shard flax /cephfs-flax/volumes/_nogroup/
