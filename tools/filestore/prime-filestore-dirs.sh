@@ -19,4 +19,4 @@ POOL=$1
 
 ulimit -n100000
 
-rados bench -p ${POOL} 120 write -b 4096
+rados bench -p ${POOL} 30 write -b 4096
