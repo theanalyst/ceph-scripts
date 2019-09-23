@@ -82,7 +82,7 @@ fi
 
 draw "$DEV is osd.$OSD"
 
-if [[ `systemctl is-active ceph-osd@1120 --quiet;` -eq 0 ]];
+if [[ `systemctl is-active ceph-osd@$OSD --quiet;` -eq 0 ]];
 then
   draw "osd.$OSD is active"
   if [[ `ceph osd ok-to-stop osd.$OSD &> /dev/null` -eq 0 ]];
