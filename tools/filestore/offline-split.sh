@@ -1,7 +1,5 @@
 #!/bin/bash
 
-shift
-
 echo killall ceph-osd
 echo systemctl stop ceph-osd.target
 echo sleep 10
