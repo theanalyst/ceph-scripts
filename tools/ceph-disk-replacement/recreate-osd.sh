@@ -2,7 +2,6 @@
 
 if [[ `cat /etc/motd | grep hostgroup | grep -Eo "ceph/[a-Z0-9/]+" | grep -c castor` -eq 1 ]];
 then
-  echo "#castor mode ON"
   CASTOR=1
 fi
 
@@ -59,13 +58,17 @@ function draw(){
 
 if [[ -z $DEV ]];
 then
-  echo "echo \"No drive passed\""
+  echo "echo \"----------------------------------------\""
+  echo "echo \"No drive passed, use --dev /dev/<device>\""
+  echo "echo \"----------------------------------------\""
   exit
 fi
 
 if [[ `echo $DEV | grep -Eo "/dev/sd[a-z][a-z]?" -c` -eq 0 ]];
 then
+  echo "echo \"----------------------------------\""
   echo "echo \"Argument malformed, check spelling\""
+  echo "echo \"----------------------------------\""
   exit
 fi
 
