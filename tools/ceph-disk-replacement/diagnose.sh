@@ -7,6 +7,7 @@ for i in `ceph osd tree down | awk -v awkhost=$PATIENT 'BEGIN { out=0 } { if($0 
 do
   OSD=`echo "osd.$i"`;
   DMNSTATUS=`systemctl status ceph-osd@$i | grep -E "Active:" | sed -e 's/Active: //'`;
+  IOERROR=`systemctl status ceph-osd@$i | grep -Eo "Input/output error" | uniq`
   DEV=""
   for i in `lvs -o +devices,tags | grep -E "osd_id=$i" | grep -Eo "/dev/sd[a-z]+"`; 
   do 
@@ -37,10 +38,14 @@ do
     dmesg -T | grep $i | grep -qi Error;
     if [[ $? -eq 0 ]];
     then
-      echo "$OSD: bad drive $i"
+      echo "$OSD: bad drive $i (Power_On_Hours: `smartctl -a /dev/$i | grep -i Power_on_hours | awk '{ print $10; }'`)"
     fi
   done
   
   echo "$OSD: daemon is $DMNSTATUS";
+  if [[ -z $IOERROR ]];
+  then 
+    echo "$OSD: I/O errors";
+  fi
 done
 echo "--"
