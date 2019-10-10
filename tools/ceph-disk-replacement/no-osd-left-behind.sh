@@ -13,6 +13,7 @@ do
     esac
 done
 
+echo "Scanning ceph/`cat /etc/motd | grep -Eo "ceph/.*/mon" | cut -d/ -f2`"
 
 for i in `ceph osd tree down | grep -E "host" | cut -d"p" -f2`; 
 do 
@@ -24,6 +25,6 @@ if [[ ! -z $SUMMARY ]];
 then
     FAILEDOSD=`ceph osd tree down | grep osd | wc -l`;
 
-    echo "SUMMARY:"
-    echo "Number of down OSD: $FAILEDOSD"
+    echo "Summary for ceph/`cat /etc/motd | grep -Eo "ceph/.*/mon" | cut -d/ -f2`:"
+    echo "Number of down OSDs: $FAILEDOSD"
 fi
