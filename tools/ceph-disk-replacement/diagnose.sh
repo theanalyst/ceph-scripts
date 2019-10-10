@@ -14,9 +14,16 @@ do
     DEV=`echo "$DEV $i"`; 
   done
 
+  if [[ -z $DEV ]];
+  then
+    echo "No device found"
+    for i in `lsscsi | grep -Eo "/dev/sd[c-z]|/dev/sd[a-z][a-z]"`; do lvs -o +devices,tags | grep "$i" -q; if [[ $? -eq 1 ]]; then DEV=`echo $DEV $i`; fi; done
+    echo "-> $DEV seems unattached, replacement in progress?"
+  fi
+
   dmesg -T | grep $DEV | grep -qi Error;
   if [[ $? -eq 0 ]];
   then
-    echo "- $OSD: bad drive $DEV (medium error)"
+    echo "- $OSD: bad drive $DEV"
   fi
 done
