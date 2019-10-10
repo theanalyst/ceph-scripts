@@ -41,7 +41,10 @@ do
       echo "$OSD: /dev/$i has medium error "
     fi
   done
-  echo "$OSD: $DEV: Power_On_Hours: `smartctl -a /dev/$i | grep -i Power_on_hours | awk '{ print $10; }'`"
+  for i in `echo $DEV`; 
+  do 
+    echo "$OSD: $i: Power_On_Hours: `smartctl -a $i | grep -i Power_on_hours | awk '{ print $10; }'`"
+  done
   echo "$OSD: daemon status: $DMNSTATUS";
   if [[ -z $IOERROR ]];
   then 
