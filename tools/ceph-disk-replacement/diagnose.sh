@@ -15,7 +15,20 @@ do
 
   if [[ -z $DEV ]];
   then
-    for i in `lsscsi | grep -Eo "/dev/sd[c-z]|/dev/sd[a-z][a-z]"`; do lvs -o +devices,tags | grep "$i" -q; if [[ $? -eq 1 ]]; then DEV=`echo $DEV $i`; fi; done
+#DEV=""; i=204; for i in `lsscsi | grep -Eo "/dev/sd[c-z]|/dev/sd[a-z][a-z]"`; do lvs -o +devices,tags | grep "$i" -q; if [[ $? -eq 1 ]]; then blkid | grep "ceph data" | grep -q -E "$DEV"; if [[ $? -eq 1 ]]; then  DEV=`echo $DEV $i`; fi; fi; done; echo $DEV
+
+    for i in `lsscsi | grep -v INTEL | grep -Eo "/dev/sd[c-z]|/dev/sd[a-z][a-z]"`; 
+    do 
+      lvs -o +devices,tags | grep "$i" -q; 
+      if [[ $? -eq 1 ]]; 
+      then
+        blkid | grep "ceph" | grep -q -E "$i";
+        if [[ $? -eq 1 ]];
+        then
+          DEV=`echo $DEV $i`;
+        fi;
+      fi;
+    done
     echo "$OSD: $DEV seems unattached, replacement in progress?"
   fi
 
