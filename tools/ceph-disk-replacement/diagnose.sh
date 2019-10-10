@@ -26,4 +26,7 @@ do
       echo "$OSD: bad drive $i"
     fi
   done
+  
+  DMNSTATUS=`systemctl status ceph-osd@$i | grep -E "Active:" | sed -e 's/Active: //'`;
+  echo "$OSD: daemon is $DMNSTATUS";
 done
