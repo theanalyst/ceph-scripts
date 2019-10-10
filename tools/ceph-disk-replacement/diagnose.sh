@@ -30,3 +30,4 @@ do
   
   echo "$OSD: daemon is $DMNSTATUS";
 done
+echo "--"
