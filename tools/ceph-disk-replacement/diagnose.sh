@@ -38,14 +38,14 @@ do
     dmesg -T | grep $i | grep -qi Error;
     if [[ $? -eq 0 ]];
     then
-      echo "$OSD: bad drive $i "
+      echo "$OSD: /dev/$i has medium error "
     fi
   done
   echo "$OSD: $DEV: Power_On_Hours: `smartctl -a /dev/$i | grep -i Power_on_hours | awk '{ print $10; }'`"
   echo "$OSD: daemon status: $DMNSTATUS";
   if [[ -z $IOERROR ]];
   then 
-    echo "$OSD: I/O errors";
+    echo "$OSD: deamon reporting I/O errors";
   fi
 done
 echo "--"
