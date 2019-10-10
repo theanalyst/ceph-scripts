@@ -6,6 +6,7 @@ echo "Diagnosing patient: $PATIENT"
 for i in `ceph osd tree down | awk -v awkhost=$PATIENT 'BEGIN { out=0 } { if($0 ~ /host/ && out) {out=0} if(out) {print $0;} if($0 ~ awkhost) {out=1}; }' | grep -Eo "osd\.[0-9]+" | tr -d "[a-z\.]"`;
 do
   OSD=`echo "osd.$i"`;
+  DMNSTATUS=`systemctl status ceph-osd@$i | grep -E "Active:" | sed -e 's/Active: //'`;
   DEV=""
   for i in `lvs -o +devices,tags | grep -E "osd_id=$i" | grep -Eo "/dev/sd[a-z]+"`; 
   do 
@@ -27,6 +28,5 @@ do
     fi
   done
   
-  DMNSTATUS=`systemctl status ceph-osd@$i | grep -E "Active:" | sed -e 's/Active: //'`;
   echo "$OSD: daemon is $DMNSTATUS";
 done
