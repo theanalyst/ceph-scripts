@@ -114,6 +114,7 @@ then
   then
     draw "No block device found, switching to ceph-volume"
     DBD=`ceph-volume lvm list | awk -v awkosdid=osd.$OSD 'BEGIN { out=0 } { if($0 ~ /====/) {out=0} if(out) {print $0;} if($0 ~ awkosdid) {out=1}; }'  | grep -Eo "db device.*$" | sed 's/db device.*\/dev\///' | sort | uniq;`
+    draw "Found DEV: $DEV, DBD: $DBD"
   fi
 fi
 
@@ -128,12 +129,13 @@ fi
 
 if [[ $CASTOR -eq 1 ]];
 then
-  for i in `lsscsi | grep -Eo "/dev/sd[c-z][a-z]|/dev/sda[a-z]" | grep -vE "$DEV"`; 
+  for i in `lsscsi | grep -Eo "/dev/sd[c-z]|/dev/sda[a-z]" | grep -vE "$DEV"`; 
   do 
     lvs -o +devices,tags | grep -q $i; 
     if [[ $? -eq 1 ]];
     then
       MOREDEV=`echo $i`; 
+      draw "$MOREDEV"
     fi;
   done
   if [ -z $MOREDEV ]; then
