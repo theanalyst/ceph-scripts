@@ -92,6 +92,13 @@ except ValueError:
   eprint('Error loading remapped pgs')
   sys.exit(1)
 
+# nautilus compat
+try:
+  _remapped = remapped['pg_stats']
+  remapped = _remapped
+except KeyError:
+  pass
+
 # discover existing upmaps
 osd_dump_json = commands.getoutput('ceph osd dump -f json')
 osd_dump = json.loads(osd_dump_json)
