@@ -1,19 +1,12 @@
-#!/usr/bin/python -u
+#!/usr/bin/python
 
-from ldap3 import Server, Connection, ALL, ALL_ATTRIBUTES
+import ldap 
 
-username = "jcollet"
+l = ldap.initialize('ldap://xldap.cern.ch:389')
+basedn = "ou=Users,ou=Organic Units,dc=cern,dc=ch"
+query = "(mail=wen.guan@cern.ch)"
 
-server = Server("xldap.cern.ch")
-print "server instantiated"
+result = l.search_s(basedn,ldap.SCOPE_SUBTREE,query)
 
-base_dn = "OU=Users,OU=Organic Units,DC=cern,DC=ch"
-conn = Connection(server, auto_bind=True)
-print "connection is secured"
-
-search_filter = "(CN=" + username + ")"
-conn.search(search_base=base_dn, search_filter=search_filter, attributes=ALL_ATTRIBUTES)
-print "Sending query"
-
-print(conn.entries[0])
+print result[0][1]['displayName'][0]+": "+result[0][1]['division'][0]+"-"+result[0][1]['cernGroup'][0]+"-"
 
