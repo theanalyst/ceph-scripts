@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# exit if no filestore osds running
+if [ `ls -1 /var/lib/ceph/osd/ceph-*/journal 2>/dev/null | wc -l ` -lt 1 ]
+then
+  exit
+fi
+
 # Loop over FileStore OSDs
 for J in /var/lib/ceph/osd/ceph-*/journal
 do
