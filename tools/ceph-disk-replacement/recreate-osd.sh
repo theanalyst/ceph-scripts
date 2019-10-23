@@ -124,6 +124,13 @@ retval=`echo $?`
 if [[ $retval -ne 0 ]];
 then
   echo "echo \"osd.$OSD still unsafe to destroy\"" 
+  echo $INITSTATE | grep -q "HEALTH_OK"
+  if [[ $? -eq 1 ]];
+  then
+    echo "echo \"Ceph is unhealthy, aborting\"" 
+  else
+    echo "echo \"Ceph seems fine, needs to investigate whether $OSD is used or not\""
+  fi  
   exit
 fi
 
