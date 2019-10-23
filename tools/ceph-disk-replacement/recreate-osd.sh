@@ -123,17 +123,13 @@ retval=`echo $?`
 
 if [[ $retval -ne 0 ]];
 then
-  echo "echo \"osd.$OSD still unsafe to destroy\"" 
   echo $INITSTATE | grep -q "HEALTH_OK"
   if [[ $? -eq 1 ]];
   then
-    echo "echo \"Ceph is unhealthy, aborting\"" 
-  else
-    echo "echo \"Ceph seems fine, needs to investigate whether $OSD is used or not\""
-#ceph pg dump --format json  | jq '.pg_map.pg_stats  | .[].up ' | grep -qE " 1227,";  echo $? #if 1, 1227 is not there
-#ceph pg dump --format json  | jq '.pg_map.pg_stats  | .[].acting ' | grep -qE " 1227,";  echo $? #if 1, 1227 is not there
+    echo "echo \"osd.$OSD is unsafe to destroy\"" 
+    echo "echo \"Aborting\"" 
+    exit
   fi  
-  exit
 fi
 
 if [[ $CASTOR -eq 1 ]];
