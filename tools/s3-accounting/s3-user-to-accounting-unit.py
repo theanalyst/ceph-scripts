@@ -9,6 +9,11 @@ from cinderclient.v3 import client as cinder_client
 from manilaclient.v2 import client as manila_client
 from manilaclient import api_versions as manila_api_versions
 
+import sys
+
+if len (sys.argv) != 2:
+  print "No project_id given"
+  exit(-1)
 
 cc = cloud_config.OpenStackConfig()
 cloud = cc.get_one_cloud(cloud=os.environ.get('OS_CLOUD'))
@@ -21,8 +26,8 @@ manilaclient = manila_client.Client(
                             session=session)
 
 # openstack volume show
-volume = cinderclient.volumes.get('7ca9919b-f270-4fdf-ad7b-5a45ad4a9036')
-project_id = getattr(volume, 'os-vol-tenant-attr:tenant_id')
+#volume = cinderclient.volumes.get(sys.argv[1])
+project_id = sys.argv[1];# getattr(volume, 'os-vol-tenant-attr:tenant_id')
 
 # openstack project show
 project = keystoneclient.projects.get(project_id)
