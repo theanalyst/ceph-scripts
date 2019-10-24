@@ -1,3 +1,5 @@
+#! /usr/bin/python -u
+
 import os
 from os_client_config import config as cloud_config
 from keystoneauth1 import session as keystone_session
@@ -35,6 +37,7 @@ role_assig = keystoneclient.role_assignments.list(project=project_id,role=role_i
 user_id = role_assig[0].user['id']
 
 user = keystoneclient.users.get(user_id)
+accounting = getattr(user,'department')
 
-user.department
+print accounting
 
