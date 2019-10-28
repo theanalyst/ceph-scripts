@@ -31,7 +31,6 @@ declare -A CMD=(
     ["df-json"]="osd df -f json-pretty ,, Saves the osd df (json)"
     ["osd-map"]="osd getmap ,, Saves the osd map"
     ["mon-map"]="mon getmap ,, Saves the mon map"
-    ["mds-map"]="mds getmap ,, Saves the mds map"
 )
 
 while test $# -gt 0; do
@@ -137,9 +136,9 @@ elif [[ $SAVE_WHAT == "" ]]; then
 fi
 
 exec_cmd() {
-    PATH=${PREFIX}${CLUSTER}/$(/usr/bin/date +%Y_%m_%d)
-    /usr/bin/mkdir -p $PATH
-    eval "/usr/bin/ceph --cluster $CLUSTER $1 2>> /var/log/ceph/cluster_dump.log | /usr/bin/gzip -q > $PATH/$(/usr/bin/date +%H_%M)_$2.gz"
+    OUT_PATH=${PREFIX}${CLUSTER}/$(date +%Y_%m_%d)
+    mkdir -p $PATH
+    2>> /var/log/ceph/cluster_dump.log ceph --cluster $CLUSTER $1 | gzip -q > $PATH/$(date +%H_%M)_$2.gz
 }
 
 for key in $SAVE_WHAT; do
