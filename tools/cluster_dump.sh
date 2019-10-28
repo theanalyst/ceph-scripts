@@ -139,7 +139,7 @@ fi
 exec_cmd() {
     PATH=${PREFIX}${CLUSTER}/$(/usr/bin/date +%Y_%m_%d)
     /usr/bin/mkdir -p $PATH
-    eval "/usr/bin/ceph --cluster $CLUSTER $1 > $PATH/$2_$(/usr/bin/date +%H_%M) 2>> /var/log/ceph/cluster_dump.log"
+    eval "/usr/bin/ceph --cluster $CLUSTER $1 2>> /var/log/ceph/cluster_dump.log | gzip -q > $PATH/$(/usr/bin/date +%H_%M)_$2.gz"
 }
 
 for key in $SAVE_WHAT; do
