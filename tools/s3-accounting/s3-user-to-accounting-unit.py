@@ -29,20 +29,21 @@ manilaclient = manila_client.Client(
 #volume = cinderclient.volumes.get(sys.argv[1])
 project_id = sys.argv[1];# getattr(volume, 'os-vol-tenant-attr:tenant_id')
 
-# openstack project show
-project = keystoneclient.projects.get(project_id)
+try: 
+  # openstack project show
+  project = keystoneclient.projects.get(project_id)
+  accounting_group = getattr(project,'accounting-group')
 
+  role = keystoneclient.roles.find(name='owner') 
+  role_id = getattr(role,'id')
 
-accounting_group = getattr(project,'accounting-group')
+  role_assig = keystoneclient.role_assignments.list(project=project_id,role=role_id)
+  user_id = role_assig[0].user['id']
 
-role = keystoneclient.roles.find(name='owner') 
-role_id = getattr(role,'id')
+  user = keystoneclient.users.get(user_id)
 
-role_assig = keystoneclient.role_assignments.list(project=project_id,role=role_id)
-user_id = role_assig[0].user['id']
+except:  
+  user = keystoneclient.users.get(project_id)
 
-user = keystoneclient.users.get(user_id)
 accounting = getattr(user,'department')
-
 print accounting
-
