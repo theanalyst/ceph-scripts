@@ -30,24 +30,24 @@ for uid in users:
 
         buckets = json.loads(commands.getoutput('radosgw-admin --cluster=gabe bucket list --uid=%s' % uid))
         # affiliation = commands.getoutput('./get-user-dept-group-info-by-email.sh %s' % info['email'])
-        query = "(mail="+info['email']+")" 
-        result = l.search_s(basedn,ldap.SCOPE_SUBTREE,query);
-        try: 
-            user_div = result[0][1]['division'][0]
-        except:
-            user_div = ""
+        # query = "(mail="+info['email']+")" 
+        # result = l.search_s(basedn,ldap.SCOPE_SUBTREE,query);
+        # try: 
+        #     user_div = result[0][1]['division'][0]
+        # except:
+        #     user_div = ""
 
-        try:
-            user_grp = "-"+result[0][1]['cernGroup'][0]
-        except:
-            user_grp = ""
+        # try:
+        #     user_grp = "-"+result[0][1]['cernGroup'][0]
+        # except:
+        #     user_grp = ""
  
-        try:
-            user_sct = "-"+result[0][1]['cernSection'][0]
-        except:
-            user_sct = ""
+        # try:
+        #     user_sct = "-"+result[0][1]['cernSection'][0]
+        # except:
+        #     user_sct = ""
 
-        affiliation = user_div+user_grp+user_sct         
+        # affiliation = user_div+user_grp+user_sct         
 
         print '%s (%s): %s quota, %s used, %d buckets, %d objects, %s, %s' % (info['display_name'], uid, sizeof_fmt(info['user_quota']['max_size']), sizeof_fmt(stats['total_bytes']), len(buckets), stats['total_entries'], info['email'], affiliation)
 
