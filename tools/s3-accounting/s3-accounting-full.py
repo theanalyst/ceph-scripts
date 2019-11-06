@@ -49,5 +49,5 @@ for uid in users:
 
         # affiliation = user_div+user_grp+user_sct         
 
-        print '%s (%s): %s quota, %s used, %d buckets, %d objects, %s, %s' % (info['display_name'], uid, sizeof_fmt(info['user_quota']['max_size']), sizeof_fmt(stats['total_bytes']), len(buckets), stats['total_entries'], info['email'])
+        print '%s (%s): %s quota, %s used, %d buckets, %d objects, %s' % (info['display_name'], uid, sizeof_fmt(info['user_quota']['max_size']), sizeof_fmt(stats['total_bytes']), len(buckets), stats['total_entries'], info['email'])
 
