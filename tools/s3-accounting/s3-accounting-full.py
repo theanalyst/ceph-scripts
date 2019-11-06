@@ -15,8 +15,8 @@ def sizeof_fmt(num, suffix='B'):
 
 users = json.loads(commands.getoutput('radosgw-admin --cluster=gabe user list'))
 
-l = ldap.initialize('ldap://xldap.cern.ch:389')
-basedn = "ou=Users,ou=Organic Units,dc=cern,dc=ch"
+#l = ldap.initialize('ldap://xldap.cern.ch:389')
+#basedn = "ou=Users,ou=Organic Units,dc=cern,dc=ch"
 
 for uid in users:
     info = json.loads(commands.getoutput('radosgw-admin --cluster=gabe user info --uid=%s' % uid))
@@ -49,5 +49,5 @@ for uid in users:
 
         # affiliation = user_div+user_grp+user_sct         
 
-        print '%s (%s): %s quota, %s used, %d buckets, %d objects, %s, %s' % (info['display_name'], uid, sizeof_fmt(info['user_quota']['max_size']), sizeof_fmt(stats['total_bytes']), len(buckets), stats['total_entries'], info['email'], affiliation)
+        print '%s (%s): %s quota, %s used, %d buckets, %d objects, %s, %s' % (info['display_name'], uid, sizeof_fmt(info['user_quota']['max_size']), sizeof_fmt(stats['total_bytes']), len(buckets), stats['total_entries'], info['email'])
 
