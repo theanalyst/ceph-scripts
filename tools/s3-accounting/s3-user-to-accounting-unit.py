@@ -28,8 +28,8 @@ manilaclient = manila_client.Client(
 # openstack volume show
 #volume = cinderclient.volumes.get(sys.argv[1])
 project_id = sys.argv[1];# getattr(volume, 'os-vol-tenant-attr:tenant_id')
-
 try: 
+#try: 
   # openstack project show
   project = keystoneclient.projects.get(project_id)
   accounting_group = getattr(project,'accounting-group')
@@ -47,3 +47,6 @@ except:
 
 accounting = getattr(user,'department')
 print accounting
+
+#except: 
+#  print "---"
