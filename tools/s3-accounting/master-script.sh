@@ -7,8 +7,8 @@ OUTFILE="s3-accounting-`date '+%Y-%m-%d'`.log"
 rm $OUTFILE
 
 
-#ssh cephadm /root/ceph-scripts/tools/s3-accounting/s3-accounting-full.py > $FILENAME
-FILENAME="s3accfull.out"
+FILENAME="/tmp/s3accounting.tmp.log"
+ssh cephadm /root/ceph-scripts/tools/s3-accounting/s3-accounting-full.py > $FILENAME
 
 while read -r line; 
 do 
@@ -31,8 +31,4 @@ do
   fi;
 done < $FILENAME
 
-
 s3cmd put $OUTFILE s3://s3-accounting-files
-#
-# push $FILENAME to S3
-#
