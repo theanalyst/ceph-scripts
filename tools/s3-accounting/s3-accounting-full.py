@@ -1,5 +1,7 @@
 #!/usr/bin/python -u
 
+from __future__ import division
+
 import json, commands, ldap
 
 
@@ -27,5 +29,5 @@ for uid in users:
 
         buckets = json.loads(commands.getoutput('radosgw-admin --cluster=gabe bucket list --uid=%s' % uid))
 
-        print '%s (%s): %s quota, %s used, %d buckets, %d objects, %s' % (info['display_name'], uid, sizeof_fmt(info['user_quota']['max_size']), sizeof_fmt(stats['total_bytes']), len(buckets), stats['total_entries'], info['email'])
+        print "%s (%s): %s quota, %s used, %.2f percent full,  %d buckets, %d objects, %s," % (info['display_name'], uid, sizeof_fmt(info['user_quota']['max_size']), sizeof_fmt(stats['total_bytes']), 100*stats['total_bytes']/info['user_quota']['max_size'] , len(buckets), stats['total_entries'], info['email'])
 
