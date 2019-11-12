@@ -115,6 +115,11 @@ then
     draw "No block device found, switching to ceph-volume"
     DBD=`ceph-volume lvm list | awk -v awkosdid=osd.$OSD 'BEGIN { out=0 } { if($0 ~ /====/) {out=0} if(out) {print $0;} if($0 ~ awkosdid) {out=1}; }'  | grep -Eo "db device.*$" | sed 's/db device.*\/dev\///' | sort | uniq;`
     draw "Found DEV: $DEV, DBD: $DBD"
+    if [[ -z $DBD && $FORCEMODE ]];
+    then
+      RTDBD="/dev/`ceph-volume lvm list  | grep -Eo /sd[a-z]+ | sort | uniq -c | sort -k1 | grep -v 1 | head -n 1 | grep -Eo sd[a-z]+`"
+      DBD=`lvs -o +devices,tags | grep ${RTDBD} | grep -vE "osd_id" | awk '{print $2"/"$1}'`
+    fi
   fi
 fi
 
