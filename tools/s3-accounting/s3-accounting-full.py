@@ -55,7 +55,7 @@ for uid in users:
             overquota[uid] = [info, percentused] 
             # sendnotification(uid, info, percentused)
 
-        print "%s (%s): %s quota, %s used, %.2f percent full,  %d buckets, %d objects, %s," % (info['display_name'], uid, sizeof_fmt(info['user_quota']['max_size']), sizeof_fmt(stats['total_bytes']), percentused, len(buckets), stats['total_entries'], info['email'])
+        print "%s (%s): %s quota, %s used, %.2f percent full,  %d buckets, %d objects, %s," % (info['display_name'], uid, sizeof_fmt(info['user_quota']['max_size']), sizeof_fmt(stats['total_bytes']), percentused, len(buckets), stats['total_entries'], info['email'] if info['email'] != '' else 'none' )
 
 
 
