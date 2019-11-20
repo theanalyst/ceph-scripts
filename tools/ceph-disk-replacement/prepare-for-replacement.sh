@@ -112,6 +112,7 @@ then
   fi
 else
   echo "echo \"osd.$OSD still unsafe to destroy\"" 
+  echo "echo \"Please wait and retry later\""
 fi
 
 

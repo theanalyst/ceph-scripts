@@ -132,6 +132,7 @@ then
   if [[ $? -eq 1 ]];
   then
     echo "echo \"osd.$OSD is unsafe to destroy\"" 
+    echo "echo \"Please wait and try again later\""
     echo "echo \"Aborting\"" 
     exit
   fi  
