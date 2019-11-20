@@ -30,7 +30,7 @@ do
   then 
     ./s3-user-to-accounting-unit.py $prid >> $OUTFILE
   else
-    ./get-user-dept-group-info-by-email.sh `echo $line | grep  -Eo "[a-z0-9\.-]*@.*$" | tr -d ","` | awk '{print " "$1"/"$2}' >> $OUTFILE
+    ./cern-user-to-accounting-unit.sh `echo $line | grep  -Eo "[a-z0-9\.-]*@.*$" | tr -d ","` | awk '{print " "$1"/"$2}' >> $OUTFILE
   fi;
 done < $FILENAME
 
