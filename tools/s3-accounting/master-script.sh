@@ -16,8 +16,6 @@ then
   TRESHOLD=85
 fi
 
-exit
-
 echo -n "" > $OUTFILE
 
 ssh cephadm /root/ceph-scripts/tools/s3-accounting/s3-accounting-full.py > $FILENAME
