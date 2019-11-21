@@ -55,8 +55,8 @@ do
 done < $OUTFILE
 
 # clean
-#rm $PRVFILE
-#rm $OUTFILE
+rm $PRVFILE
+rm $OUTFILE
 
 
 
