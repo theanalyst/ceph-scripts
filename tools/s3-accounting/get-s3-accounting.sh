@@ -50,7 +50,6 @@ do
     then
       echo "User `echo $uid | tr -d "()"` is reaching $act percent of its allowed quota (was $prv)" | mail -s "S3 Account $uid quota treshold reached" julien.collet@cern.ch
     fi
-    echo ""
   fi
 done < $OUTFILE
 
