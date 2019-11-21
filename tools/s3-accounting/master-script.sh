@@ -28,12 +28,12 @@ do
   then 
     ./s3-user-to-accounting-unit.py $prid >> $OUTFILE
   else
-    ./cern-user-to-accounting-unit.sh `echo $line | grep  -Eo "[a-z0-9\.-]*@.*$" | tr -d ","` | awk '{print " "$1"/"$2}' >> $OUTFILE
+    ./cern-get-accounting-unit.sh `echo $line | grep  -Eo "[a-z0-9\.-]*@.*$" | tr -d ","` >> $OUTFILE
   fi;
 done < $FILENAME
 
 s3cmd put $OUTFILE s3://s3-accounting-files
-s3cmd get s3://s3-accounting-files/$PRVFILE  
+s3cmd get --force s3://s3-accounting-files/$PRVFILE  
 
 while read -r line;
 do
@@ -46,16 +46,19 @@ do
     prv=`grep "$uid" $PRVFILE | grep -Eo ", [0-9.]+ percent full" | tr -d "[a-z ,]"`
     act=`echo $line | grep -E "$uid" | grep -Eo ", [0-9.]+ percent full" | tr -d "[a-z ,]"`
 
+    echo -n "$uid is $act, was $prv"
     if (( $(echo "$act > $TRESHOLD" | bc -l) )) && (( $(echo "$prv < $TRESHOLD" | bc -l) ))  ;
     then
+      echo -n " mail sent"
       echo "User `echo $uid | tr -d "()"` is reaching $act percent of its allowed quota (was $prv)" | mail -s "S3 Account $uid quota treshold reached" julien.collet@cern.ch
     fi
+    echo ""
   fi
 done < $OUTFILE
 
 # clean
-rm $PRVFILE
-rm $OUTFILE
+#rm $PRVFILE
+#rm $OUTFILE
 
 
 
