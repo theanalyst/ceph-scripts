@@ -18,7 +18,7 @@ fi
 
 echo -n "" > $OUTFILE
 
-ssh cephadm /root/ceph-scripts/tools/s3-accounting/get-s3-user-stat.py > $FILENAME
+ssh cephadm /root/ceph-scripts/tools/s3-accounting/get-s3-user-stats.py > $FILENAME
 
 while read -r line; 
 do 
