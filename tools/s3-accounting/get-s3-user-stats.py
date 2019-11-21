@@ -15,7 +15,7 @@ def sizeof_fmt(num, suffix='B'):
 users = sys.stdin.readlines(); # json.loads(commands.getoutput('radosgw-admin --cluster=gabe user list'))
 
 for uid in users:
-    info = json.loads(commands.getoutput('radosgw-admin --cluster=gabe user info --uid=%s' % uid.strip('\n'))
+    info = json.loads(commands.getoutput('radosgw-admin --cluster=gabe user info --uid=%s' % uid.strip('\n')))
     if info['user_quota']['max_size_kb'] > 1:
         try:
             stats = json.loads(commands.getoutput('radosgw-admin --cluster=gabe user stats --uid=%s' % uid.strip('\n')))['stats']
