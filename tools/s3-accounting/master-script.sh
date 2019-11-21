@@ -46,10 +46,8 @@ do
     prv=`grep "$uid" $PRVFILE | grep -Eo ", [0-9.]+ percent full" | tr -d "[a-z ,]"`
     act=`echo $line | grep -E "$uid" | grep -Eo ", [0-9.]+ percent full" | tr -d "[a-z ,]"`
 
-    echo -n "$uid is $act, was $prv"
     if (( $(echo "$act > $TRESHOLD" | bc -l) )) && (( $(echo "$prv < $TRESHOLD" | bc -l) ))  ;
     then
-      echo -n " mail sent"
       echo "User `echo $uid | tr -d "()"` is reaching $act percent of its allowed quota (was $prv)" | mail -s "S3 Account $uid quota treshold reached" julien.collet@cern.ch
     fi
     echo ""
