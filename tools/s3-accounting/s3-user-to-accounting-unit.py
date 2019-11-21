@@ -47,6 +47,3 @@ except:
 
 accounting = getattr(user,'department')
 print accounting
-
-#except: 
-#  print "---"

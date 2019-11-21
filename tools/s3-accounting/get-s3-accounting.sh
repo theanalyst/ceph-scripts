@@ -8,7 +8,7 @@ export OS_PROJECT_NAME=Services
 OUTFILE="s3-accounting-`date '+%Y-%m-%d'`.log"
 PRVFILE="s3-accounting-`date -d "yesterday" '+%Y-%m-%d'`.log"
 TRESHOLD=$1
-FILENAME="/tmp/s3accounting.tmp.log"
+FILENAME="/tmp/s3-accounting-`date '+%Y-%m-%d'`.tmp.log"
 
 
 if [ -z $TRESHOLD ];
@@ -18,11 +18,7 @@ fi
 
 echo -n "" > $OUTFILE
 
-echo "ssh..."
-
 openstack project list --domain default --tags-any s3quota --format json | jq '.[].ID' | tr -d "\"" | ssh cephadm /root/ceph-scripts/tools/s3-accounting/get-s3-user-stats.py > $FILENAME
-
-echo "done"
 
 while read -r line; 
 do 
