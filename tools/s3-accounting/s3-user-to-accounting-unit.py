@@ -16,7 +16,8 @@ if len (sys.argv) != 2:
   exit(-1)
 
 cc = cloud_config.OpenStackConfig()
-cloud = cc.get_one_cloud(cloud=os.environ.get('OS_CLOUD'))
+#cloud = cc.get_one_cloud(cloud=os.environ.get('OS_CLOUD')) # try with 'cern'
+cloud = cc.get_one_cloud(cloud='cern') # try with 'cern'
 session = keystone_session.Session(auth=cloud.get_auth())
 
 keystoneclient = keystone_client.Client(session=session)
