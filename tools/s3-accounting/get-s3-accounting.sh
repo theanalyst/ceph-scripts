@@ -5,10 +5,10 @@
 
 export OS_PROJECT_NAME=Services
 
-OUTFILE="s3-accounting-`date '+%Y-%m-%d'`.log"
-PRVFILE="s3-accounting-`date -d "yesterday" '+%Y-%m-%d'`.log"
+OUTFILE="s3-accounting-`date '+%F'`.log"
+PRVFILE="s3-accounting-`date -d "yesterday" '+%F'`.log"
 TRESHOLD=$1
-FILENAME="/tmp/s3-accounting-`date '+%Y-%m-%d'`.tmp.log"
+FILENAME="/tmp/s3-accounting-`date '+%F'`.tmp.log"
 
 
 if [ -z $TRESHOLD ];
