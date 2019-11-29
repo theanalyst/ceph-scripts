@@ -26,7 +26,8 @@ do
   echo -n $line" " >> $OUTFILE; 
   if [ ! -z $prid ]; 
   then 
-    /afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/s3-user-to-accounting-unit.py $prid >> $OUTFILE
+    userid=`/afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/s3-user-to-accounting-unit.py $prid`
+    /afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/cern-get-accounting-unit.sh $userid >> $OUTFILE
   else
     /afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/cern-get-accounting-unit.sh `echo $line | grep  -Eo "[a-z0-9\.-]*@.*$" | tr -d ","` >> $OUTFILE
   fi;
@@ -52,8 +53,6 @@ do
     fi
   fi
 done < $OUTFILE
-
-cat $OUTFILE
 
 # clean
 rm $PRVFILE
