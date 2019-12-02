@@ -6,6 +6,7 @@
 export OS_PROJECT_NAME=Services
 
 OUTFILE="s3-accounting-`date '+%F'`.log"
+FDOFILE="s3-accounting-`date '+%F'`.data"
 PRVFILE="s3-accounting-`date -d "yesterday" '+%F'`.log"
 TRESHOLD=$1
 FILENAME="/tmp/s3-accounting-`date '+%F'`.tmp.log"
@@ -54,7 +55,45 @@ do
   fi
 done < $OUTFILE
 
+echo -n "{\"data\": [" > $FDOFILE
+
+while read -r line; 
+do 
+  name=`echo $line | grep -Eo "^.*\(" | tr -d "("`
+  uid=`echo $line | grep -Eo "\(.*\)" | tr -d "()"`
+
+  data=`echo $line | grep -Eo ":.*$" | tr -d ":"`
+
+  echo -n "{\"name\": \"$name\",\"uid\":\"$uid\","  >> $FDOFILE
+  echo -n $data | tr -d "," | awk '{ printf \
+   "\""$2"\":\""$1"\","\
+   "\"usage\":\""$3"\"," \
+   "\"usage_human\":\""$5"\"," \
+   "\"num_bucket\":\""$8"\"," \
+   "\"num_objects\":\""$10"\"," \
+   "\"mail\":\""$12"\"," \
+  }' >> $FDOFILE
+
+  accountinggroup=`echo -n $data | grep -Eo " [A-Z]+/[A-Z]+/?[A-Z]+?"`
+  
+  echo $accountinggroup | sed -e 's/\// /g' | awk '{ printf \
+   "\"division\":\""$1"\"," \
+   "\"group\":\""$2"\"," \
+   "\"section\":\""$3"\"" \
+ }' >> $FDOFILE
+
+  echo -n "}," >> $FDOFILE
+done < $OUTFILE
+
+
+
+echo -n "{}]}" >> $FDOFILE
+
+s3cmd put $FDOFILE s3://s3-storage-accounting/
+
+
 # clean
+rm $FDOFILE
 rm $PRVFILE
 rm $OUTFILE
 
