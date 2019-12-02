@@ -15,7 +15,6 @@ serviceowner=`echo $reply | grep -Eo "managedBy: CN=[a-z0-9\-\+]*," | sed -e 's/
 
 mail=`echo $reply | grep -Eo "mail: [a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-]+" | sed -e 's/.*: //'`
 
-
 if [ -z $serviceowner ];
 then
   userdepgrp=`echo $reply | grep -Eo "department: [A-Z]+[/A-Z]?+" | sed -e 's/.*: //'`;

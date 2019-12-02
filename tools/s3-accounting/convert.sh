@@ -1,7 +1,6 @@
 #!/bin/bash
 
 
-
 echo -n "{\"data\": ["
 
 while read -r line; 
