@@ -1,5 +1,17 @@
 #! /bin/bash
 
+
+if [[ `cat /etc/motd | grep hostgroup | grep -Eo "ceph/[a-Z0-9/]+" | grep -c critical` -eq 1 ]];
+then
+    echo "echo \"------------------------\""
+    echo "echo \"Intervention ongoing on \""
+    echo "echo \"beesly/osd/critical     \""
+    echo "echo \"contact ceph-admins     \""
+    echo "echo \"------------------------\""
+    exit
+fi
+
+
 if [[ `cat /etc/motd | grep hostgroup | grep -Eo "ceph/[a-Z0-9/]+" | grep -c castor` -eq 1 ]];
 then
   CASTOR=1
