@@ -96,7 +96,7 @@ except ValueError:
 try:
   _remapped = remapped['pg_stats']
   remapped = _remapped
-except KeyError:
+except TypeError:
   pass
 
 # discover existing upmaps
