@@ -11,7 +11,7 @@ then
     exit
 fi
 
-if [[ `facter -p landb_rackname 2> /dev/null | grep -Eoq "EC0[56]"` -eq 1 ]];
+if [[ `facter -p landb_rackname 2> /dev/null | grep -Eoc "EC0[56]"` -eq 1 ]];
 then
     echo "echo \"------------------------\""
     echo "echo \"Intervention ongoing on \""
