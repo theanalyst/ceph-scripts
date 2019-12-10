@@ -10,6 +10,16 @@ then
     exit
 fi
 
+if [[ `facter -p landb_rackname 2> /dev/null | grep -Eoq "EC0[56]"` -eq 1 ]];
+then
+    echo "echo \"------------------------\""
+    echo "echo \"Intervention ongoing on \""
+    echo "echo \"Racks EC0[56]           \""
+    echo "echo \"contact ceph-admins     \""
+    echo "echo \"------------------------\""
+    exit
+fi
+
 
 INITSTATE=`ceph health`
 FORCEMODE=0;
