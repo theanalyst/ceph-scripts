@@ -65,23 +65,16 @@ do
 
   data=`echo $line | grep -Eo ":.*$" | tr -d ":"`
 
-  echo -n "{\"name\": \"$name\",\"uid\":\"$uid\","  >> $FDOFILE
+  echo -n "{\"display_name\": \"$name\",\"uid\":\"$uid\","  >> $FDOFILE
   echo -n $data | tr -d "," | awk '{ printf \
-   "\""$2"\":\""$1"\","\
+   "\"quota\":\""$1"\","\
    "\"usage\":\""$3"\"," \
    "\"usage_human\":\""$5"\"," \
    "\"num_bucket\":\""$8"\"," \
    "\"num_objects\":\""$10"\"," \
-   "\"mail\":\""$12"\"," \
+   "\"owner\":\""$12"\"," \
+   "\"mail\":\""$13"\"" \
   }' >> $FDOFILE
-
-  accountinggroup=`echo -n $data | grep -Eo " [A-Z]+/[A-Z]+/?[A-Z]+?"`
-  
-  echo $accountinggroup | sed -e 's/\// /g' | awk '{ printf \
-   "\"division\":\""$1"\"," \
-   "\"group\":\""$2"\"," \
-   "\"section\":\""$3"\"" \
- }' >> $FDOFILE
 
   echo -n "}," >> $FDOFILE
 done < $OUTFILE

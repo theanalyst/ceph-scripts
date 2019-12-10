@@ -19,10 +19,12 @@ if [ -z $serviceowner ];
 then
   userdepgrp=`echo $reply | grep -Eo "department: [A-Z]+[/A-Z]?+" | sed -e 's/.*: //'`;
   userSection=`echo $reply | grep -Eo "cernSection: [A-Z]+" | sed -e 's/.*: /\//'`;
+  echo -n "$userid, "
 else
   replytoso=`ldapsearch -x -h xldap.cern.ch -p 389 -s base -b "cn=$serviceowner,ou=Users,ou=Organic Units,dc=cern,dc=ch"`
   userdepgrp=`echo $replytoso|  grep -Eo "department: [A-Z]+[/A-Z]?+" | sed -e 's/.*: //'`
   userSection=`echo $replytoso | grep -Eo "cernSection: [A-Z]+" | sed -e 's/.*: /\//'`;
+  echo -n "$serviceowner, "
 fi
 
-echo $mail, $userdepgrp$userSection
+echo $mail
