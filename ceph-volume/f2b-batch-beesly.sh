@@ -2,7 +2,7 @@
 
 set -x
 
-if ((`pgrep ceph-osd | wc -l` == 0))
+if ((`pgrep ceph-osd | wc -l` == 20))
 then
     if ((`lsscsi | grep -i 'intel.*/dev/sd[c-f]' | wc -l` == 4)) &&
        ((`lsscsi | grep -i 'hgst.*hms5.*/dev/sd[g-z]' | wc -l` == 20))
