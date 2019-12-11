@@ -2,7 +2,7 @@
 
 for i in `ceph osd tree | grep host | grep -Eo "p.*"`; 
 do 
-  ssh $i ceph-scripts/tools/ceph-disk-replacement/list-available-drives.sh; 
+  ssh -oStrictHostKeyChecking=no $i ceph-scripts/tools/ceph-disk-replacement/list-available-drives.sh; 
 done
 
 #while [[ $# -gt 0 ]]
