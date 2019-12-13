@@ -1,17 +1,19 @@
 #!/bin/bash
 
-# usage ./no-osd-left-behind.sh <cephcluster>
+#usage ./no-osd-left-behind.sh <cephcluster>
 
-#OUTFILE="s3-accounting-`date '+%F'`.log"
+OUTFILE="s3-accounting-`date '+%F'`.log"
 
-#echo -n "" > $OUTFILE
+echo -n "" > $OUTFILE
 
 for i in `ceph osd tree | grep host | grep -Eo "p.*"`; 
 do 
-  ssh -oStrictHostKeyChecking=no $i ceph-scripts/tools/ceph-disk-replacement/list-available-drives.sh # >> ${OUTFILE}. 
+  ssh -oStrictHostKeyChecking=no $i ceph-scripts/tools/ceph-disk-replacement/list-available-drives.sh  >> ${OUTFILE}
 done
 
-# s3cmd put $OUTFILE s3://ceph-`echo $1`/
+
+cat $OUTFILE | jq '. | {path: .path, hostname: .hostname} | select(.path)'
+s3cmd put $OUTFILE s3://ceph-`echo $1`/
 
 
 
