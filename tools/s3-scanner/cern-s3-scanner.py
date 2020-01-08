@@ -50,7 +50,7 @@ def checkBucket(bName, mode='default', outFile=sys.stdout, triesLeft=2):
 def getBucketOwner(bName):
     try:
         info = json.loads(subprocess.getoutput('ssh cephadm radosgw-admin --cluster=gabe metadata get bucket:'+bName))
-        return info['data']['owner']
+        return subprocess.getoutput('../s3-accounting/s3-user-to-accounting-unit.py '+info['data']['owner'])
     except:
         print('Couldn\'t reach cephgabe',file=sys.stdout)
         return 'OwnerNotFound'
