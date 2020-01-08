@@ -49,7 +49,7 @@ def checkBucket(bName, mode='default', outFile=sys.stdout, triesLeft=2):
 
 def getBucketOwner(bName):
     try:
-        info = json.loads(subprocess.getoutput('radosgw-admin --cluster=gabe metadata get bucket:',bName))
+        info = json.loads(subprocess.getoutput('ssh cephadm radosgw-admin --cluster=gabe metadata get bucket:'+bName))
         return info['data']['owner']
     except:
         print('Couldn\'t reach cephgabe',file=sys.stdout)
