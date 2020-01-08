@@ -9,8 +9,12 @@ DBSIZE="29GiB"
 
 ls -l $@ | awk '{ print $10 }' | \
 while read d1; read d2; do
-    echo ceph-volume lvm zap $d1
-    echo ceph-volume lvm zap $d2
+    echo ceph-volume lvm zap $d1 --destroy
+    echo ceph-volume lvm zap $d2 --destroy
+    echo sleep 1
+    echo pvremove $d1
+    echo pvremove $d2
+    echo sleep 1
     vgname=ceph-block-`uuid -v4`
     lvname=osd-block-`uuid -v4`
     dbname=osd-block-db-`uuid -v4`
