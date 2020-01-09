@@ -12,6 +12,13 @@ upmaps = osd_dump['pg_upmap_items']
 pgs_json = commands.getoutput('ceph pg ls -f json')
 pgs = json.loads(pgs_json)
 
+# nautilus compat
+try:
+  _pgs = pgs['pg_stats']
+  pgs = _pgs
+except TypeError:
+  pass
+
 up = {}
 for pg in pgs:
   up[pg['pgid']] = pg['up']
