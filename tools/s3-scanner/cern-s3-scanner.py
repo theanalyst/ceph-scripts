@@ -50,12 +50,17 @@ def checkBucket(bName, mode='default', outFile=sys.stdout, triesLeft=2):
 def getBucketOwner(bName):
     try:
         info = json.loads(subprocess.getoutput('ssh cephadm radosgw-admin --cluster=gabe metadata get bucket:'+bName))
-        return subprocess.getoutput('../s3-accounting/s3-user-to-accounting-unit.py '+info['data']['owner'])
+        owner = json.loads(subprocess.getoutput('ssh cephadm radosgw-admin --cluster=gabe metadata get user:'+info['data']['owner']))
+        email = subprocess.getoutput('../s3-accounting/cern-get-accounting-unit.sh --id '+owner['data']['email'])
+        if email != ", ":
+          return email
+        else:
+          return subprocess.getoutput('../s3-accounting/cern-get-accounting-unit.sh --id `../s3-accounting/s3-user-to-accounting-unit.py '+info['data']['owner']+'`')
     except:
         print('Couldn\'t reach cephgabe',file=sys.stdout)
         return 'OwnerNotFound'
 
-def exploreBucket(bName, mode='default'):
+def exploreBucket(bName, mode='default', outFile=sys.stdout):
     """ Explore bucket (if possible) and show publicly accessible objects 
         - bName: bucket name """
 
@@ -87,7 +92,7 @@ args = parser.parse_args()
 if not path.isfile(args.buckets):
     if checkBucket(args.buckets, args.mode, args.outFile): 
         if args.mode != 'bucketonly': 
-            exploreBucket(args.buckets, args.mode)
+            exploreBucket(args.buckets, args.mode, args.outFile)
 
 
 
