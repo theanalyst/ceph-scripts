@@ -101,6 +101,7 @@ done < $OUTFILE
 
 
 echo -n "{}]}" >> $FDOFILE
+sed -e 's/,{}]/]/' -i $FDOFILE
 
 s3cmd put $FDOFILE s3://s3-storage-accounting/
 
