@@ -28,9 +28,9 @@ do
   if [ ! -z $prid ]; 
   then 
     userid=`/afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/s3-user-to-accounting-unit.py $prid`
-    /afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/cern-get-accounting-unit.sh $userid >> $OUTFILE
+    /afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/cern-get-accounting-unit.sh --id $userid -f >> $OUTFILE
   else
-    /afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/cern-get-accounting-unit.sh `echo $line | grep  -Eo "[a-z0-9\.-]*@.*$" | tr -d ","` >> $OUTFILE
+    /afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/cern-get-accounting-unit.sh --id `echo $line | grep  -Eo "[a-z0-9\.-]*@.*$" -f | tr -d ","` >> $OUTFILE
   fi;
 done < $FILENAME
 
@@ -65,6 +65,23 @@ do
 
   data=`echo $line | grep -Eo ":.*$" | tr -d ":"`
 
+  affiliation=`echo $line | grep -Eo ", [A-Za-z/]+$" | tr -d " ,"`
+  if [ `echo $affiliation | sed 's/[^/]//g' | awk '{ print length }'` -eq 2 ]
+  then
+    sec=`echo $affiliation | sed 's/\// /g' | awk '{print $3}'`
+    grp=`echo $affiliation | sed 's/\// /g' | awk '{print $2}'` 
+    dep=`echo $affiliation | sed 's/\// /g' | awk '{print $1}'`
+  elif [ `echo $affiliation | sed 's/[^/]//g' | awk '{ print length }'` -eq 1 ]
+  then
+    sec="" 
+    grp=`echo $affiliation | sed 's/\// /g' | awk '{print $2}'`
+    dep=`echo $affiliation | sed 's/\// /g' | awk '{print $1}'`
+  else
+    sec=""
+    grp=""
+    dep=$affiliation
+  fi
+
   echo -n "{\"display_name\": \"$name\",\"uid\":\"$uid\","  >> $FDOFILE
   echo -n $data | tr -d "," | awk '{ printf \
    "\"quota\":\""$1"\","\
@@ -73,9 +90,11 @@ do
    "\"num_bucket\":\""$8"\"," \
    "\"num_objects\":\""$10"\"," \
    "\"owner\":\""$12"\"," \
-   "\"mail\":\""$13"\"" \
+   "\"mail\":\""$13"\"," \
   }' >> $FDOFILE
-
+  echo -n "\"division\":\"$dep\"," >> $FDOFILE
+  echo -n "\"group\":\"$grp\"," >> $FDOFILE
+  echo -n "\"section\":\"$sec\"" >> $FDOFILE
   echo -n "}," >> $FDOFILE
 done < $OUTFILE
 

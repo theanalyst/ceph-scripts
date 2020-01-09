@@ -6,8 +6,30 @@
 # where <user>: user-id, email
 #
 
+while [[ $# -gt 0 ]]
+do
+    key="$1"
 
-userid=`echo $1 | sed -e 's/@.*//'`
+    case "$key" in
+        --id)
+        ID=$2
+        shift;
+        shift;
+        ;;
+        
+        -f)
+        FULLMODE=1;
+        shift;
+        ;;
+
+        *)
+        shift;
+        ;;
+    esac
+done
+
+
+userid=`echo $ID | sed -e 's/@.*//'`
 
 reply=`ldapsearch -xLLL -h xldap.cern.ch -p 389 -b "dc=cern,dc=ch" "(|(mail=$1)(cn=$userid))"`
 
@@ -27,4 +49,9 @@ else
   echo -n "$serviceowner, "
 fi
 
-echo $mail
+if [ ! -z $FULLMODE ];
+then
+  echo "$mail, ${userdepgrp}${userSection}";
+else
+  echo $mail
+fi
