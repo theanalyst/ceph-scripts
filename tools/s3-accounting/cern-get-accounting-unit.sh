@@ -31,7 +31,7 @@ done
 
 userid=`echo $ID | sed -e 's/@.*//'`
 
-reply=`ldapsearch -xLLL -h xldap.cern.ch -p 389 -b "dc=cern,dc=ch" "(|(mail=$1)(cn=$userid))"`
+reply=`ldapsearch -xLLL -h xldap.cern.ch -p 389 -b "dc=cern,dc=ch" "(|(mail=$ID)(cn=$userid))"`
 
 serviceowner=`echo $reply | grep -Eo "managedBy: CN=[a-z0-9\-\+]*," | sed -e 's/.*CN=//' | tr -d ","`
 
