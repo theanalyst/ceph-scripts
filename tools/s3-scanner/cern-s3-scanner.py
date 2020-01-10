@@ -51,11 +51,11 @@ def getBucketOwner(bName):
     try:
         info = json.loads(subprocess.getoutput('ssh cephadm radosgw-admin --cluster=gabe metadata get bucket:'+bName))
         owner = json.loads(subprocess.getoutput('ssh cephadm radosgw-admin --cluster=gabe metadata get user:'+info['data']['owner']))
-        email = subprocess.getoutput('../s3-accounting/cern-get-accounting-unit.sh --id '+owner['data']['email'])
+        email = subprocess.getoutput('/afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/cern-get-accounting-unit.sh --id '+owner['data']['email'])
         if email != ", ":
           return email
         else:
-          return subprocess.getoutput('../s3-accounting/cern-get-accounting-unit.sh --id `../s3-accounting/s3-user-to-accounting-unit.py '+info['data']['owner']+'`')
+           return subprocess.getoutput('/afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/cern-get-accounting-unit.sh --id `/afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/s3-user-to-accounting-unit.py '+info['data']['owner']+'`')  
     except:
         print('Couldn\'t reach cephgabe',file=sys.stdout)
         return 'OwnerNotFound'
