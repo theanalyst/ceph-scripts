@@ -98,16 +98,15 @@ do
   echo -n "}," >> $FDOFILE
 done < $OUTFILE
 
-
-
 echo -n "{}]}" >> $FDOFILE
 sed -e 's/,{}]/]/' -i $FDOFILE
 
 s3cmd put $FDOFILE s3://s3-storage-accounting/
 
+# publish data to cern.ch/storage/accounting
+mv $FDOFILE /eos/project/f/fdo/www/accounting/data.s3.json 
 
 # clean
-rm $FDOFILE
 rm $PRVFILE
 rm $OUTFILE
 
