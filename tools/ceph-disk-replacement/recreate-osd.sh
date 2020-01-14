@@ -169,6 +169,7 @@ then
   echo "ceph osd destroy $OSD --yes-i-really-mean-it"
   echo "pvremove $DEV" 
   echo "pvremove $MOREDEV"
+  echo "pvscan --cache"
   CMDS=`../../ceph-volume/striped-osd-prepare.sh $DEV $MOREDEV`
   echo "$CMDS --osd-id $OSD"
 else
