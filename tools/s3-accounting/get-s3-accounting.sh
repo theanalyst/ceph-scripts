@@ -30,12 +30,14 @@ do
     userid=`/afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/s3-user-to-accounting-unit.py $prid`
     /afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/cern-get-accounting-unit.sh --id $userid -f >> $OUTFILE
   else
-    /afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/cern-get-accounting-unit.sh --id `echo $line | grep  -Eo "[a-z0-9\.-]*@.*$" -f | tr -d ","` >> $OUTFILE
+    echo "HI THERE: --$line --"
+    /afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/cern-get-accounting-unit.sh --id `echo $line | grep  -Eo "[a-z0-9\.-]*@.*$" | tr -d ","` -f >> $OUTFILE
   fi;
 done < $FILENAME
 
 s3cmd put $OUTFILE s3://s3-accounting-files
 s3cmd get --force s3://s3-accounting-files/$PRVFILE  
+s3cmd rm s3://s3-accounting-files/$PRVFILE
 
 while read -r line;
 do
@@ -100,8 +102,6 @@ done < $OUTFILE
 
 echo -n "{}]}" >> $FDOFILE
 sed -e 's/,{}]/]/' -i $FDOFILE
-
-s3cmd put $FDOFILE s3://s3-storage-accounting/
 
 # publish data to cern.ch/storage/accounting
 mv $FDOFILE /eos/project/f/fdo/www/accounting/data.s3.json 
