@@ -2,6 +2,8 @@
 
 set -x
 
+roger update --appstate intervention --message "Reformatting machines to Bluestore" --duration 2d `hostname -s`
+
 ceph osd set noout
 systemctl stop ceph-osd.target
 while ((`pgrep ceph-osd | wc -l` > 0)); do
