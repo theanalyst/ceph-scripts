@@ -42,8 +42,15 @@ try:
 
   user = keystoneclient.users.get(user_id)
 
-except:  
-  user = keystoneclient.users.get(project_id)
-  
-username = getattr(user,'id')
+except:
+  try:
+    user = keystoneclient.users.get(project_id)
+  except:
+    user = "Unknown"
+
+try:
+  username = getattr(user,'id')
+except:
+  username = "Unknown"
+
 print username
