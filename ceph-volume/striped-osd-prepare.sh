@@ -14,8 +14,8 @@ while read d1; read d2; do
     ceph-volume lvm zap $d1 --destroy
     ceph-volume lvm zap $d2 --destroy
     sleep 1
-    pvremove $d1
-    pvremove $d2
+#    pvremove $d1
+#    pvremove $d2
     pvscan --cache
     sleep 1
     vgname=ceph-block-`uuid -v4`
