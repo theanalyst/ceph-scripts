@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # Check if cephrocks VG exists
 vgs cephrocks &> /dev/null && ROCKSDB=true || ROCKSDB=false
 
@@ -9,21 +11,22 @@ DBSIZE="29GiB"
 
 ls -l $@ | awk '{ print $10 }' | \
 while read d1; read d2; do
-    echo ceph-volume lvm zap $d1 --destroy
-    echo ceph-volume lvm zap $d2 --destroy
-    echo sleep 1
-    echo pvremove $d1
-    echo pvremove $d2
-    echo sleep 1
+    ceph-volume lvm zap $d1 --destroy
+    ceph-volume lvm zap $d2 --destroy
+    sleep 1
+    pvremove $d1
+    pvremove $d2
+    pvscan --cache
+    sleep 1
     vgname=ceph-block-`uuid -v4`
     lvname=osd-block-`uuid -v4`
     dbname=osd-block-db-`uuid -v4`
-    echo vgcreate $vgname $d1 $d2
-    echo lvcreate -i 2 -l 100%FREE -n $lvname $vgname
+    vgcreate $vgname $d1 $d2
+    lvcreate -i 2 -l 100%FREE -n $lvname $vgname
     if $ROCKSDB; then
-        echo lvcreate -L $DBSIZE -n $dbname cephrocks
-        echo ceph-volume lvm create --bluestore --data $vgname/$lvname --block.db cephrocks/$dbname
+        lvcreate -L $DBSIZE -n $dbname cephrocks
+        ceph-volume lvm create --bluestore --data $vgname/$lvname --block.db cephrocks/$dbname
     else
-        echo ceph-volume lvm create --bluestore --data $vgname/$lvname
+        ceph-volume lvm create --bluestore --data $vgname/$lvname
     fi
 done
