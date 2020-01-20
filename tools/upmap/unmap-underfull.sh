@@ -1,6 +1,6 @@
 #!/bin/bash
 
-UNDERFULL=`ceph osd df | grep 'hdd 5.45798  1.00000' | sort -k8 -n | head -n4 | awk '{print $1}'`
+UNDERFULL=`ceph osd df | grep hdd | grep 1.00000 | sort -k8 -n | head -n4 | awk '{print $1}'`
 
 for osd in $UNDERFULL
 do
