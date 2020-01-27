@@ -5,7 +5,7 @@ set -x
 roger update --appstate intervention --message "Reformatting machines to Bluestore" --duration 2d `hostname -s`
 
 readarray -t OSD_IDS < <(ceph osd ls-tree `hostname -s`)
-echo "$OSD_IDS" | xargs ceph osd out
+echo "${OSD_IDS[@]}" | xargs ceph osd out
 
 ceph osd set noout
 systemctl stop ceph-osd.target
