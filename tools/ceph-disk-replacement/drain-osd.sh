@@ -105,6 +105,7 @@ then
   if [[ `ceph osd ok-to-stop osd.$OSD &> /dev/null` -eq 0 ]];
   then
     echo "ceph osd out osd.$OSD;"
+    echo "ceph osd primary-affinity osd.$OSD 0;"
   fi
 else
   echo "echo \"osd.$OSD is already out draining.\""
