@@ -42,6 +42,7 @@ do
     BATCH_DEVS=$(printf "/dev/%s\n" "${HDDS[@]:((i*BATCH_SIZE)):BATCH_SIZE}" "${SSDS[$i]}")
     xargs -i printf "( wipefs -a %s; ceph-volume lvm zap %s ) &\n" {} {} <<< "$BATCH_DEVS" | sh
     wait
+    sleep 10s
     ceph-volume lvm batch --yes $BATCH_DEVS --osd-ids ${OSD_IDS[@]:((i*BATCH_SIZE)):BATCH_SIZE}
 done
 
