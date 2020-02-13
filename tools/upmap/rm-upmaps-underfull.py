@@ -20,6 +20,11 @@ def eprint(*args, **kwargs):
 def rm_upmap_pg_items(pgid):
   print('ceph osd rm-pg-upmap-items %s &' % pgid)
 
+def doexit():
+    eprint("Waiting for stable PGs...")
+    print('wait; sleep 4; while ceph status | grep -q "peering\|activating"; do sleep 2; done')
+    sys.exit(0)
+
 # start here
 
 # discover osd fullness
@@ -54,6 +59,10 @@ for u in upmaps:
         except KeyError:
             upmaps_from_osd[m['from']] = [pgid,]
 
+# safety wait
+eprint("Waiting for stable PGs...")
+print('while ceph status | grep -q "peering\|activating"; do sleep 2; done')
+
 # remove 30 upmaps
 to_go = 30
 pgs_removed = []
@@ -71,6 +80,8 @@ for osd in osds:
             to_go -= 1
             per_osd_to_go -= 1
             if to_go == 0:
-                sys.exit(0)
+                doexit()
             if per_osd_to_go == 0:
                 break
+
+doexit()
