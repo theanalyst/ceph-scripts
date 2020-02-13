@@ -61,6 +61,9 @@ for osd in osds:
     eprint("Handling osd.%d (%.3f%% full)" % (osd['id'], osd['utilization']))
     osdid = osd['id']
     per_osd_to_go = 4
+    if osdid not in upmaps_from_osd:
+        eprint('No upmaps from osd.%d found!' % (osdid))
+        continue
     for pgid in upmaps_from_osd[osdid]:
         if pgid not in pgs_removed:
             rm_upmap_pg_items(pgid)
