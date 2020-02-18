@@ -70,6 +70,9 @@ then
   exit
 fi
 
+
+pvscan --cache
+
 echo $INITSTATE | grep -q "HEALTH_OK"
 if [[ $? -eq 1 ]]; 
 then
