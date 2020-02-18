@@ -8,8 +8,6 @@ import subprocess
 import sys
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-v", "--verbose", help="increase output verbosity",
-                    action="store_true")
 parser.add_argument("-p", "--pool", help="consider this pool only",
                     type=int)
 args = parser.parse_args()
