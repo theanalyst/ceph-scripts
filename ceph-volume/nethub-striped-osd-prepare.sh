@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 ls -l $@ | awk '{ print $10 }' | \
 while read d1; read d2; do
     ceph-volume lvm zap $d1 --destroy
