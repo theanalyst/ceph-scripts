@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# You need to `ceph config set osd debug_osd 1/10` before this can work
+
+set -x
+for OSD in `ceph osd status $(hostname -s) | grep exists | grep -v up | awk '{print $2}'`;
+do
+    MAP=`grep Aborted /var/log/ceph/ceph-osd.$OSD.log -B1 | tail -2 | head -1 | grep -o 'add_map_bl [0-9]*' | grep -o '[0-9]*'`
+    echo "ceph osd getmap $MAP -o $MAP"
+    echo "ceph-objectstore-tool --op set-osdmap --data-path /var/lib/ceph/osd/ceph-$OSD/ --file $MAP"
+    echo "systemctl reset-failed ceph-osd@$OSD"
+    echo "systemctl restart ceph-osd@$OSD"
+done
