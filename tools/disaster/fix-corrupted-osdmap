@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# You need to `ceph config set osd debug_osd 1/10` before this can work
+# You need to `ceph config set osd debug_osd 10` before this can work
 
 set -x
 for OSD in `ceph osd status $(hostname -s) | grep exists | grep -v up | awk '{print $2}'`;
