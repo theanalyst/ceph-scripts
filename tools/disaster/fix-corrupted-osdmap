@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # You need to `ceph config set osd debug_osd 10` before this can work
+# and patch ceph-osd@.service to comment out the restart on failure lines
 
 set -x
 for OSD in `ceph osd status $(hostname -s) | grep exists | grep -v up | awk '{print $2}'`;
