@@ -8,8 +8,12 @@ OSDS=`lvs -o +devices,tags | grep -E "/dev/sdd\(0\)|/dev/sdaa" | grep -Eo "osd_i
 
 for OSD in $OSDS; 
 do
+    echo "systemctl stop ceph-osd@$OSD"
     echo "ceph-volume lvm zap --destroy --osd-id $OSD";
+    echo "ceph osd destroy $OSD --yes-i-really-mean-it";
 done
+
+echo "sleep 10"
 
 echo "./nethub-striped-osd-prepare.sh /dev/sdd  /dev/sdaa `echo $OSDS | cut -d ' '  -f 1`"
 echo "./nethub-striped-osd-prepare.sh /dev/sdab /dev/sday `echo $OSDS | cut -d ' '  -f 2`"
