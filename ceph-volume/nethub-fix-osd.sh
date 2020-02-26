@@ -15,6 +15,6 @@ done
 
 echo "sleep 10"
 
-echo "./nethub-striped-osd-prepare.sh /dev/sdd  /dev/sdaa `echo $OSDS | cut -d ' '  -f 1`"
-echo "./nethub-striped-osd-prepare.sh /dev/sdab /dev/sday `echo $OSDS | cut -d ' '  -f 2`"
+echo "/root/ceph-scripts/ceph-volume/nethub-striped-osd-prepare.sh /dev/sdd  /dev/sdaa `echo $OSDS | cut -d ' '  -f 1`"
+echo "/root/ceph-scripts/ceph-volume/nethub-striped-osd-prepare.sh /dev/sdab /dev/sday `echo $OSDS | cut -d ' '  -f 2`"
 
