@@ -170,7 +170,7 @@ then
   echo "pvremove $DEV" 
   echo "pvremove $MOREDEV"
   echo "pvscan --cache"
-  CMDS=`/root/ceph-scripts/ceph-volume/striped-osd-prepare.sh $DEV $MOREDEV`
+  CMDS=`/root/ceph-scripts/ceph-volume/repair-team-striped-osd-prepare.sh $DEV $MOREDEV`
   echo "$CMDS --osd-id $OSD"
 else
   echo "ceph-volume lvm zap $DEV"
