@@ -59,7 +59,6 @@ def gen_upmap_replicated(up, acting):
   assert(len(u) == len(a))
   lhs = u - a
   rhs = a - u
-  assert(len(lhs) == len(rhs))
   return zip(lhs, rhs)
 
 def gen_upmap_erasure(up, acting):
