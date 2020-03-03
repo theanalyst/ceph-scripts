@@ -65,11 +65,7 @@ def gen_upmap_erasure(up, acting):
   u = valid_osds(up)
   a = valid_osds(acting)
   assert(len(u) == len(a))
-  mappings = []
-  for pair in zip(u, a):
-    if pair[0] != pair[1]:
-      mappings.append(pair)
-  return mappings
+  return filter(lambda (p1, p2): p1 != p2, zip(u, a))
 
 def upmap_pg_items(pgid, mapping):
   print('ceph osd pg-upmap-items %s ' % pgid, end='')
