@@ -11,4 +11,9 @@ vgname=ceph-block-`uuid -v4`
 lvname=osd-block-`uuid -v4`
 vgcreate $vgname $1 $2
 lvcreate -i 2 -l 100%FREE -n $lvname $vgname
-ceph-volume lvm create --bluestore --data $vgname/$lvname --osd-id $3
+if [ -z $3 ]; 
+then
+  ceph-volume lvm create --bluestore --data $vgname/$lvname 
+else
+  ceph-volume lvm create --bluestore --data $vgname/$lvname --osd-id $3
+fi
