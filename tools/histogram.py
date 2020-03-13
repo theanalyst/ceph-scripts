@@ -208,7 +208,7 @@ def histogram(stream, options):
         step = diff / buckets
         bucket_counts = [0 for x in range(buckets)]
         for x in range(buckets):
-            boundaries.append(min_v + (step * (x + 1)))
+            boundaries.append(min_v + (step * (x + 2)))
 
     skipped = 0
     samples = 0
