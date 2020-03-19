@@ -38,9 +38,9 @@ def checkBucket(bName, mode='default', outFile=sys.stdout, triesLeft=2):
         bOwnerName = getBucketOwner(bName)
         #print(bOwnerName,': ',bUrl + ' (',r.status_code,')',file=outFile)
         if bOwnerName.split(',')[0] in userDict:
-          userDict[bOwnerName.split(',')[0]].append(str(bOwnerName.split(',')[1]+': '+bName))
+          userDict[bOwnerName.split(',')[0]].append(str(bOwnerName.split(',')[1]+": "+bName).strip())
         else:
-          userDict[bOwnerName.split(',')[0]]     = [str(bOwnerName.split(',')[1]+': '+bName)]
+          userDict[bOwnerName.split(',')[0]]     = [str(bOwnerName.split(',')[1]+": "+bName).strip()]
         return True
 
     elif r.status_code == 403:
@@ -91,8 +91,12 @@ def exploreBucket(bName, mode='default', outFile=sys.stdout):
             print('  [', objR.status_code, '] ' + objString,file=outFile)
 
 def dumpInfo(userList):
+  output="{"
   for bOwner in list(userList):
-    print(bOwner,': ',userList[bOwner])
+    output+=str("\""+bOwner.strip()+"\": "+json.dumps(userList[bOwner])+',');
+  output=output[:-1]
+  output+="}"
+  print(output)
 
 parser = argparse.ArgumentParser(description='# CERN s3 Scanner - simple s3 bucket scanner\n'
                                              '#\n'
@@ -101,9 +105,22 @@ parser = argparse.ArgumentParser(description='# CERN s3 Scanner - simple s3 buck
                                              '# 2019\n',
                                  prog='cern-s3-scanner')
 
+def checkBlackListing(bucket, blackList):
+  if blackList:
+    with open(blackList, 'r') as b:
+        for l in b:
+          ret = re.search (l.rstrip(), bucket)
+          if ret:
+            return False
+          else: 
+            return True
+  else:
+    return True 
 # Declare arguments
 parser.add_argument('-o', '--out-file', dest='outFile', default=sys.stdout,
                     help='Output file')
+parser.add_argument('-b', '--black-list', dest='blackList', default='',
+                    help='File containing a list of pattern to black list entries in the list')
 parser.add_argument('-m', '--mode', dest='mode', default='default',
         help='Scan mode: instead of printing only publicly accessible resources:  \n - listall, dump everything\n - listopen, dump open buckets and their contents\n - bucketonly, print only bucket, not their content ')
 parser.add_argument('buckets', help='Name of text file containing buckets to check')
@@ -112,21 +129,21 @@ parser.add_argument('buckets', help='Name of text file containing buckets to che
 args = parser.parse_args()
 
 
-
 if path.isfile(args.buckets):
   with open(args.buckets, 'r') as f:
     for line in f:
       line = line.rstrip()            # Remove any extra whitespace
-      if checkBucket(line, args.mode, args.outFile): 
-        if args.mode != 'bucketonly': 
-          exploreBucket(line, args.mode, args.outFile)
-    dumpInfo(userDict)
+      if checkBlackListing(line, args.blackList):
+        if checkBucket(line, args.mode, args.outFile): 
+          if args.mode != 'bucketonly':
+            exploreBucket(line, args.mode, args.outFile)
 
 else:
   if checkBucket(args.buckets, args.mode, args.outFile): 
     if args.mode != 'bucketonly': 
       exploreBucket(args.buckets, args.mode, args.outFile)
-
+    
+dumpInfo(userDict)
 
 
 
