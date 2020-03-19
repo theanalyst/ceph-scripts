@@ -90,13 +90,13 @@ def exploreBucket(bName, mode='default', outFile=sys.stdout):
         if objR.status_code == 200 or mode == 'listopen':   
             print('  [', objR.status_code, '] ' + objString,file=outFile)
 
-def dumpInfo(userList):
+def dumpInfo(userList,outFile=sys.stdout):
   output="{"
   for bOwner in list(userList):
     output+=str("\""+bOwner.strip()+"\": "+json.dumps(userList[bOwner])+',');
   output=output[:-1]
   output+="}"
-  print(output)
+  print(output,file=outFile)
 
 parser = argparse.ArgumentParser(description='# CERN s3 Scanner - simple s3 bucket scanner\n'
                                              '#\n'
@@ -128,22 +128,25 @@ parser.add_argument('buckets', help='Name of text file containing buckets to che
 
 args = parser.parse_args()
 
-
 if path.isfile(args.buckets):
   with open(args.buckets, 'r') as f:
     for line in f:
       line = line.rstrip()            # Remove any extra whitespace
       if checkBlackListing(line, args.blackList):
-        if checkBucket(line, args.mode, args.outFile): 
+        if checkBucket(line, args.mode): 
           if args.mode != 'bucketonly':
-            exploreBucket(line, args.mode, args.outFile)
+            exploreBucket(line, args.mode)
 
 else:
-  if checkBucket(args.buckets, args.mode, args.outFile): 
+  if checkBucket(args.buckets, args.mode): 
     if args.mode != 'bucketonly': 
-      exploreBucket(args.buckets, args.mode, args.outFile)
+      exploreBucket(args.buckets, args.mode)
     
-dumpInfo(userDict)
+if args.outFile != sys.stdout:
+  f = open(args.outFile,'x')
+  dumpInfo(userDict,f)
+else:
+  dumpInfo(userDict,args.outFile)
 
 
 
