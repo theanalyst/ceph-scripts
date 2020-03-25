@@ -32,7 +32,7 @@ def checkBucket(bName, mode='default', outFile=sys.stdout, triesLeft=2):
         r = requests.head(bUrl)
     except:
         print('Error requesting the following Url: ',bUrl,file=outFile)
-        exit(-1)
+        return False
 
     if r.status_code == 200:
         bOwnerName = getBucketOwner(bName)
@@ -123,12 +123,26 @@ parser.add_argument('-b', '--black-list', dest='blackList', default='',
                     help='File containing a list of pattern to black list entries in the list')
 parser.add_argument('-m', '--mode', dest='mode', default='default',
         help='Scan mode: instead of printing only publicly accessible resources:  \n - listall, dump everything\n - listopen, dump open buckets and their contents\n - bucketonly, print only bucket, not their content ')
-parser.add_argument('buckets', help='Name of text file containing buckets to check')
+parser.add_argument('-i', '--input', dest='buckets', default='',
+        help='Name of text file containing buckets to check')
 
 
 args = parser.parse_args()
 
-if path.isfile(args.buckets):
+
+if args.blackList == 's3://s3-scanner/blacklist':
+  ret=subprocess.getoutput("s3cmd get s3://s3-scanner/blacklist /tmp/blacklist --force --quiet")
+  args.blackList = "/tmp/blacklist"
+
+if args.buckets == '':
+  # get the whole.list from cephgabe
+  for line in json.loads(subprocess.getoutput('ssh cephadm radosgw-admin --cluster=gabe bucket list')):
+    if checkBlackListing(line, args.blackList):
+      if checkBucket(line, args.mode): 
+        if args.mode != 'bucketonly':
+          exploreBucket(line, args.mode)
+
+elif path.isfile(args.buckets):
   with open(args.buckets, 'r') as f:
     for line in f:
       line = line.rstrip()            # Remove any extra whitespace
