@@ -115,13 +115,13 @@ def checkBlackListing(bucket, blackList):
   return True 
 # Declare arguments
 parser.add_argument('-o', '--out-file', dest='outFile', default=sys.stdout,
-                    help='Output file')
+                    help='Output file. If unset, will print to terminal')
 parser.add_argument('-b', '--black-list', dest='blackList', default='',
                     help='File containing a list of pattern to black list entries in the list')
 parser.add_argument('-m', '--mode', dest='mode', default='default',
-        help='Scan mode: instead of printing only publicly accessible resources:  \n - listall, dump everything\n - listopen, dump open buckets and their contents\n - bucketonly, print only bucket, not their content ')
+                    help='Scan mode: instead of printing only publicly accessible resources:  \n - listall, dump everything\n - listopen, dump open buckets and their contents\n - bucketonly, print only bucket, not their content ')
 parser.add_argument('-i', '--input', dest='buckets', default='',
-        help='Name of text file containing buckets to check')
+                    help='Name of text file containing buckets to check, if unset, will contact cephgabe for the list of all buckets')
 
 
 args = parser.parse_args()
