@@ -112,10 +112,7 @@ def checkBlackListing(bucket, blackList):
           ret = re.search (l.rstrip(), bucket)
           if ret:
             return False
-          else: 
-            return True
-  else:
-    return True 
+  return True 
 # Declare arguments
 parser.add_argument('-o', '--out-file', dest='outFile', default=sys.stdout,
                     help='Output file')
@@ -131,11 +128,12 @@ args = parser.parse_args()
 
 
 if args.blackList == 's3://s3-scanner/blacklist':
-  subprocess.getoutput("s3cmd get s3://s3-scanner/blacklist /tmp/blacklist --force --quiet")
+  print("Downloading blacklist from ",args.blackList)
+  print(subprocess.getoutput("s3cmd get s3://s3-scanner/blacklist /tmp/blacklist --force"))
   args.blackList = "/tmp/blacklist"
 
 if args.buckets == '':
-  # get the whole.list from cephgabe
+  print("Getting bucket list from gabe")
   for line in json.loads(subprocess.getoutput('ssh cephadm radosgw-admin --cluster=gabe bucket list')):
     if checkBlackListing(line, args.blackList):
       if checkBucket(line, args.mode): 
@@ -157,10 +155,11 @@ else:
       exploreBucket(args.buckets, args.mode)
     
 if args.outFile != sys.stdout:
+  print(subprocess.getoutput("rm -fv "+args.outFile))
   with open(args.outFile,'x') as f:
     dumpInfo(userDict,f)
-  subprocess.getoutput("s3cmd put "+args.outFile+" s3://s3-scanner/"+args.outFile)
-  subprocess.getoutput("rm -f "+args.outFile)
+  print(subprocess.getoutput("s3cmd put "+args.outFile+" s3://s3-scanner/scan-output"))
+  print(subprocess.getoutput("rm -fv "+args.outFile))
 else:
   dumpInfo(userDict,args.outFile)
 
