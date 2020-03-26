@@ -2,10 +2,9 @@
 
 for i in `host s3.cern.ch | grep -Eo "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+"`; 
 do
-  JOBN=`ssh -T $i < ./s3-radosgw-whoami.sh`
+  JOBN=`ssh -T $i < ./s3-radosgw-whoami.sh | grep -Eo "rgw-.*"`
   HOST=`ssh $i facter -p "hostname"`
-
-  if [ $JOBN ];
+  if [  $JOBN ];
   then
     echo $JOBN" "$HOST
   else
