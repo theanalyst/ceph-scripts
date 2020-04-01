@@ -5,7 +5,8 @@ if [ "$HEALTH" != 'HEALTH_OK' ];
 then
     echo Aborting reboot because ceph is not healthy:
     echo
-    ceph status
+    ceph health
+    exit 1
 fi
 
 echo -n Resetting BMC...
