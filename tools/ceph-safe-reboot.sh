@@ -1,28 +1,26 @@
 #!/bin/bash
 
-HEALTH=$(ceph health)
-if [ "$HEALTH" != 'HEALTH_OK' ];
-then
-    echo Aborting reboot because ceph is not healthy:
-    echo
-    ceph health
-    exit 1
-fi
+set -e
 
-echo -n Resetting BMC...
+echo Checking if it is OK to stop
+HOSTNAME=$(hostname -s)
+OSDS=$(ceph osd crush ls ${HOSTNAME})
+ceph osd ok-to-stop ${OSDS}
+
+echo 
+echo Resetting BMC...
 ipmitool mc reset cold
-echo done.
 
-
-echo -n Setting ceph noout, noin...
+echo
+echo Setting ceph config
 ceph osd set noout
 ceph osd set noin
-echo done.
 
-echo -n Disabling no_contact alarm...
-roger update --nc_alarmed false --duration 30min
-echo done.
+echo
+echo Disabling no_contact alarm...
+roger update --nc_alarmed false --duration 30min ${HOSTNAME}
 
+echo
 echo Rebooting in 30 seconds \(ctrl-c to cancel\)...
 sleep 30
 
