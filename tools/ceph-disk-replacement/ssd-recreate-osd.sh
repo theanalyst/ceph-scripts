@@ -133,7 +133,7 @@ done
 
 for i in `echo $DEVS`;
 do
-    echo "ceph-volume lvm zap $i"
+    echo "ceph-volume lvm zap $i --destroy"
 done
 
 

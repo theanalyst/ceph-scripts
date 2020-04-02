@@ -116,7 +116,6 @@ do
     then
       echo "systemctl stop ceph-osd@$i"
       echo "umount /var/lib/ceph/osd/ceph-$i"
-      echo "ceph-volume lvm zap --destroy --osd-id $i"
     else
       echo "echo \"osd.$i still unsafe to destroy\"" 
       echo "echo \"Please wait and retry later\""
