@@ -129,13 +129,8 @@ done
 for i in `echo $OSDS`;
 do
   echo "ceph osd destroy $i --yes-i-really-mean-it"
+  echo "ceph-volume lvm zap --destroy --osd-id $i"
 done
-
-for i in `echo $DEVS`;
-do
-    echo "ceph-volume lvm zap $i --destroy"
-done
-
 
 echo "ceph-volume lvm zap $DEV"
 echo "ceph-volume lvm batch $DEV $DEVS --osd-ids $OSDS"
