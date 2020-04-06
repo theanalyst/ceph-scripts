@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# which cluster and dir to shard?
+cluster=$1
+target=$2
+drain=$3
+to=$4
+
+# get the max_mds setting
+max_mds=`ceph mds dump --format json --cluster ${cluster} 2>/dev/null | jq -r .max_mds`
+
+# cd to the dir to shard
+cd $target
+
+# iterate over the subdirs and pin them
+for dir in `find . -mindepth 1 -maxdepth 1 -type d`
+do
+
+    # wait for health ok
+    until ceph --cluster=${cluster} health | grep -q HEALTH_OK
+    do
+       echo Waiting 10s for HEALTH_OK...
+       sleep 10
+    done
+
+    # do a consistent hash(${dir}) modulo max_mds
+    pin=`echo ${dir} | cksum | awk -v m=${max_mds} '{ print $1 % m }'`
+
+    # replace rank $drain with $to
+    if [ "${pin}" == "${drain}" ]
+    then
+        echo Draining ${dir} from rank ${pin}
+
+        # pin the dir
+        echo Pinning ${dir} to ${to}
+        echo setfattr -n ceph.dir.pin -v ${to} ${dir}
+
+        echo sleep 1
+    fi
+
+done
