@@ -19,6 +19,12 @@ then
 fi
 
 
+if [[ `lsscsi  | grep -v encl | grep -v INT | wc -l` -gt 40 && `cat /etc/motd | grep hostgroup | grep -Eo "ceph/[a-Z0-9/]+" | grep -c gabe` -eq 1  ]]
+then
+  CASTOR=1
+fi
+
+
 INITSTATE=`ceph health`
 FORCEMODE=0;
 VERBOSE=0

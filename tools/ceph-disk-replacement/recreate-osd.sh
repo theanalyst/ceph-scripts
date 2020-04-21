@@ -18,6 +18,12 @@ then
   CASTOR=1
 fi
 
+if [[ `lsscsi  | grep -v encl | grep -v INT | wc -l` -gt 40 && `cat /etc/motd | grep hostgroup | grep -Eo "ceph/[a-Z0-9/]+" | grep -c gabe` -eq 1  ]]
+then
+  CASTOR=1
+fi  
+
+
 INITSTATE=`ceph health`
 FORCEMODE=0;
 VERBOSE=0
@@ -172,6 +178,7 @@ then
   echo "pvscan --cache"
   CMDS=`/root/ceph-scripts/ceph-volume/repair-team-striped-osd-prepare.sh $DEV $MOREDEV`
   echo "$CMDS --osd-id $OSD"
+  echo "ceph osd primary-affinity osd.$OSD 1;"
 else
   echo "ceph-volume lvm zap $DEV"
 
