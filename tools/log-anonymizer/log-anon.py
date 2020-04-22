@@ -34,7 +34,7 @@ with open(args.infile,'r') as f:
                 ip_list[ip] = 'ip_address_'+str(len(ip_list))
             r = re.sub(ip,ip_list[ip],r)
 
-        ret = re.findall('[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{6}', line)
+        ret = re.findall('[0-9]{4}[-/][0-9]{2}[-/][0-9]{2}[ -][0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{6}', line)
         for ts in ret:
             t = totimestamp(dp.parse(ts)) - t0
             r = re.sub(ts,str(t),r)
