@@ -1,0 +1,2 @@
+2020-04-22 03:22:03.754350 7ff8adcfa700  0 -- 128.142.162.30:6839/2364636 >> 128.142.23.55:6801/2802042 conn(0x55ffe1e06800 :6839 s=STATE_ACCEPTING_WAIT_CONNECT_MSG_AUTH pgs=0 cs=0 l=0).handle_connect_msg accept connect_seq 7217 vs existing csq=7217 existing_state=STATE_STANDBY
+2020-04-22 03:22:03.754595 7ff8adcfa700  0 -- 148.142.162.30:6839/2364636 >> 128.142.23.55:6801/2802042 conn(0x55ffe1e06800 :6839 s=STATE_ACCEPTING_WAIT_CONNECT_MSG_AUTH pgs=0 cs=0 l=0).handle_connect_msg accept connect_seq 7218 vs existing csq=7217 existing_state=STATE_STANDBY
