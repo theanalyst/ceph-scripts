@@ -32,10 +32,8 @@ do
     userac=`echo $userinfo | sed -s "s/$userid//"`
     if [[ -z $userac ]]; 
     then
-      #userac="chargegroup: `curl -s -XGET https://accounting-receiver.cern.ch/v2/$userid | jq .[].charge_group`, chargerole: default"
       userac="chargegroup: empty, chargerole: default"
     fi
-    #echo " id: $userid. acc: $userac, prj: $prid"
     echo -n "$userac, " >> $OUTFILE
     /afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/cern-get-accounting-unit.sh --id $userid -f >> $OUTFILE
   else
@@ -43,9 +41,9 @@ do
   fi;
 done < $FILENAME
 
-#s3cmd put $OUTFILE s3://s3-accounting-files
+s3cmd put $OUTFILE s3://s3-accounting-files
 s3cmd get --force s3://s3-accounting-files/$PRVFILE  
-#s3cmd rm s3://s3-accounting-files/$PRVFILE
+s3cmd rm s3://s3-accounting-files/$PRVFILE
 
 while read -r line;
 do
@@ -108,10 +106,15 @@ do
   }' >> $FDOFILE
   echo -n  "\"charge_group\":\"$chargegroup\"," >> $FDOFILE
   echo -n  "\"charge_role\":\"$chargerole\"," >> $FDOFILE
-  echo -n "\"division\":\"$dep\"," >> $FDOFILE
   echo -n "\"FE\":\"S3 Object storage\"," >> $FDOFILE
+  echo -n "\"date\":\"`date '+%F'`\"," >> $FDOFILE
+  echo -n "\"division\":\"$dep\"," >> $FDOFILE
   echo -n "\"group\":\"$grp\"," >> $FDOFILE
-  echo -n "\"section\":\"$sec\"" >> $FDOFILE
+  echo -n "\"section\":\"$sec\"," >> $FDOFILE
+  echo -n "\"messageformatversion\":\"2\"," >> $FDOFILE
+  echo -n "\"wallclockhours\":\"0\"," >> $FDOFILE
+  echo -n "\"cpuhours\":\"0\"," >> $FDOFILE
+  echo -n "\"dedicated\":\"\"" >> $FDOFILE
   echo -n "}," >> $FDOFILE
 done < $OUTFILE
 
