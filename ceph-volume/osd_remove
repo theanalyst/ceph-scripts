@@ -11,7 +11,7 @@ echo "Killing all ceph-osd processes..."
 kill $(pgrep ceph-osd)
 sleep 5
 
-OSD_LIST=$(ceph-volume lvm list | grep -oP "osd\\.\K[0-9]*")
+OSD_LIST=$(ceph osd ls-tree `hostname -s`)
 R=1
 
 for OSD in $OSD_LIST;

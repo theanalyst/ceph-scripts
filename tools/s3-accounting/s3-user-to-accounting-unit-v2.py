@@ -37,7 +37,7 @@ try:
   accounting_group = getattr(project,'accounting-group')
 
   if hasattr(project, 'chargegroup'):
-    outstr="project: "+project_id+", chargegroup: "+project.chargegroup+", chargerole: "+project.chargerole
+    outstr="chargegroup: "+project.chargegroup+", chargerole: "+project.chargerole
 
   role = keystoneclient.roles.find(name='owner') 
   role_id = getattr(role,'id')
