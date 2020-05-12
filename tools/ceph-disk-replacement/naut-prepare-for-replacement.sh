@@ -43,15 +43,15 @@ do
   key="$1"
 
   case "$key" in
-    -f) 
-    shift; 
+    -f)
+    shift;
     FORCEMODE=1;
     ;;
 
     -v)
     shift;
-    VERBOSE=1;   
-    ;; 
+    VERBOSE=1;
+    ;;
 
     --dev)
     DEV=$2
@@ -67,7 +67,7 @@ done
 
 function draw(){
   if [[ $VERBOSE -eq 1 ]];
-  then 
+  then
     echo ${1}
   fi
 }
@@ -89,7 +89,7 @@ then
 fi
 
 echo $INITSTATE | grep -q "HEALTH_OK"
-if [[ $? -eq 1 ]]; 
+if [[ $? -eq 1 ]];
 then
   if [[ $FORCEMODE -eq 0 ]];
   then
@@ -101,5 +101,41 @@ then
   fi
 fi
 
+DEVID=`echo $DEV | grep -Eo "sd[a-z]+"`
+draw "Looking at: $DEVID"
 
+OSD=`ceph device ls | grep $HOSTNAME | grep $DEVID | awk '{ print $3 }' | sed -e 's/osd.//'`
+draw "OSD is: $OSD"
+
+if [[ -z $OSD ]];
+then
+  echo "echo \" No OSD mapped to drive $DEV. \""
+  exit
+fi
+
+OSDINFO=`ceph device ls | grep $HOSTNAME | grep -E "sd[a-z]+[ ]+osd.$OSD" | grep -Eo " .*:sd[a-z]+"`
+for i in `echo $OSDINFO`; do echo "# $i osd.$OSD"; done
+
+OSDDB=`ceph device ls | grep $HOSTNAME | grep -E "osd.$OSD" | grep -E "osd.[0-9]+ osd.[0-9]+" | grep -Eo " .*:sd[a-z]+"`
+if [[ ! -z $OSDDB ]];
+then
+    for i in `echo $OSDDB`; do echo "# $i osd.$OSD (db)"; done
+fi
+
+ceph osd safe-to-destroy osd.$OSD &> /dev/null
+retval=`echo $?`
+
+if [[ $retval -eq 0 ]];
+then
+  echo "systemctl stop ceph-osd@$OSD"
+  echo "umount /var/lib/ceph/osd/ceph-$OSD"
+  if [[ $CASTOR -eq 1 ]]; then
+    echo "ceph-volume lvm zap --destroy --osd-id $OSD"
+  else
+    echo "ceph-volume lvm zap $DEV --destroy"
+  fi
+else
+  echo "echo \"osd.$OSD still unsafe to destroy\"" 
+  echo "echo \"Please wait and retry later\""
+fi
 
