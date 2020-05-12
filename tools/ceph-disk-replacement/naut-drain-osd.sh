@@ -74,7 +74,7 @@ fi
 
 
 DEVID=`echo $DEV | grep -Eo "sd[a-z]+"`
-OSD=`ceph device ls | grep $HOSTNAME | grep $DEVID |echo $DEV | grep -Eo "sd[a-z]+" awk '{ print $3 }' | sed -e 's/osd.//'`
+OSD=`ceph device ls | grep $HOSTNAME | grep $DEVID | grep -Eo "sd[a-z]+" awk '{ print $3 }' | sed -e 's/osd.//'`
 
 if [[ -z $OSD ]];
 then
