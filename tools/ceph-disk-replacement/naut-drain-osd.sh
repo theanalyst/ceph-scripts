@@ -1,5 +1,13 @@
 #!/bin/bash
 
+## Ceph Version check
+ret=`ceph -v | awk '{ print $3 }' | awk -F . '{ if( $1 >= 14) { print $0 } }'`
+
+if [[ -z $ret ]];
+then
+  echo "Requires at least ceph nautilus"
+  exit -1;
+fi
 
 if [[ `roger show $HOSTNAME  | jq .[].appstate | tr -d "\""` == "intervention" ]];
 then
@@ -11,15 +19,6 @@ then
     echo "No end-of-intervention date specified, contact ceph-admins";
   fi
   exit
-fi
-
-
-ret=`ceph -v | awk '{ print $3 }' | awk -F . '{ if( $1 >= 14) { print $0 } }'`
-
-if [[ -z $ret ]];
-then
-  echo "Requires at least ceph nautilus"
-  exit -1;
 fi
 
 while [[ $# -gt 0 ]]
@@ -74,7 +73,7 @@ fi
 
 
 DEVID=`echo $DEV | grep -Eo "sd[a-z]+"`
-OSD=`ceph device ls | grep $HOSTNAME | grep $DEVID | grep -Eo "sd[a-z]+" awk '{ print $3 }' | sed -e 's/osd.//'`
+OSD=`ceph device ls | grep $HOSTNAME | grep $DEVID | awk '{ print $3 }' | sed -e 's/osd.//'`
 
 if [[ -z $OSD ]];
 then
