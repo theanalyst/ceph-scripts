@@ -21,6 +21,11 @@ then
   exit
 fi
 
+INITSTATE=`ceph health`
+FORCEMODE=0;
+VERBOSE=0
+BLUESTORE=0;
+
 while [[ $# -gt 0 ]]
 do
   key="$1"
@@ -71,6 +76,20 @@ then
   exit
 fi
 
+pvscan --cache
+
+echo $INITSTATE | grep -q "HEALTH_OK"
+if [[ $? -eq 1 ]]; 
+then
+  if [[ $FORCEMODE -eq 0 ]];
+  then
+    echo "echo \"Ceph is $INITSTATE, aborting\""
+    echo "echo \"Please retry in a while\""
+    exit
+  else
+    draw "# Ceph is $INITSTATE"
+  fi
+fi
 
 DEVID=`echo $DEV | grep -Eo "sd[a-z]+"`
 OSD=`ceph device ls | grep $HOSTNAME | grep $DEVID | awk '{ print $3 }' | sed -e 's/osd.//'`
