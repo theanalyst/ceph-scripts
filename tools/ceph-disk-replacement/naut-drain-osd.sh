@@ -91,13 +91,17 @@ then
   fi
 fi
 
-DEVID=`echo $DEV | grep -Eo "sd[a-z]+"`
-OSD=`ceph device ls | grep $HOSTNAME | grep $DEVID | awk '{ print $3 }' | sed -e 's/osd.//'`
+OSD=`ceph-volume inventory --format=json | jq --arg DEV "$DEV" '. | map(select(.lvs | contains([{}]))) | map(select(.path==$DEV)) | .[].lvs | .[].osd_id' | tr -d "\""`
 
 if [[ -z $OSD ]];
 then
-  echo "echo \" No OSD mapped to drive $DEV. \""
-  exit
+  DEVID=`echo $DEV | grep -Eo "sd[a-z]+"`
+  OSD=`ceph device ls | grep $HOSTNAME | grep $DEVID | awk '{ print $3 }' | sed -e 's/osd.//'`
+  if [[ -z $OSD ]];
+  then
+    echo "echo \" No OSD mapped to drive $DEV. \""
+    exit
+  fi
 fi
 
 if [[ `systemctl is-active ceph-osd@$OSD --quiet;` -eq 0 ]];
