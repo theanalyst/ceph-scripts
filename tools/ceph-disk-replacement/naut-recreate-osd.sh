@@ -103,3 +103,38 @@ then
   fi
 fi
 
+OSD=`ceph device ls | grep $HOSTNAME | grep $DEVID | awk '{ print $3 }' | sed -e 's/osd.//'`
+
+if [[ -z $OSD ]];
+then
+  # try automatically resolve OSD with ceph osd tree down
+fi
+
+if [[ -z $DBD ]];
+then
+  # identify if there are db devices on this cluster. 
+  if [[ `ceph device ls | grep $HOSTNAME | grep -E "osd.[0-9]+ osd.[0-9]+"` ]];
+  then
+    DBD="/dev/`ceph device ls | grep $HOSTNAME | grep -E "osd.[0-9]+ osd.[0-9]+" | grep osd.$OSD | awk '{ print $2 }' | sed -e 's/.*://'`"
+  fi
+fi
+
+
+
+# cat beesly.inventory | jq '. | map(select(.available))'
+
+# how many drives per osd : ceph device ls | grep $HOSTNAME | grep -Eo "osd.[0-9]+" | sort  | uniq -c | sed -e 's/osd.*$//' | uniq | tr -d " " 
+# erin: 2
+
+# testing osd id from ceph inventory: 
+# ceph-volume inventory --format=json | jq '. | map(select(.lvs | contains([{}]))) | map(select(.path | contains("/dev/sdg")))'
+
+# ceph-volume inventory --format=json | jq '. | map(select(.lvs | contains([{}]))) | map(select(.path | contains("/dev/sdg"))) | .[].lvs | .[].osd_id' | tr -d "\""
+
+# get an osd's drives
+# cat erin.inventory |  jq '. | map(select(.lvs | contains([{}]))) |  map(select(.lvs | .[0].osd_id | contains("362")) | .path)'
+
+# getting available drives
+# cat ~/beesly.inventory |  jq '. | map(select(.available==true) | .path)'
+
+
