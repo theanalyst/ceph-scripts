@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo ceph osd set noout
+echo ceph osd set noin
 echo killall ceph-osd
 echo systemctl stop ceph-osd.target
 echo sleep 10
@@ -10,3 +12,6 @@ do
 done
 echo wait
 echo systemctl start ceph-osd.target
+echo sleep 60
+echo ceph osd unset noout
+echo ceph osd unset noin
