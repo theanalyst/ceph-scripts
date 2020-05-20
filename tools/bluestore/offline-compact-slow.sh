@@ -3,6 +3,8 @@
 set -e
 set -x
 
+roger update --appstate=intervention --message="Compacting OSDs"
+
 ceph osd set noout
 ceph osd set noin
 for OSD in /var/lib/ceph/osd/ceph-*;
@@ -17,3 +19,5 @@ do
 done
 ceph osd unset noout
 ceph osd unset noin
+
+roger update --appstate=production
