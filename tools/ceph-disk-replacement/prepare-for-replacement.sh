@@ -1,5 +1,16 @@
 #! /bin/bash
 
+## Ceph Version check
+ret=`ceph -v | awk '{ print $3 }' | awk -F . '{ if( $1 < 14) { print $0 } }'`
+
+if [[ -z $ret ]];
+then
+  echo "ceph nautilus detected."
+  echo "please use './naut-prepare-for-replacement.sh --dev <device>' instead"
+  exit -1;
+fi
+
+
 if [[ `roger show $HOSTNAME  | jq .[].appstate | tr -d "\""` == "intervention" ]];
 then
   echo "Operation cannot be performed. Machine currently in `roger show $HOSTNAME | jq '.[].appstate' | grep -Eo [a-Z]+` state (updated by: `roger show $HOSTNAME | jq '.[].updated_by'`) with the following message: `roger show $HOSTNAME | jq '.[].message'`";
