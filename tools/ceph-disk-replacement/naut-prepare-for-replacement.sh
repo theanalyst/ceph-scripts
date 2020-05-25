@@ -6,6 +6,7 @@ ret=`ceph -v | awk '{ print $3 }' | awk -F . '{ if( $1 >= 14) { print $0 } }'`
 if [[ -z $ret ]];
 then
   echo "Requires at least ceph nautilus"
+  echo "please use './prepare-for-replacement.sh --dev <device>' instead"
   exit -1;
 fi
 
