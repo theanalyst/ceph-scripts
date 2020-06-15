@@ -27,4 +27,4 @@ for uid in users:
         buckets = json.loads(subprocess.getoutput('radosgw-admin --cluster=gabe bucket list --uid=%s' % uid.strip('\n')))
         percentused = 100*stats['total_bytes']/info['user_quota']['max_size'];
 
-        print("%s (%s): %s quota, %s used, %.2f percent full,  %d buckets, %d objects, %d raw quota, %d raw used, " % (info['display_name'], uid.strip('\n'), sizeof_fmt(info['user_quota']['max_size']), sizeof_fmt(stats['total_bytes']), percentused, len(buckets), stats['total_entries'], info['user_quota']['max_size'], stats['total_bytes'])) #, info['email'] if info['email'] != '' else 'none' )
+        print("%s (%s): %s quota, %s used, %.2f percent full,  %d buckets, %d objects, %d raw_quota, %d raw_used, " % (info['display_name'], uid.strip('\n'), sizeof_fmt(info['user_quota']['max_size']), sizeof_fmt(stats['total_bytes']), percentused, len(buckets), stats['total_entries'], info['user_quota']['max_size'], stats['total_bytes'])) #, info['email'] if info['email'] != '' else 'none' )

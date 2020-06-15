@@ -97,8 +97,9 @@ do
   echo -n "{\"display_name\": \"$name\",\"uid\":\"$uid\","  >> $FDOFILE
   echo -n $data | tr -d "," | awk '{ printf \
    "\"quota\":\""$1"\","\
+   "\"quota_raw\":\""$14"\","\
    "\"usage\":\""$3"\"," \
-   "\"usage_raw\":\""$18"\"," \
+   "\"usage_raw\":\""$12"\"," \
    "\"usage_human\":\""$5"\"," \
    "\"num_bucket\":"$8"," \
    "\"num_objects\":"$10"," \
