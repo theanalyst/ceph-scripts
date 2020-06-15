@@ -5,11 +5,11 @@
 
 export OS_PROJECT_NAME=Services
 
-OUTFILE="s3-accounting-`date '+%F'`.log"
-FDOFILE="s3-accounting-`date '+%F'`.data"
-PRVFILE="s3-accounting-`date -d "yesterday" '+%F'`.log"
+OUTFILE="s3-dev-accounting-`date '+%F'`.log"
+FDOFILE="s3-dev-accounting-`date '+%F'`.data"
+PRVFILE="s3-dev-accounting-`date -d "yesterday" '+%F'`.log"
 TRESHOLD=$1
-FILENAME="/tmp/s3-accounting-`date '+%F'`.tmp.log"
+FILENAME="/tmp/s3-dev-accounting-`date '+%F'`.tmp.log"
 
 
 if [ -z $TRESHOLD ];
@@ -43,7 +43,7 @@ done < $FILENAME
 
 s3cmd put $OUTFILE s3://s3-accounting-files
 s3cmd get --force s3://s3-accounting-files/$PRVFILE  
-s3cmd rm s3://s3-accounting-files/$PRVFILE
+#s3cmd rm s3://s3-accounting-files/$PRVFILE
 
 while read -r line;
 do
@@ -98,23 +98,21 @@ do
   echo -n $data | tr -d "," | awk '{ printf \
    "\"quota\":\""$1"\","\
    "\"usage\":\""$3"\"," \
+   "\"usage_raw\":\""$18"\"," \
    "\"usage_human\":\""$5"\"," \
-   "\"num_bucket\":\""$8"\"," \
-   "\"num_objects\":\""$10"\"," \
+   "\"num_bucket\":"$8"," \
+   "\"num_objects\":"$10"," \
    "\"owner\":\""$16"\"," \
    "\"mail\":\""$17"\"," \
   }' >> $FDOFILE
+  echo -n  "\"MessageFormatVersion\":\"2\"," >> $FDOFILE
   echo -n  "\"charge_group\":\"$chargegroup\"," >> $FDOFILE
   echo -n  "\"charge_role\":\"$chargerole\"," >> $FDOFILE
   echo -n "\"FE\":\"S3 Object storage\"," >> $FDOFILE
   echo -n "\"date\":\"`date '+%F'`\"," >> $FDOFILE
   echo -n "\"division\":\"$dep\"," >> $FDOFILE
   echo -n "\"group\":\"$grp\"," >> $FDOFILE
-  echo -n "\"section\":\"$sec\"," >> $FDOFILE
-  echo -n "\"messageformatversion\":\"2\"," >> $FDOFILE
-  echo -n "\"wallclockhours\":\"0\"," >> $FDOFILE
-  echo -n "\"cpuhours\":\"0\"," >> $FDOFILE
-  echo -n "\"dedicated\":\"\"" >> $FDOFILE
+  echo -n "\"section\":\"$sec\"" >> $FDOFILE
   echo -n "}," >> $FDOFILE
 done < $OUTFILE
 
@@ -122,11 +120,11 @@ echo -n "{}]}" >> $FDOFILE
 sed -e 's/,{}]/]/' -i $FDOFILE
 
 # publish data to cern.ch/storage/accounting
-mv $FDOFILE /eos/project/f/fdo/www/accounting/data.s3.json 
+mv $FDOFILE /eos/project/f/fdo/www/accounting/data-dev.s3.json 
 
 # clean
-rm $PRVFILE
-rm $OUTFILE
+#rm $PRVFILE
+#rm $OUTFILE
 
 
 
