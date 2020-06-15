@@ -1,15 +1,14 @@
-#! /bin/bash
+#!/bin/bash
 
 ## Ceph Version check
-ret=`ceph -v | awk '{ print $3 }' | awk -F . '{ if( $1 < 14) { print $0 } }'`
+ret=`ceph -v | awk '{ print $3 }' | awk -F . '{ if( $1 >= 14) { print $0 } }'`
 
 if [[ -z $ret ]];
 then
-  echo "ceph nautilus detected."
-  echo "please use './naut-prepare-for-replacement.sh --dev <device>' instead"
+  echo "Requires at least ceph nautilus"
+  echo "please use './prepare-for-replacement.sh --dev <device>' instead"
   exit -1;
 fi
-
 
 if [[ `roger show $HOSTNAME  | jq .[].appstate | tr -d "\""` == "intervention" ]];
 then
@@ -35,7 +34,6 @@ then
   CASTOR=1
 fi
 
-
 INITSTATE=`ceph health`
 FORCEMODE=0;
 VERBOSE=0
@@ -46,15 +44,15 @@ do
   key="$1"
 
   case "$key" in
-    -f) 
-    shift; 
+    -f)
+    shift;
     FORCEMODE=1;
     ;;
 
     -v)
     shift;
-    VERBOSE=1;   
-    ;; 
+    VERBOSE=1;
+    ;;
 
     --dev)
     DEV=$2
@@ -70,7 +68,7 @@ done
 
 function draw(){
   if [[ $VERBOSE -eq 1 ]];
-  then 
+  then
     echo ${1}
   fi
 }
@@ -92,7 +90,7 @@ then
 fi
 
 echo $INITSTATE | grep -q "HEALTH_OK"
-if [[ $? -eq 1 ]]; 
+if [[ $? -eq 1 ]];
 then
   if [[ $FORCEMODE -eq 0 ]];
   then
@@ -104,30 +102,30 @@ then
   fi
 fi
 
-OSD=`lvs -o +devices,tags | grep "$DEV" | grep -E "type=block" | grep -Eo "osd_id=[0-9]+" | tr -d "[a-z=_]"`
+OSD=`ceph-volume inventory --format=json | jq --arg DEV "$DEV" '. | map(select(.lvs | contains([{}]))) | map(select(.path==$DEV)) | .[].lvs | .[].osd_id' | tr -d "\""`
 
 if [[ -z $OSD ]];
 then
-  draw "# No bluestore osd found, going through ceph-disk for filestore osds."
-  OSD=`ceph-disk list 2>/dev/null | grep "^ $DEV" | grep -oE "osd\.[0-9]+" | tr -d "[osd\.]"`
+  DEVID=`echo $DEV | grep -Eo "sd[a-z]+"`
+  OSD=`ceph device ls | grep $HOSTNAME | grep $DEVID | awk '{ print $3 }' | sed -e 's/osd.//'`
+  if [[ -z $OSD ]];
+  then
+    echo "echo \" No OSD mapped to drive $DEV. \""
+    exit
+  fi
 fi
 
-if [[ -z $OSD ]];
-then
-  echo "echo \"$DEV has no OSD mapped to it.\""
-  exit;
-fi 
+draw "OSD is: $OSD"
 
-# How many drives per OSD?
-NUM=`lvs -o +devices,tags | grep type=block | grep osd_id=$OSD | grep -oE "/dev/.* " | grep  "dev/sd[a-z]*" -o | wc -l`
-if [[ $NUM -gt 1 ]];
+OSDINFO=`ceph device ls | grep $HOSTNAME | grep -E "sd[a-z]+[ ]+osd.$OSD" | grep -Eo " .*:sd[a-z]+"`
+for i in `echo $OSDINFO`; do echo "# $i osd.$OSD"; done
+
+OSDDB=`ceph device ls | grep $HOSTNAME | grep -E "osd.$OSD" | grep -E "osd.[0-9]+ osd.[0-9]+" | grep -Eo " .*:sd[a-z]+"`
+if [[ ! -z $OSDDB ]];
 then
-  draw "osd.$OSD has $NUM drives"
-  echo "echo \"Please note that the OSD was using the following drives: `lvs -o +devices,tags | grep type=block | grep osd_id=$OSD | grep -oE "/dev/.* " | sed 's/([0-9])//g'`\""
+    for i in `echo $OSDDB`; do echo "# $i osd.$OSD (db)"; done
 fi
 
-
-draw "$DEV is osd.$OSD"
 ceph osd safe-to-destroy osd.$OSD &> /dev/null
 retval=`echo $?`
 
@@ -145,5 +143,3 @@ else
   echo "echo \"Please wait and retry later\""
 fi
 
-
- 

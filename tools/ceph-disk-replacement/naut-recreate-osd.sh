@@ -1,12 +1,11 @@
-#! /bin/bash
+#!/bin/bash
 
 ## Ceph Version check
-ret=`ceph -v | awk '{ print $3 }' | awk -F . '{ if( $1 < 14) { print $0 } }'`
+ret=`ceph -v | awk '{ print $3 }' | awk -F . '{ if( $1 >= 14) { print $0 } }'`
 
 if [[ -z $ret ]];
 then
-  echo "ceph nautilus detected."
-  echo "please use './naut-prepare-for-replacement.sh --dev <device>' instead"
+  echo "Requires at least ceph nautilus"
   exit -1;
 fi
 
@@ -104,46 +103,38 @@ then
   fi
 fi
 
-OSD=`lvs -o +devices,tags | grep "$DEV" | grep -E "type=block" | grep -Eo "osd_id=[0-9]+" | tr -d "[a-z=_]"`
+OSD=`ceph device ls | grep $HOSTNAME | grep $DEVID | awk '{ print $3 }' | sed -e 's/osd.//'`
 
 if [[ -z $OSD ]];
 then
-  draw "# No bluestore osd found, going through ceph-disk for filestore osds."
-  OSD=`ceph-disk list 2>/dev/null | grep "^ $DEV" | grep -oE "osd\.[0-9]+" | tr -d "[osd\.]"`
+  # try automatically resolve OSD with ceph osd tree down
 fi
 
-if [[ -z $OSD ]];
+if [[ -z $DBD ]];
 then
-  echo "echo \"$DEV has no OSD mapped to it.\""
-  exit;
-fi 
-
-# How many drives per OSD?
-NUM=`lvs -o +devices,tags | grep type=block | grep osd_id=$OSD | grep -oE "/dev/.* " | grep  "dev/sd[a-z]*" -o | wc -l`
-if [[ $NUM -gt 1 ]];
-then
-  draw "osd.$OSD has $NUM drives"
-  echo "echo \"Please note that the OSD was using the following drives: `lvs -o +devices,tags | grep type=block | grep osd_id=$OSD | grep -oE "/dev/.* " | sed 's/([0-9])//g'`\""
-fi
-
-
-draw "$DEV is osd.$OSD"
-ceph osd safe-to-destroy osd.$OSD &> /dev/null
-retval=`echo $?`
-
-if [[ $retval -eq 0 ]];
-then
-  echo "systemctl stop ceph-osd@$OSD"
-  echo "umount /var/lib/ceph/osd/ceph-$OSD"
-  if [[ $CASTOR -eq 1 ]]; then
-    echo "ceph-volume lvm zap --destroy --osd-id $OSD"
-  else
-    echo "ceph-volume lvm zap $DEV --destroy"
+  # identify if there are db devices on this cluster. 
+  if [[ `ceph device ls | grep $HOSTNAME | grep -E "osd.[0-9]+ osd.[0-9]+"` ]];
+  then
+    DBD="/dev/`ceph device ls | grep $HOSTNAME | grep -E "osd.[0-9]+ osd.[0-9]+" | grep osd.$OSD | awk '{ print $2 }' | sed -e 's/.*://'`"
   fi
-else
-  echo "echo \"osd.$OSD still unsafe to destroy\"" 
-  echo "echo \"Please wait and retry later\""
 fi
 
 
- 
+
+# cat beesly.inventory | jq '. | map(select(.available))'
+
+# how many drives per osd : ceph device ls | grep $HOSTNAME | grep -Eo "osd.[0-9]+" | sort  | uniq -c | sed -e 's/osd.*$//' | uniq | tr -d " " 
+# erin: 2
+
+# testing osd id from ceph inventory: 
+# ceph-volume inventory --format=json | jq '. | map(select(.lvs | contains([{}]))) | map(select(.path | contains("/dev/sdg")))'
+
+# ceph-volume inventory --format=json | jq '. | map(select(.lvs | contains([{}]))) | map(select(.path | contains("/dev/sdg"))) | .[].lvs | .[].osd_id' | tr -d "\""
+
+# get an osd's drives
+# cat erin.inventory |  jq '. | map(select(.lvs | contains([{}]))) |  map(select(.lvs | .[0].osd_id | contains("362")) | .path)'
+
+# getting available drives
+# cat ~/beesly.inventory |  jq '. | map(select(.available==true) | .path)'
+
+
