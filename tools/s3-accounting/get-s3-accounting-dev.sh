@@ -32,7 +32,7 @@ do
     userac=`echo $userinfo | sed -s "s/$userid//"`
     if [[ -z $userac ]]; 
     then
-      userac="chargegroup: empty, chargerole: default"
+      userac="chargegroup: IT, chargerole: default"
     fi
     echo -n "$userac, " >> $OUTFILE
     /afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/cern-get-accounting-unit.sh --id $userid -f >> $OUTFILE
@@ -97,20 +97,20 @@ do
   echo -n "{\"display_name\": \"$name\",\"uid\":\"$uid\","  >> $FDOFILE
   echo -n $data | tr -d "," | awk '{ printf \
    "\"quota\":\""$1"\","\
-   "\"quota_raw\":\""$14"\","\
+   "\"quota_raw\":"$12","\
    "\"usage\":\""$3"\"," \
-   "\"usage_raw\":\""$12"\"," \
-   "\"usage_human\":\""$5"\"," \
+   "\"usage_raw\":"$14"," \
+   "\"usage_human\":"$5"," \
    "\"num_bucket\":"$8"," \
    "\"num_objects\":"$10"," \
-   "\"owner\":\""$16"\"," \
-   "\"mail\":\""$17"\"," \
+   "\"owner\":\""$20"\"," \
+   "\"mail\":\""$21"\"," \
   }' >> $FDOFILE
-  echo -n  "\"MessageFormatVersion\":\"2\"," >> $FDOFILE
+  echo -n  "\"MessageFormatVersion\":2," >> $FDOFILE
   echo -n  "\"charge_group\":\"$chargegroup\"," >> $FDOFILE
   echo -n  "\"charge_role\":\"$chargerole\"," >> $FDOFILE
-  echo -n "\"FE\":\"S3 Object storage\"," >> $FDOFILE
-  echo -n "\"date\":\"`date '+%F'`\"," >> $FDOFILE
+  echo -n "\"FE\":\"S3 Object Storage\"," >> $FDOFILE
+  echo -n "\"date\":\"`date -d "yesterday" '+%F'`\"," >> $FDOFILE
   echo -n "\"division\":\"$dep\"," >> $FDOFILE
   echo -n "\"group\":\"$grp\"," >> $FDOFILE
   echo -n "\"section\":\"$sec\"" >> $FDOFILE

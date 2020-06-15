@@ -18,4 +18,4 @@
 #
 
 
-cat data-dev.s3.json | jq '[ .[][] | {MessageFormatVersion: .MessageFormatVersion, Date: .date, FE: .FE, ChargeGroup: .charge_group, ChargeRole: .charge_role, WallClockHours: "0", CPUHours: "0", DiskQuota: .quota, DiskUsage: .usage, Prenormalised: "false", Dedicated: "false"}]  ' 
+cat data-dev.s3.json | jq '[ .[][] | {MessageFormatVersion: .MessageFormatVersion, Date: .date, FE: .FE, ChargeGroup: .charge_group, ChargeRole: .charge_role, WallClockHours: 0, CPUHours: 0, DiskQuota: .quota_raw, DiskUsage: .usage_raw, Prenormalised: "false", Dedicated: "false"}]  ' 
