@@ -5,11 +5,11 @@
 
 export OS_PROJECT_NAME=Services
 
-OUTFILE="s3-dev-accounting-`date '+%F'`.log"
-FDOFILE="s3-dev-accounting-`date '+%F'`.data"
-PRVFILE="s3-dev-accounting-`date -d "yesterday" '+%F'`.log"
+OUTFILE="s3-accounting-`date '+%F'`.log"
+FDOFILE="s3-accounting-`date '+%F'`.data"
+PRVFILE="s3-accounting-`date -d "yesterday" '+%F'`.log"
 TRESHOLD=$1
-FILENAME="/tmp/s3-dev-accounting-`date '+%F'`.tmp.log"
+FILENAME="/tmp/s3-accounting-`date '+%F'`.tmp.log"
 
 
 if [ -z $TRESHOLD ];
@@ -43,7 +43,7 @@ done < $FILENAME
 
 s3cmd put $OUTFILE s3://s3-accounting-files
 s3cmd get --force s3://s3-accounting-files/$PRVFILE  
-#s3cmd rm s3://s3-accounting-files/$PRVFILE
+s3cmd rm s3://s3-accounting-files/$PRVFILE
 
 while read -r line;
 do
@@ -66,14 +66,23 @@ done < $OUTFILE
 
 echo -n "{\"data\": [" > $FDOFILE
 
+#Download 
+curl -XGET --negotiate -u : https://haggis.cern.ch:8204/chargegroup > listofchargegroup
+
 while read -r line; 
 do 
   name=`echo $line | grep -Eo "^.*\(" | tr -d "("`
   uid=`echo $line | grep -Eo "\(.*\)" | tr -d "()"`
 
 
-  chargegroup=`echo $line | grep -Eo "chargegroup: [0-9a-zA-Z-]*," | sed -e 's/chargegroup: //' | tr -d ","`
+  tmpchargegroup=`echo $line | grep -Eo "chargegroup: [0-9a-zA-Z-]*," | sed -e 's/chargegroup: //' | tr -d ","`
   chargerole=`echo $line | grep -Eo "chargerole: [0-9a-zA-Z-]*," | sed -e 's/chargerole: //' | tr -d ","`
+
+  if [[ $tmpchargegroup != "IT" ]]; then
+    chargegroup=`jq --arg tmpchargegroup "$tmpchargegroup" '. | map(select(.UUID | contains($tmpchargegroup))) | .[].Name ' listofchargegroup | tr -d "\""`
+  else
+    chargegroup="IT"
+  fi
 
   data=`echo $line | grep -Eo ":.*$" | tr -d ":"`
 
@@ -120,12 +129,15 @@ done < $OUTFILE
 echo -n "{}]}" >> $FDOFILE
 sed -e 's/,{}]/]/' -i $FDOFILE
 
-# publish data to cern.ch/storage/accounting
-mv $FDOFILE /eos/project/f/fdo/www/accounting/data-dev.s3.json 
+/afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/convert-accounting-file.sh $FDOFILE > general-accounting.s3.json
+
+# publish data to cern.ch/storage/accounting and general
+mv $FDOFILE /eos/project/f/fdo/www/accounting/data.s3.json 
+
+curl -X POST -H "Content-Type: application/json" -H "API-key:XXXXXXX"  https://acc-receiver-dev.cern.ch/v2/fe/S3%20Object%20Storage -d "@general-accounting.s3.json" 
 
 # clean
-#rm $PRVFILE
-#rm $OUTFILE
-
-
-
+rm $PRVFILE
+rm $OUTFILE
+rm general-accounting.s3.json
+rm listofchargegroup
