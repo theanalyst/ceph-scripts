@@ -134,7 +134,7 @@ sed -e 's/,{}]/]/' -i $FDOFILE
 # publish data to cern.ch/storage/accounting and general
 mv $FDOFILE /eos/project/f/fdo/www/accounting/data.s3.json 
 
-curl -X POST -H "Content-Type: application/json" -H "API-key:XXXXXXX"  https://acc-receiver-dev.cern.ch/v2/fe/S3%20Object%20Storage -d "@general-accounting.s3.json" 
+curl -X POST -H "Content-Type: application/json" -H "API-key:`cat /afs/cern.ch/project/ceph/private/s3-accounting.key`"  https://acc-receiver-dev.cern.ch/v2/fe/S3%20Object%20Storage -d "@general-accounting.s3.json" 
 
 # clean
 rm $PRVFILE
