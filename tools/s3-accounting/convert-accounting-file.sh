@@ -7,15 +7,4 @@
 #
 
 
-#cat data-dev.s3.json | jq -c .data | jq -c '.[]' | head -n 3 | while read -r line; 
-#do
-#  #resolve chargegroup/role
-#  dataowner=`echo $line | jq -r .owner`
-#  accrecdata=`curl -s -XGET https://accounting-receiver.cern.ch/v2/$dataowner`
-#  charge_group=`echo $accrecdata | jq .[].charge_group -r`
-#  echo "$line" | jq --arg DATE `date "+%d-%m-%Y"` --arg CHARGEGRP "$charge_group" -c '. | { name: .display_name, DiskUsage: .usage, DiskQuota: .quota, Date: $DATE, Owner: .owner, ChargeGroup: $CHARGEGRP, ChargeRole: "string", WallClockHours: 0, CPUHours: 0, FE: "S3 Object Storage" }' >> outfile
-#done
-#
-
-
-cat data-dev.s3.json | jq '[ .[][] | {MessageFormatVersion: .MessageFormatVersion, Date: .date, FE: .FE, ChargeGroup: .charge_group, ChargeRole: .charge_role, WallClockHours: 0, CPUHours: 0, DiskQuota: .quota_raw, DiskUsage: .usage_raw, Prenormalised: "false", Dedicated: "false"}]  ' 
+cat $1 | jq '[ .[][] | {MessageFormatVersion: .MessageFormatVersion, Date: .date, FE: .FE, ChargeGroup: .charge_group, ChargeRole: .charge_role, WallClockHours: 0, CPUHours: 0, DiskQuota: .quota_raw, DiskUsage: .usage_raw, Prenormalised: false, Dedicated: false}]  '  | jq  'group_by(.ChargeGroup) | map({MessageFormatVersion: .[0].MessageFormatVersion, Date: .[0].Date, FE: .[0].FE, ChargeGroup: .[0].ChargeGroup, ChargeRole: "default", WallClockHours: 0, CPUHours: 0, DiskUsage: map(.DiskUsage) | add, DiskQuota: map(.DiskQuota) | add, Prenormalised: false, Dedicated: false})' 
