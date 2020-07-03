@@ -27,7 +27,7 @@ do
   echo -n $line" " >> $OUTFILE; 
   if [ ! -z $prid ]; 
   then 
-    userinfo=`/afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/s3-user-to-accounting-unit-v2.py $prid`
+    userinfo=`/root/ceph-scripts/tools/s3-accounting/s3-user-to-accounting-unit-v2.py $prid`
     userid=`echo $userinfo | cut -f1 -d" "`
     userac=`echo $userinfo | sed -s "s/$userid//"`
     if [[ -z $userac ]]; 
@@ -35,9 +35,9 @@ do
       userac="chargegroup: IT, chargerole: default"
     fi
     echo -n "$userac, " >> $OUTFILE
-    /afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/cern-get-accounting-unit.sh --id $userid -f >> $OUTFILE
+    /root/ceph-scripts/tools/s3-accounting/cern-get-accounting-unit.sh --id $userid -f >> $OUTFILE
   else
-    /afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/cern-get-accounting-unit.sh --id `echo $line | grep  -Eo "[a-z0-9\.-]*@.*$" | tr -d ","` -f >> $OUTFILE
+    /root/ceph-scripts/tools/s3-accounting/cern-get-accounting-unit.sh --id `echo $line | grep  -Eo "[a-z0-9\.-]*@.*$" | tr -d ","` -f >> $OUTFILE
   fi;
 done < $FILENAME
 
@@ -129,12 +129,12 @@ done < $OUTFILE
 echo -n "{}]}" >> $FDOFILE
 sed -e 's/,{}]/]/' -i $FDOFILE
 
-/afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/convert-accounting-file.sh $FDOFILE > general-accounting.s3.json
+/root/ceph-scripts/tools/s3-accounting/convert-accounting-file.sh $FDOFILE > general-accounting.s3.json
 
 # publish data to cern.ch/storage/accounting and general
-mv $FDOFILE /eos/project/f/fdo/www/accounting/data.s3.json 
+#mv $FDOFILE /eos/project/f/fdo/www/accounting/data.s3.json 
 
-curl -X POST -H "Content-Type: application/json" -H "API-key:`cat /afs/cern.ch/project/ceph/private/s3-accounting.key`"  https://acc-receiver-dev.cern.ch/v2/fe/S3%20Object%20Storage -d "@general-accounting.s3.json" 
+#curl -X POST -H "Content-Type: application/json" -H "API-key:`cat /afs/cern.ch/project/ceph/private/s3-accounting.key`"  https://acc-receiver-dev.cern.ch/v2/fe/S3%20Object%20Storage -d "@general-accounting.s3.json" 
 
 # clean
 rm $PRVFILE
