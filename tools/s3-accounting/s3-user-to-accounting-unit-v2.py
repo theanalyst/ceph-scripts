@@ -1,4 +1,4 @@
-#! /usr/bin/python -u
+#! /usr/bin/python3 -u
 
 import os
 from os_client_config import config as cloud_config
@@ -12,7 +12,7 @@ from manilaclient import api_versions as manila_api_versions
 import sys
 
 if len (sys.argv) != 2:
-  print "No project_id given"
+  print("No project_id given")
   exit(-1)
 
 cc = cloud_config.OpenStackConfig()
@@ -58,4 +58,4 @@ try:
 except:
   username = "Unknown"
 
-print username+" "+outstr
+print(username+" "+outstr)
