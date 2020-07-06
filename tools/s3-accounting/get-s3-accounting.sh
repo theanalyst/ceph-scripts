@@ -27,7 +27,14 @@ do
   echo -n $line" " >> $OUTFILE; 
   if [ ! -z $prid ]; 
   then 
-    userid=`/afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/s3-user-to-accounting-unit.py $prid`
+    userinfo=`/afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/s3-user-to-accounting-unit.py $prid`
+    userid=`echo $userinfo | cut -f1 -d" "`
+    userac=`echo $userinfo | sed -s "s/$userid//"`
+    if [[ -z $userac ]]; 
+    then
+      userac="chargegroup: IT, chargerole: default"
+    fi
+    echo -n "$userac, " >> $OUTFILE
     /afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/cern-get-accounting-unit.sh --id $userid -f >> $OUTFILE
   else
     /afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/cern-get-accounting-unit.sh --id `echo $line | grep  -Eo "[a-z0-9\.-]*@.*$" | tr -d ","` -f >> $OUTFILE
@@ -36,7 +43,7 @@ done < $FILENAME
 
 s3cmd put $OUTFILE s3://s3-accounting-files
 s3cmd get --force s3://s3-accounting-files/$PRVFILE  
-s3cmd rm s3://s3-accounting-files/$PRVFILE
+#s3cmd rm s3://s3-accounting-files/$PRVFILE
 
 while read -r line;
 do
@@ -59,10 +66,23 @@ done < $OUTFILE
 
 echo -n "{\"data\": [" > $FDOFILE
 
+#Download 
+curl -XGET --negotiate -u : https://haggis.cern.ch:8204/chargegroup > listofchargegroup
+
 while read -r line; 
 do 
   name=`echo $line | grep -Eo "^.*\(" | tr -d "("`
   uid=`echo $line | grep -Eo "\(.*\)" | tr -d "()"`
+
+
+  tmpchargegroup=`echo $line | grep -Eo "chargegroup: [0-9a-zA-Z-]*," | sed -e 's/chargegroup: //' | tr -d ","`
+  chargerole=`echo $line | grep -Eo "chargerole: [0-9a-zA-Z-]*," | sed -e 's/chargerole: //' | tr -d ","`
+
+  if [[ $tmpchargegroup != "IT" ]]; then
+    chargegroup=`jq --arg tmpchargegroup "$tmpchargegroup" '. | map(select(.UUID | contains($tmpchargegroup))) | .[].Name ' listofchargegroup | tr -d "\""`
+  else
+    chargegroup="IT"
+  fi
 
   data=`echo $line | grep -Eo ":.*$" | tr -d ":"`
 
@@ -86,13 +106,20 @@ do
   echo -n "{\"display_name\": \"$name\",\"uid\":\"$uid\","  >> $FDOFILE
   echo -n $data | tr -d "," | awk '{ printf \
    "\"quota\":\""$1"\","\
+   "\"quota_raw\":"$12","\
    "\"usage\":\""$3"\"," \
-   "\"usage_human\":\""$5"\"," \
-   "\"num_bucket\":\""$8"\"," \
-   "\"num_objects\":\""$10"\"," \
-   "\"owner\":\""$12"\"," \
-   "\"mail\":\""$13"\"," \
+   "\"usage_raw\":"$14"," \
+   "\"usage_human\":"$5"," \
+   "\"num_bucket\":"$8"," \
+   "\"num_objects\":"$10"," \
+   "\"owner\":\""$20"\"," \
+   "\"mail\":\""$21"\"," \
   }' >> $FDOFILE
+  echo -n  "\"MessageFormatVersion\":2," >> $FDOFILE
+  echo -n  "\"charge_group\":\"$chargegroup\"," >> $FDOFILE
+  echo -n  "\"charge_role\":\"$chargerole\"," >> $FDOFILE
+  echo -n "\"FE\":\"S3 Object Storage\"," >> $FDOFILE
+  echo -n "\"date\":\"`date -d "yesterday" '+%F'`\"," >> $FDOFILE
   echo -n "\"division\":\"$dep\"," >> $FDOFILE
   echo -n "\"group\":\"$grp\"," >> $FDOFILE
   echo -n "\"section\":\"$sec\"" >> $FDOFILE
@@ -102,12 +129,15 @@ done < $OUTFILE
 echo -n "{}]}" >> $FDOFILE
 sed -e 's/,{}]/]/' -i $FDOFILE
 
-# publish data to cern.ch/storage/accounting
+/afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/convert-accounting-file.sh $FDOFILE > general-accounting.s3.json
+
+# publish data to cern.ch/storage/accounting and general
 mv $FDOFILE /eos/project/f/fdo/www/accounting/data.s3.json 
+
+#curl -X POST -H "Content-Type: application/json" -H "API-key:`cat /afs/cern.ch/project/ceph/private/s3-accounting.key`"  https://acc-receiver-dev.cern.ch/v2/fe/S3%20Object%20Storage -d "@general-accounting.s3.json" 
 
 # clean
 rm $PRVFILE
 rm $OUTFILE
-
-
-
+rm general-accounting.s3.json
+rm listofchargegroup
