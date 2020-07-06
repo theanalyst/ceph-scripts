@@ -43,7 +43,7 @@ done < $FILENAME
 
 s3cmd put $OUTFILE s3://s3-accounting-files
 s3cmd get --force s3://s3-accounting-files/$PRVFILE  
-#s3cmd rm s3://s3-accounting-files/$PRVFILE
+s3cmd rm s3://s3-accounting-files/$PRVFILE
 
 while read -r line;
 do

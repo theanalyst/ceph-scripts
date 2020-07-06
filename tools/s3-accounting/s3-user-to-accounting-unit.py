@@ -25,6 +25,8 @@ manilaclient = manila_client.Client(
                 api_version=manila_api_versions.APIVersion('2.39'),
                             session=session)
 
+outstr=""
+
 # openstack volume show
 #volume = cinderclient.volumes.get(sys.argv[1])
 project_id = sys.argv[1];# getattr(volume, 'os-vol-tenant-attr:tenant_id')
@@ -33,6 +35,9 @@ try:
   # openstack project show
   project = keystoneclient.projects.get(project_id)
   accounting_group = getattr(project,'accounting-group')
+
+  if hasattr(project, 'chargegroup'):
+    outstr="chargegroup: "+project.chargegroup+", chargerole: "+project.chargerole
 
   role = keystoneclient.roles.find(name='owner') 
   role_id = getattr(role,'id')
@@ -53,4 +58,4 @@ try:
 except:
   username = "Unknown"
 
-print username
+print username+" "+outstr 
