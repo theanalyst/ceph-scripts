@@ -43,7 +43,7 @@ done < $FILENAME
 
 s3cmd put $OUTFILE s3://s3-accounting/
 s3cmd get --force s3://s3-accounting/$PRVFILE  
-s3cmd rm s3://s3-accounting/$PRVFILE
+#s3cmd rm s3://s3-accounting/$PRVFILE
 
 while read -r line;
 do
@@ -139,5 +139,5 @@ sed -e 's/,{}]/]/' -i $FDOFILE
 # clean
 rm $PRVFILE
 rm $OUTFILE
-rm general-accounting.s3.json
+#rm general-accounting.s3.json
 rm listofchargegroup
