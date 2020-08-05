@@ -1,7 +1,7 @@
 #! /bin/bash
 
 
-journals=`blkid | grep journal | grep -v LVM | awk 'BEGIN {FS="="} {print $3}' | tr -d "\""`
+journals=`blkid | grep journal | grep -v xfs | grep -v LVM | grep -v | awk 'BEGIN {FS="="} {print $3}' | tr -d "\""`
 
 
 for line in $journals; do
