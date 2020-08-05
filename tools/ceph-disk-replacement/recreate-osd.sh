@@ -13,6 +13,12 @@ then
 fi
 
 
+if [[ `cat /etc/motd | grep hostgroup | grep -Eo "ceph/[a-Z0-9/]+" | grep -c beesly` -eq 1 ]];
+then
+  echo "ceph/beesly procedure update in progress. Contact ceph-admins"
+  exit -1
+fi
+
 if [[ `cat /etc/motd | grep hostgroup | grep -Eo "ceph/[a-Z0-9/]+" | grep -c erin` -eq 1 ]];
 then
   CASTOR=1
