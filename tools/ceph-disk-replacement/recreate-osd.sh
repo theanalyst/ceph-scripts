@@ -13,11 +13,11 @@ then
 fi
 
 
-if [[ `cat /etc/motd | grep hostgroup | grep -Eo "ceph/[a-Z0-9/]+" | grep -c beesly` -eq 1 ]];
-then
-  echo "ceph/beesly procedure update in progress. Contact ceph-admins"
-  exit -1
-fi
+#if [[ `cat /etc/motd | grep hostgroup | grep -Eo "ceph/[a-Z0-9/]+" | grep -c beesly` -eq 1 ]];
+#then
+#  echo "ceph/beesly procedure update in progress. Contact ceph-admins"
+#  exit -1
+#fi
 
 if [[ `cat /etc/motd | grep hostgroup | grep -Eo "ceph/[a-Z0-9/]+" | grep -c erin` -eq 1 ]];
 then
@@ -27,7 +27,7 @@ fi
 if [[ `lsscsi  | grep -v encl | grep -v INT | wc -l` -gt 40 && `cat /etc/motd | grep hostgroup | grep -Eo "ceph/[a-Z0-9/]+" | grep -c gabe` -eq 1  ]]
 then
   CASTOR=1
-fi  
+fi
 
 
 INITSTATE=`ceph health`
@@ -40,18 +40,18 @@ do
     key="$1"
 
     case "$key" in
-        -f) 
-        shift; 
+        -f)
+        shift;
         FORCEMODE=1;
         ;;
 
         -v)
         shift;
-        VERBOSE=1;   
-        ;; 
+        VERBOSE=1;
+        ;;
 
         --db)
-        DBD=$2  
+        DBD=$2
         shift;
         shift;
         ;;
@@ -76,7 +76,7 @@ done
 
 function draw(){
     if [[ $VERBOSE -eq 1 ]];
-    then 
+    then
         echo ${1}
     fi
 }
@@ -98,7 +98,7 @@ then
 fi
 
 echo $INITSTATE | grep -q "HEALTH_OK"
-if [[ $? -eq 1 ]]; 
+if [[ $? -eq 1 ]];
 then
   if [[ $FORCEMODE -eq 0 ]];
   then
@@ -124,17 +124,8 @@ then
 fi
 
 if [[ -z $DBD ]];
-then 
-  for i in `ceph-disk list 2>/dev/null | grep -E "ceph journal"  | grep -vE "for" | grep -oE "/dev/sd[a-z]+[0-9]"`;
-  do 
-    draw "investigating $i"
-    lvs -o +devices,tags | grep -q $i; 
-    if [[ $? -eq 1 ]];
-    then 
-      draw "$i can be used";
-      DBD=$i;
-    fi;
-  done
+then
+  DBD=`/root/ceph-scripts/tools/ceph-disk-replacement/scan.sh | head -n 1`;
   if [[ -z $DBD ]];
   then
     draw "No block device found, switching to ceph-volume"
@@ -160,17 +151,17 @@ then
     echo "echo \"Please wait and try again later\""
     echo "echo \"Aborting\"" 
     exit
-  fi  
+  fi
 fi
 
 if [[ $CASTOR -eq 1 ]];
 then
-  for i in `lsscsi | grep -Eo "/dev/sd[c-z]|/dev/sda[a-z]" | grep -vE "$DEV"`; 
-  do 
-    lvs -o +devices,tags | grep -q $i; 
+  for i in `lsscsi | grep -Eo "/dev/sd[c-z]|/dev/sda[a-z]" | grep -vE "$DEV"`;
+  do
+    lvs -o +devices,tags | grep -q $i;
     if [[ $? -eq 1 ]];
     then
-      MOREDEV=`echo $i`; 
+      MOREDEV=`echo $i`;
       draw "$MOREDEV"
     fi;
   done
@@ -189,14 +180,16 @@ else
   echo "ceph-volume lvm zap $DEV"
 
   if [[ -z $DBD ]];
-  then 
+  then
     echo "ceph osd destroy $OSD --yes-i-really-mean-it"
-    echo "ceph-volume lvm create --osd-id $OSD --data $DEV"
+#    echo "ceph-volume lvm create --osd-id $OSD --data $DEV"
+    echo "ceph-volume lvm batch $DEV --osd-id $OSD --yes"
     echo "ceph osd primary-affinity osd.$OSD 1;"
   else
     echo "ceph-volume lvm zap $DBD"
     echo "ceph osd destroy $OSD --yes-i-really-mean-it"
-    echo "ceph-volume lvm create --osd-id $OSD --data $DEV --block.db $DBD"
+    echo "ceph-volume lvm batch $DEV $DBD --yes --osd-id $OSD"
+#    echo "ceph-volume lvm create --osd-id $OSD --data $DEV --block.db $DBD"
     echo "ceph osd primary-affinity osd.$OSD 1;"
   fi
 fi
@@ -206,5 +199,6 @@ fi
 # Auto discover osd to be replaced (grep on ceph osd tree down to find down osd on the host)
 # Auto find if 2-disk OSDs are used
 
- 
+
 #  awk 'BEGIN { out=0 } { if($0 ~ /rack/) {out=0} if(out) {print $0} if($0 ~ /RJ55/) {out=1}; } '
+
