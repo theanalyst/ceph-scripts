@@ -97,7 +97,7 @@ OSD=`ceph-volume inventory --format=json | jq --arg DEV "$DEV" '. | map(select(.
 if [[ -z $OSD ]];
 then
   DEVID=`echo $DEV | grep -Eo "sd[a-z]+"`
-  OSD=`ceph device ls | grep $HOSTNAME | grep $DEVID | awk '{ print $3 }' | sed -e 's/osd.//'`
+  OSD=`ceph device ls | grep $HOSTNAME | grep "$DEVID " | awk '{ print $3 }' | sed -e 's/osd.//'`
   if [[ -z $OSD ]];
   then
     echo "echo \" No OSD mapped to drive $DEV. \""
