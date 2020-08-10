@@ -11,6 +11,7 @@ then
   exit -1
 fi
 
+echo "Generating report for ceph-$1"
 
 
 # Check for down osds
@@ -42,6 +43,11 @@ do
                 echo "[$target_host:$target_drive] Drive appears to be missing"
             fi
             echo "[$target_host:$target_drive] $hist_report"
+        fi
+
+        if [[ -z $hist_report && -z $dmesg_report]];
+        then
+          echo "[$target_host:$target_drive] Cannot determine the drive's status, will require manual investigation"
         fi
     done
 done
