@@ -18,7 +18,7 @@ echo "Generating report for ceph-$1"
 for i in `ceph --cluster $1 osd tree down | grep -Eo "osd.[0-9]+"`;
 do
 #    # Checking each drives of the down osds
-    echo "Checking $i"
+    echo "Checking status of $i"
     for j in `ceph --cluster $1 device ls-by-daemon --format=json-pretty $i | jq -c '.[] | .location[] | { host: .host, dev: .dev}'`;
     do
         target_host=`echo $j  | jq -r -c '.host'`
@@ -45,7 +45,7 @@ do
             echo "[$target_host:$target_drive] $hist_report"
         fi
 
-        if [[ -z $hist_report && -z $dmesg_report]];
+        if [[ -z $hist_report && -z $dmesg_report ]];
         then
           echo "[$target_host:$target_drive] Cannot determine the drive's status, will require manual investigation"
         fi
