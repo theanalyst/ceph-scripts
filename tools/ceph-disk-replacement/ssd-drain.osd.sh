@@ -23,15 +23,15 @@ do
   key="$1"
 
   case "$key" in
-    -f) 
-    shift; 
+    -f)
+    shift;
     FORCEMODE=1;
     ;;
 
     -v)
     shift;
-    VERBOSE=1;   
-    ;; 
+    VERBOSE=1;
+    ;;
 
     --dev)
     DEV=$2
@@ -47,7 +47,7 @@ done
 
 function draw(){
   if [[ $VERBOSE -eq 1 ]];
-  then 
+  then
     echo ${1}
   fi
 }
@@ -74,7 +74,7 @@ fi
 pvscan --cache
 
 echo $INITSTATE | grep -q "HEALTH_OK"
-if [[ $? -eq 1 ]]; 
+if [[ $? -eq 1 ]];
 then
   if [[ $FORCEMODE -eq 0 ]];
   then
@@ -86,13 +86,14 @@ then
   fi
 fi
 
+
 OSD=`lvs -o +devices,tags | grep "$DEV" | grep -E "type=db" | grep -Eo "osd_id=[0-9]+," | tr -d "[a-z=_\n]" | sed -e 's/,/ /g'`
 
 if [[ -z $OSD ]];
 then
-  echo "echo \"$DEV has no OSD mapped to it.\""
-  exit;
-fi 
+    DEV=`echo $DEV | sed -e 's/\/dev\///'`
+    OSD=`ceph device ls | grep $HOSTNAME | grep $DEV | awk 'BEGIN{FS=":"} {print $2}' | tr -d "[a-z.]"`
+fi
 
 
 for i in `echo $OSD`;
@@ -109,4 +110,3 @@ do
     fi
 done
 
- 
