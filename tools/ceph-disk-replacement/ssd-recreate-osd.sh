@@ -132,9 +132,9 @@ OPT=`ceph-volume inventory --format=json | jq '. | map(select(.available==true))
 for i in `echo $OSDS`;
 do
   echo "ceph osd destroy $i --yes-i-really-mean-it"
-  echo "ceph-volume lvm zap --destroy --osd-id $i"
 done
 
+echo "ceph-volume lvm zap --destroy $DEVS"
 echo "ceph-volume lvm zap /dev/$DEV"
 echo "ceph-volume lvm batch $OPT $DEVS /dev/$DEV --osd-ids $OSDS"
 echo "ceph osd unset noout"
