@@ -107,23 +107,6 @@ done
 
 echo "# $OSDS / $DEVS"
 
-for i in `echo $OSDS`;
-do
-  ceph osd safe-to-destroy osd.$i &> /dev/null
-  retval=`echo $?`
-  if [[ $retval -ne 0 ]];
-  then
-    echo $INITSTATE | grep -q "HEALTH_OK"
-    if [[ $? -eq 1 ]];
-    then
-      echo "echo \"osd.$i is unsafe to destroy\"" 
-      echo "echo \"Please wait and try again later\""
-      echo "echo \"Aborting\"" 
-      exit
-    fi
-  fi
-done
-
 #EVS=""; OSD=""; DEV=sdad; for i in `ceph device ls | grep $HOSTNAME | grep $DEV | grep -Eo osd.[0-9]+`; do echo systemctl stop ceph-osd@`echo $i | grep -Eo [0-9]+`; CURDEV=`ceph osd metadata $i | jq '.devices' -r | sed -e "s/$DEV,//"`; echo "ceph-volume lvm zap /dev/$CURDEV"; echo sleep 5; DEVS="$DEVS $CURDEV"; OSD="$OSD `echo $i | grep -Eo "[0-9]+"`"; done; echo ceph-volume lvm zap /dev/$DEV; echo ceph-volume lvm batch $DEVS /dev/$DEV --osd-ids $OSD
 
 
