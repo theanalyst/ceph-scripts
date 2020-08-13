@@ -97,6 +97,14 @@ then
   exit
 fi
 
+DEVID=`echo $DEV | grep -Eo "sd[a-z]+"`
+
+if [[ `cat /sys/block/${DEVID}/queue/rotational` -eq 0 ]];
+then
+    echo "echo \"SSD detected, contact ceph-admins\"";
+    exit -1
+fi
+
 echo $INITSTATE | grep -q "HEALTH_OK"
 if [[ $? -eq 1 ]];
 then

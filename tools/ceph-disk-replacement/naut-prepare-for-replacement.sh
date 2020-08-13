@@ -89,6 +89,14 @@ then
   exit
 fi
 
+DEVID=`echo $DEV | grep -Eo "sd[a-z]+"`
+
+if [[ `cat /sys/block/${DEVID}/queue/rotational` -eq 0 ]];
+then
+    echo "echo \"SSD detected, contact ceph-admins\"";
+    exit -1
+fi
+
 echo $INITSTATE | grep -q "HEALTH_OK"
 if [[ $? -eq 1 ]];
 then
@@ -106,7 +114,6 @@ OSD=`ceph-volume inventory --format=json | jq --arg DEV "$DEV" '. | map(select(.
 
 if [[ -z $OSD ]];
 then
-  DEVID=`echo $DEV | grep -Eo "sd[a-z]+"`
   OSD=`ceph device ls | grep $HOSTNAME | grep "$DEVID " | awk '{ print $3 }' | sed -e 's/osd.//'`
   if [[ -z $OSD ]];
   then
