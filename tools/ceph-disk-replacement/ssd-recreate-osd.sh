@@ -112,6 +112,8 @@ echo "# $OSDS / $DEVS"
 
 OPT=`ceph-volume inventory --format=json | jq '. | map(select(.available==true)) | .[].path' -r`
 
+OPTOSD=`ceph osd tree destroyed --format=json | jq '.[][] | select(.type == "host") | select(.name == "p06253939n66715") |  .children[0]'`
+
 for i in `echo $OSDS`;
 do
   echo "ceph osd destroy $i --yes-i-really-mean-it"
@@ -119,7 +121,7 @@ done
 
 echo "ceph-volume lvm zap --destroy $DEVS"
 echo "ceph-volume lvm zap /dev/$DEV"
-echo "ceph-volume lvm batch $OPT $DEVS /dev/$DEV --osd-ids $OSDS"
+echo "ceph-volume lvm batch $OPT $DEVS /dev/$DEV --osd-ids $OPTOSD $OSDS"
 echo "ceph osd unset noout"
 
 
