@@ -102,7 +102,7 @@ DEV=`echo $DEV | sed -e 's/\/dev\///'`
 for i in `ceph device ls | grep $HOSTNAME | grep $DEV | grep -Eo osd.[0-9]+`;
 do
     OSDS="$OSDS `echo $i | grep -Eo "[0-9]+"`"
-    DEVS="$DEVS /dev/`ceph osd metadata $i | jq '.devices' -r | sed -e "s/$DEV,//"`"
+    DEVS="$DEVS /dev/`ceph osd metadata $i | jq '.devices' -r | sed -e "s/$DEV,//" -e "s/,$DEV//"`"
 done
 
 echo "# $OSDS / $DEVS"
