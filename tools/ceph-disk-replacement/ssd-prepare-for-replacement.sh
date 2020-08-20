@@ -147,5 +147,7 @@ if [[ $BADOSD ]];
 then
   echo "umount /var/lib/ceph/osd/ceph-$BADOSD"
   echo "ceph osd destroy $BADOSD --yes-i-really-mean-it"
+  BADDEV=`ceph device ls | grep $HOSTNAME | grep -vE "osd.[0-9]+ osd.[0-9]+" | grep osd.$BADOSD | sed -e 's/.*://' | awk '{print $1}'`
+  echo "ceph-volume lvm zap --destroy /dev/$BADDEV"
 fi
 
