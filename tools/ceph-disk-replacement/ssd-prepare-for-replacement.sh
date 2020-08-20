@@ -45,6 +45,12 @@ do
     shift;
     ;;
 
+    --bad)
+    BADOSD=$2
+    shift;
+    shift;
+    ;;
+
     *)
     shift;
     ;;
@@ -88,7 +94,7 @@ then
 fi
 
 DEV=`echo $DEV | sed -e 's/\/dev\///'`
-  
+ 
 OSD=`lvs -o +devices,tags | grep "/dev/$DEV" | grep -E "type=db" | grep -Eo "osd_id=[0-9]+" | tr -d "[a-z=_]"`
 
 if [[ -z $OSD ]];
@@ -111,6 +117,11 @@ do
     fi
 done
 
+if [[ $BADOSD ]];
+then
+  echo "rm -f /etc/ceph/osd/$BADOSD-*"
+fi
+
 draw "$DEV is osd.$OSD"
 ceph osd safe-to-destroy osd.$OSD &> /dev/null
 retval=`echo $?`
@@ -118,24 +129,22 @@ retval=`echo $?`
 echo "ceph osd set noout"
 for i in `echo $OSD`;
 do
-    if [[ $retval -ne 0 ]];
-    then
-      echo "systemctl stop ceph-osd@$i"
-    else
-      echo "echo \"osd.$i still unsafe to destroy\"" 
-      echo "echo \"Please wait and retry later\""
-    fi
+  echo "systemctl stop ceph-osd@$i"
 done
+
+if [[ $BADOSD ]];
+then
+  echo "systemctl stop ceph-osd@$BADOSD"
+fi
+
 echo "sleep 5"
 for i in `echo $OSD`;
 do
-    if [[ $retval -ne 0 ]];
-    then
-      echo "umount /var/lib/ceph/osd/ceph-$i"
-    else
-      echo "echo \"osd.$i still unsafe to destroy\"" 
-      echo "echo \"Please wait and retry later\""
-    fi
+  echo "umount /var/lib/ceph/osd/ceph-$i"
 done
 
+if [[ $BADOSD ]];
+then
+  echo "umount /var/lib/ceph/osd/ceph-$BADOSD"
+fi
 
