@@ -146,5 +146,6 @@ done
 if [[ $BADOSD ]];
 then
   echo "umount /var/lib/ceph/osd/ceph-$BADOSD"
+  echo "ceph osd destroy $BADOSD --yes-i-really-mean-it"
 fi
 
