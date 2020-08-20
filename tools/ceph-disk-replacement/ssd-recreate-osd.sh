@@ -112,7 +112,8 @@ echo "# $OSDS / $DEVS"
 
 OPT=`ceph-volume inventory --format=json | jq '. | map(select(.available==true)) | .[].path' -r`
 
-OPTOSD=`ceph osd tree destroyed --format=json | jq '.[][] | select(.type == "host") | select(.name == "p06253939n66715") |  .children[0]'`
+HOSTNAME_SHORT=`hostname -s`
+OPTOSD=`ceph osd tree destroyed --format=json | jq --arg HOSTNAME "$HOSTNAME_SHORT" '.[][] | select(.type == "host") | select(.name == $HOSTNAME) |  .children
 
 for i in `echo $OSDS`;
 do
