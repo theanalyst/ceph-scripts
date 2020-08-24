@@ -33,3 +33,4 @@ do
    ceph osd unset nodeep-scrub
    ceph osd unset noscrub
 done
+ceph status
