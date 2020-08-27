@@ -164,15 +164,7 @@ fi
 
 if [[ $CASTOR -eq 1 ]];
 then
-  for i in `lsscsi | grep -Eo "/dev/sd[c-z]|/dev/sda[a-z]" | grep -vE "$DEV"`;
-  do
-    lvs -o +devices,tags | grep -q $i;
-    if [[ $? -eq 1 ]];
-    then
-      MOREDEV=`echo $i`;
-      draw "$MOREDEV"
-    fi;
-  done
+  MOREDEV=`ceph-volume inventory --format=json  | jq '.[] | select(.available == true) | .path' -r | grep -v $DEV`
   if [ -z $MOREDEV ]; then
     echo "cannot go further"
     exit
