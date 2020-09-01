@@ -133,7 +133,7 @@ then
     for i in `echo $OSDDB`; do echo "# $i osd.$OSD (db)"; done
 fi
 
-ceph osd safe-to-destroy osd.$OSD &> /dev/null
+ceph osd ok-to-stop osd.$OSD &> /dev/null
 retval=`echo $?`
 
 if [[ $retval -eq 0 ]];
@@ -145,8 +145,8 @@ then
   else
     echo "ceph-volume lvm zap $DEV --destroy"
   fi
-  echo "touch /tmp/prepare.${HOSTNAME}.${OSD}"
-  echo "rm -f /tmp/drain.${HOSTNAME}.${OSD}"
+  echo "touch /tmp/log.prepare.${HOSTNAME}.${OSD}"
+  echo "rm -f /tmp/log.drain.${HOSTNAME}.${OSD}"
 else
   echo "echo \"osd.$OSD still unsafe to destroy\"" 
   echo "echo \"Please wait and retry later\""
