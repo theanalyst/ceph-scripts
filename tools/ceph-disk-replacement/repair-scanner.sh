@@ -4,7 +4,7 @@
 
 
 MONITORING_HOST="filer-carbon.cern.ch"
-MONITORING)PORT="2003"
+MONITORING_PORT="2003"
 METRIC_PREFIX="ceph-repairs"
 
 for i in `ceph osd tree | grep host | awk '{print $4}'`; 
