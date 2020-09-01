@@ -127,7 +127,7 @@ ceph osd ok-to-stop $OSD &> /dev/null
 retval=`echo $?`
 
 
-if [[ $retval ]];
+if [[ $retval -ne 0 ]];
 then
   echo "not okay to stop"
   exit -1;
