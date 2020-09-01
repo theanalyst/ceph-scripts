@@ -8,12 +8,11 @@ MONITORING_PORT="2003"
 METRIC_PREFIX="ceph-repairs"
 
 for i in `ceph osd tree | grep host | awk '{print $4}'`; 
-do  
-  echo -n "$i "; 
-  drain=`ssh $i ls /tmp/log.drain.*`;
-  replt=`ssh $i ls /tmp/log.prepare.*`;
+do
+  drain=`ssh $i ls /tmp/log.drain.* 2> /dev/null`;
+  replt=`ssh $i ls /tmp/log.prepare.* 2> /dev/null`;
 
-  if [ $drain -ne "" ];
+  if [ ! -z $drain ];
   then
     for j in `echo $drain`;
     do
@@ -21,7 +20,7 @@ do
     done
   fi
 
-  if [ $replt -ne "" ];
+  if [ ! -z $replt ];
   then
     for j in `echo $replt`;
     do
