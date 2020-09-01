@@ -182,16 +182,15 @@ else
   if [[ -z $DBD ]];
   then
     echo "ceph osd destroy $OSD --yes-i-really-mean-it"
-#    echo "ceph-volume lvm create --osd-id $OSD --data $DEV"
     echo "ceph-volume lvm batch $DEV --osd-id $OSD --yes"
     echo "ceph osd primary-affinity osd.$OSD 1;"
   else
     echo "ceph-volume lvm zap $DBD"
     echo "ceph osd destroy $OSD --yes-i-really-mean-it"
     echo "ceph-volume lvm batch $DEV $DBD --yes --osd-id $OSD"
-#    echo "ceph-volume lvm create --osd-id $OSD --data $DEV --block.db $DBD"
     echo "ceph osd primary-affinity osd.$OSD 1;"
   fi
+  echo "rm -f /tmp/log.prepare.${HOSTNAME}.${OSD}"
 fi
 
 ## TODO
