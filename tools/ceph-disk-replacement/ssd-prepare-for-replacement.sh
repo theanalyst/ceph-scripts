@@ -123,8 +123,15 @@ then
 fi
 
 draw "$DEV is osd.$OSD"
-ceph osd safe-to-destroy osd.$OSD &> /dev/null
+ceph osd ok-to-stop $OSD &> /dev/null
 retval=`echo $?`
+
+
+if [[ $retval ]];
+then
+  echo "not okay to stop"
+  exit -1;
+fi
 
 echo "ceph osd set noout"
 for i in `echo $OSD`;
