@@ -122,7 +122,7 @@ done
 
 echo "ceph-volume lvm zap --destroy $DEVS"
 echo "ceph-volume lvm zap /dev/$DEV"
-echo "ceph-volume lvm batch $OPT $DEVS /dev/$DEV --osd-ids $OPTOSD $OSDS"
+echo "ceph-volume lvm batch $OPT $DEVS /dev/$DEV --osd-ids $OPTOSD $OSDS --yes"
 echo "ceph osd unset noout"
 
 
