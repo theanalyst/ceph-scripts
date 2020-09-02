@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cluster=`facter hostgroup1`
+cluster=`facter hostgroup_1`
 
 
 for disk in `ls /tmp/log.drain.*`;
