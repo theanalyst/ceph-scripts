@@ -35,6 +35,8 @@ FORCEMODE=0;
 VERBOSE=0
 BLUESTORE=0;
 
+cluster=`/opt/puppetlabs/bin/facter hostgroup_1`
+
 while [[ $# -gt 0 ]]
 do
     key="$1"
@@ -119,9 +121,9 @@ then
 fi
 
 
+AWKHOST=`echo $HOSTNAME | sed 's/.cern.ch//'`
 if [[ -z $OSD ]];
 then
-    AWKHOST=`echo $HOSTNAME | sed 's/.cern.ch//'`
     OSD=`ceph osd tree down | awk -v awkhost=$AWKHOST 'BEGIN { out=0 } { if($0 ~ /rack/) {out=0} if(out) {print $0; out=0} if($0 ~ awkhost) {out=1}; }' | grep -Eo "osd\.[0-9]+" | tr -d "[a-z\.]"`
 fi
 
@@ -191,6 +193,7 @@ else
     echo "ceph osd primary-affinity osd.$OSD 1;"
   fi
   echo "rm -f /tmp/log.prepare.${HOSTNAME}.${OSD}"
+  echo "echo \"cephrepairs.${cluster}.prepare.${AWKHOST}.${OSD} 0 `date +%s` | nc filer-carbon.cern.ch 2003\""
 fi
 
 ## TODO

@@ -38,6 +38,8 @@ INITSTATE=`ceph health`
 FORCEMODE=0;
 VERBOSE=0
 BLUESTORE=0;
+  
+cluster=`/opt/puppetlabs/bin/facter hostgroup_1`
 
 while [[ $# -gt 0 ]]
 do
@@ -110,6 +112,7 @@ then
   fi
 fi
 
+AWKHOST=`echo $HOSTNAME | sed 's/.cern.ch//'`
 OSD=`ceph-volume inventory --format=json | jq --arg DEV "$DEV" '. | map(select(.lvs | contains([{}]))) | map(select(.path==$DEV)) | .[].lvs | .[].osd_id' | tr -d "\""`
 
 if [[ -z $OSD ]];
@@ -147,6 +150,7 @@ then
   fi
   echo "touch /tmp/log.prepare.${HOSTNAME}.${OSD}"
   echo "rm -f /tmp/log.drain.${HOSTNAME}.${OSD}"
+  echo "echo \"cephrepairs.${cluster}.drain.${AWKHOST}.${OSD} 0 `date +%s` | nc filer-carbon.cern.ch 2003\""
 else
   echo "echo \"osd.$OSD still unsafe to destroy\"" 
   echo "echo \"Please wait and retry later\""
