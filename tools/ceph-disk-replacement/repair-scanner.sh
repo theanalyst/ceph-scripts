@@ -9,8 +9,8 @@ METRIC_PREFIX="ceph-repairs"
 
 for i in `ceph osd tree | grep host | awk '{print $4}'`; 
 do
-  drain=`ssh $i ls /tmp/log.drain.* 2> /dev/null`;
-  replt=`ssh $i ls /tmp/log.prepare.* 2> /dev/null`;
+  drain=`ssh -oStrictHostKeyChecking=no $i ls /tmp/log.drain.* 2> /dev/null`;
+  replt=`ssh -oStrictHostKeyChecking=no $i ls /tmp/log.prepare.* 2> /dev/null`;
 
   if [ ! -z $drain ];
   then
