@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cluster=`facter hostgroup_1`
+cluster=`/opt/puppetlabs/bin/bin/facter hostgroup_1`
 
 
 for disk in `ls /tmp/log.drain.*`;
