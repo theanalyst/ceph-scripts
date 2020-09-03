@@ -29,7 +29,6 @@ BLUESTORE=0;
 
 
 cluster=`/opt/puppetlabs/bin/facter hostgroup_1`
-AWKHOST=`echo $HOSTNAME | sed 's/.cern.ch//'`
 
 while [[ $# -gt 0 ]]
 do
