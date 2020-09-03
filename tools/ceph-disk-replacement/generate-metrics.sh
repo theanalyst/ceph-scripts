@@ -3,12 +3,5 @@
 cluster=`/opt/puppetlabs/bin/facter hostgroup_1`
 
 
-for disk in `ls /tmp/log.prepare.*`;
-do
-  echo "cephrepairs.${cluster}.`echo $disk | sed -e 's/\/tmp\/log.//' -e 's/.cern.ch//'` 1 `date +%s`" | nc filer-carbon.cern.ch 2003;
-done
-
-for disk in `ls /tmp/log.drain.*`;
-do
-  echo "cephrepairs.${cluster}.`echo $disk | sed -e 's/\/tmp\/log.//' -e 's/.cern.ch//'` 1 `date +%s`" | nc filer-carbon.cern.ch 2003;
-done
+echo "cephrepairs.${cluster}.drain.`hostname -s` `ls /tmp/log.drain.* 2> /dev/null | wc -l` `date +%s`" | nc filer-carbon.cern.ch 2003;
+echo "cephrepairs.${cluster}.prepare.`hostname -s` `ls /tmp/log.prepare.* 2> /dev/null | wc -l` `date +%s`" | nc filer-carbon.cern.ch 2003;
