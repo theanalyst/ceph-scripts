@@ -150,9 +150,6 @@ then
   fi
   echo "touch /tmp/log.prepare.${HOSTNAME}.${OSD}"
   echo "rm -f /tmp/log.drain.${HOSTNAME}.${OSD}"
-  echo "echo \"cephrepairs.${cluster}.drain.${AWKHOST}.${OSD} 0 `date +%s`\" | nc filer-carbon.cern.ch 2003"
-  echo "echo \"cephrepairs.test.${cluster}.drain.${AWKHOST}.${OSD} 0 `date +%s`\" | nc filer-carbon.cern.ch 2003"
-  echo "echo \"cephrepairs.test.${cluster}.prepare.${AWKHOST}.${OSD} 1 `date +%s`\" | nc filer-carbon.cern.ch 2003"
 else
   echo "echo \"osd.$OSD still unsafe to destroy\"" 
   echo "echo \"Please wait and retry later\""

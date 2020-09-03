@@ -124,7 +124,6 @@ then
     echo "ceph osd out osd.$OSD;"
     echo "ceph osd primary-affinity osd.$OSD 0;"
     echo "touch /tmp/log.drain.${HOSTNAME}.${OSD}"
-    echo "echo \"cephrepairs.test.${cluster}.drain.${AWKHOST}.${OSD} 1 `date +%s`\" | nc filer-carbon.cern.ch 2003"
   fi
 else
   echo "echo \"osd.$OSD is already out, draining.\""
