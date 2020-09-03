@@ -194,6 +194,7 @@ else
   fi
   echo "rm -f /tmp/log.prepare.${HOSTNAME}.${OSD}"
   echo "echo \"cephrepairs.${cluster}.prepare.${AWKHOST}.${OSD} 0 `date +%s`\" | nc filer-carbon.cern.ch 2003"
+  echo "echo \"cephrepairs.test.${cluster}.prepare.${AWKHOST}.${OSD} 0 `date +%s`\" | nc filer-carbon.cern.ch 2003"
 fi
 
 ## TODO
