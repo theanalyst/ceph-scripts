@@ -41,6 +41,9 @@ FORCEMODE=0;
 VERBOSE=0
 BLUESTORE=0;
 
+
+cluster=`/opt/puppetlabs/bin/facter hostgroup_1`
+
 while [[ $# -gt 0 ]]
 do
   key="$1"
@@ -140,8 +143,8 @@ then
   else
     echo "ceph-volume lvm zap $DEV --destroy"
   fi
-  echo "touch /tmp/log.prepare.${HOSTNAME}.${OSD}"
-  echo "rm -f /tmp/log.drain.${HOSTNAME}.${OSD}"
+  echo "touch /tmp/log.${cluster}.prepare.${HOSTNAME}.${OSD}"
+  echo "rm -f /tmp/log.${cluster}.drain.${HOSTNAME}.${OSD}"
 else
   echo "echo \"osd.$OSD still unsafe to destroy\"" 
   echo "echo \"Please wait and retry later\""
