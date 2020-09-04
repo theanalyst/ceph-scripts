@@ -1,4 +1,4 @@
-#! /usr/bin/python -u
+#! /usr/bin/python2 -u
 
 import os
 from os_client_config import config as cloud_config
