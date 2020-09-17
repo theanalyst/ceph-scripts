@@ -31,3 +31,7 @@ fi
 # Destroy all secrets, disable puppet
 puppet agent --disable "HW Decommissioning"
 rm -rf /etc/ceph/ /var/lib/ceph/
+
+echo `hostname -s` has been removed from the cluster. Now do:
+echo ai-foreman updatehost -c ceph/spare `hostname -s`
+echo ai-disownhost `hostname -s`
