@@ -15,6 +15,7 @@ fi
 
 if [[ `cat /etc/motd | grep hostgroup | grep -Eo "ceph/[a-Z0-9/]+" | grep -c beesly` -eq 1 ]];
 then
+  BEESLY=1
   echo "ceph/beesly procedure update in progress. Contact ceph-admins"
   exit -1
 fi
