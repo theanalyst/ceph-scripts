@@ -121,21 +121,6 @@ then
   fi
 fi
 
-if [[ $BEESLY -eq 1 ]];
-then
-    OSD=`ceph device ls | grep $HOSTNAME | grep $DEVID | awk '{print $3}' | sed -e 's/osd.//'`
-    SSDOSD=`ceph device ls | grep $HOSTNAME | grep $OSD | grep -v $DEVID | awk '{print $2}' | awk 'BEGIN {FS=":"} {print $2} '`
-    OSDS=`ceph device ls | grep $HOSTNAME | grep $SSDOSD | awk 'BEGIN { FS=":" } {print $2}' | tr -d "[a-z.]"`
-    NUMFS=`for i in $OSDS; do ceph osd metadata $i; done | jq '.osd_objectstore' | sort | uniq -c | grep filestore | awk '{print $1}'`
-    echo "# $OSD $SSDOSD $DEVID ($NUMFS)"
-    if [[ $NUMFS -eq 6 ]];
-    then
-        echo "# You need to run ./ssd-prepare-for-replacement.sh --dev /dev/$SSDOSD --bad $OSD; and ./ssd-recreate-osd.sh --dev /dev/$SSDOSD --bad $OSD;"
-        echo "# Please read the documentation (Section \"Replacing beesly OSDs\" or ask ceph admins"
-    fi
-    exit -1
-fi
-
 AWKHOST=`echo $HOSTNAME | sed 's/.cern.ch//'`
 if [[ -z $OSD ]];
 then
