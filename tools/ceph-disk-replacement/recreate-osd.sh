@@ -207,7 +207,7 @@ else
     echo "ceph-volume lvm batch $DEV $DBD --yes --osd-id $OSD"
     echo "ceph osd primary-affinity osd.$OSD 1;"
   fi
-  echo "rm -f /tmp/log.${cluster}.prepare.${HOSTNAME}.${OSD}"
+  echo "rm -f /root/log.${cluster}.prepare.${HOSTNAME}.${OSD}"
 fi
 
 ## TODO
