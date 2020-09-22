@@ -5,6 +5,13 @@ set -x
 roger update --appstate intervention --message "Reformatting machines to Bluestore" --duration 2d `hostname -s`
 
 readarray -t OSD_IDS < <(ceph osd ls-tree `hostname -s`)
+
+if [[ `ceph osd ok-to-stop ${OSD_IDS[@]} &> /dev/null` -ne 0 ]];
+then
+  echo "not okay to stop. abort."
+  exit -1
+fi
+
 echo "${OSD_IDS[@]}" | xargs ceph osd out
 
 ceph osd set noout
