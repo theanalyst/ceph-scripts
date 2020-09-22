@@ -13,6 +13,8 @@ then
 fi
 
 ceph osd set noout
+ceph osd set norebalance
+
 systemctl stop ceph-osd.target
 while ((`pgrep ceph-osd | wc -l` > 0)); do
   sleep 1s
@@ -51,4 +53,7 @@ do
     ceph-volume lvm batch --yes $BATCH_DEVS --osd-ids ${OSD_IDS[@]:((i*BATCH_SIZE)):BATCH_SIZE}
 done
 
+/root/ceph-scripts/tools/upmap/upmap-remapped.py | sh -x
+/root/ceph-scripts/tools/upmap/upmap-remapped.py | sh -x
+ceph osd unset norebalance
 ceph osd unset noout
