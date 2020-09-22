@@ -12,8 +12,6 @@ then
   exit -1
 fi
 
-echo "${OSD_IDS[@]}" | xargs ceph osd out
-
 ceph osd set noout
 systemctl stop ceph-osd.target
 while ((`pgrep ceph-osd | wc -l` > 0)); do
