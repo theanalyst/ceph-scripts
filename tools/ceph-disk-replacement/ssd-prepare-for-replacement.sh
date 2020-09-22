@@ -117,11 +117,6 @@ do
     fi
 done
 
-if [[ $BADOSD ]];
-then
-  echo "rm -f /etc/ceph/osd/$BADOSD-*"
-fi
-
 draw "$DEV is osd.$OSD"
 ceph osd ok-to-stop $OSD &> /dev/null
 retval=`echo $?`
@@ -136,25 +131,12 @@ fi
 echo "ceph osd set noout"
 for i in `echo $OSD`;
 do
-  echo "systemctl stop ceph-osd@$i"
+  echo "systemctl stop ceph-osd@$i" | grep -v $BADOSD
 done
-
-if [[ $BADOSD ]];
-then
-  echo "systemctl stop ceph-osd@$BADOSD"
-fi
 
 echo "sleep 5"
 for i in `echo $OSD`;
 do
-  echo "umount /var/lib/ceph/osd/ceph-$i"
+  echo "umount /var/lib/ceph/osd/ceph-$i" | grep -v $BADOSD
 done
-
-if [[ $BADOSD ]];
-then
-  echo "umount /var/lib/ceph/osd/ceph-$BADOSD"
-  echo "ceph osd destroy $BADOSD --yes-i-really-mean-it"
-  BADDEV=`ceph device ls | grep $HOSTNAME | grep -vE "osd.[0-9]+ osd.[0-9]+" | grep osd.$BADOSD | sed -e 's/.*://' | awk '{print $1}'`
-  echo "ceph-volume lvm zap --destroy /dev/$BADDEV"
-fi
 

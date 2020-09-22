@@ -15,6 +15,7 @@ fi
 
 if [[ `cat /etc/motd | grep hostgroup | grep -Eo "ceph/[a-Z0-9/]+" | grep -c beesly` -eq 1 ]];
 then
+  BEESLY=1
   echo "ceph/beesly procedure update in progress. Contact ceph-admins"
   exit -1
 fi
@@ -120,7 +121,6 @@ then
   fi
 fi
 
-
 AWKHOST=`echo $HOSTNAME | sed 's/.cern.ch//'`
 if [[ -z $OSD ]];
 then
@@ -192,7 +192,7 @@ else
     echo "ceph-volume lvm batch $DEV $DBD --yes --osd-id $OSD"
     echo "ceph osd primary-affinity osd.$OSD 1;"
   fi
-  echo "rm -f /tmp/log.${cluster}.prepare.${HOSTNAME}.${OSD}"
+  echo "rm -f /root/log.${cluster}.prepare.${HOSTNAME}.${OSD}"
 fi
 
 ## TODO

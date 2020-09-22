@@ -64,5 +64,5 @@ for pg in upmaps:
       print pgid, 'upmap has "to" osds which are not in the up set', pg['mappings']
   failure_domain_nodes = [lookup_parent_id(osd, nodes, pools[pgid.split('.')[0]]['failure_domain']) for osd in up[pgid]]
   if len(failure_domain_nodes) != len(set(failure_domain_nodes)):
-      print pgid, 'upmap does not follow the crush rule on failure domain', pg['mappings'], up[pgid], [node[fdn]['name'] for fdn in failure_domain_nodes]
+    print pgid, 'upmap does not follow the crush rule on failure domain', pg['mappings'], up[pgid], [nodes[fdn]['name'] for fdn in failure_domain_nodes]
 

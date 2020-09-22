@@ -121,7 +121,7 @@ then
   then
     echo "ceph osd out osd.$OSD;"
     echo "ceph osd primary-affinity osd.$OSD 0;"
-    echo "touch /tmp/log.${cluster}.drain.${HOSTNAME}.${OSD}"
+    echo "touch /root/log.${cluster}.drain.${HOSTNAME}.${OSD}"
   fi
 else
   echo "echo \"osd.$OSD is already out, draining.\""

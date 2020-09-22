@@ -148,8 +148,8 @@ then
   else
     echo "ceph-volume lvm zap $DEV --destroy"
   fi
-  echo "touch /tmp/log.${cluster}.prepare.${HOSTNAME}.${OSD}"
-  echo "rm -f /tmp/log.${cluster}.drain.${HOSTNAME}.${OSD}"
+  echo "touch /root/log.${cluster}.prepare.${HOSTNAME}.${OSD}"
+  echo "rm -f /root/log.${cluster}.drain.${HOSTNAME}.${OSD}"
 else
   echo "echo \"osd.$OSD still unsafe to destroy\"" 
   echo "echo \"Please wait and retry later\""
