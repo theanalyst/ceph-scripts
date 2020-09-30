@@ -43,7 +43,7 @@ while(True):
 
   print "Loading pg stats json."
   pg_dump = json.loads(buf)
-  pg_stats = pg_dump['pg_stats']
+  pg_stats = pg_dump['pg_map']['pg_stats']
 
   # Which PGs are scrubbing?
   pgs_scrubbing = [ pg for pg in pg_stats if 'scrubbing' in pg['state'] ]
