@@ -10,8 +10,8 @@ do
    fi
 
    # disable other scrubs
-   ceph osd set nodeep-scrub
-   ceph osd set noscrub
+#   ceph osd set nodeep-scrub
+#   ceph osd set noscrub
 
    # bump up osd_max_scrubs
    ACTING=$(ceph pg $PG query | jq -r .acting[])
@@ -30,7 +30,7 @@ do
    done
 
    # disable other scrubs
-   ceph osd unset nodeep-scrub
-   ceph osd unset noscrub
+#   ceph osd unset nodeep-scrub
+#   ceph osd unset noscrub
 done
 ceph status
