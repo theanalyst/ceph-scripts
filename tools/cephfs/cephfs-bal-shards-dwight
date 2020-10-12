@@ -6,7 +6,6 @@ echo Remounting /cephfs-dwight rw
 mount -oremount,rw /cephfs-dwight
 
 echo Pinning /cephfs-dwight/volumes to mds.0
-setfattr -n ceph.dir.pin -v 0 /cephfs-dwight
 setfattr -n ceph.dir.pin -v 0 /cephfs-dwight/volumes
 
 echo Pinning /cephfs-dwight/volumes/_deleting to mds.0
