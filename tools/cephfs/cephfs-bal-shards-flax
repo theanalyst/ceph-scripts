@@ -1,14 +1,5 @@
 #!/bin/bash
 
-# Dwight
-
-# mount -oremount,rw /cephfs-dwight
-#./cephfs-bal-shard dwight /cephfs-dwight/
-#./cephfs-bal-shard dwight /cephfs-dwight/k8s/
-#./cephfs-bal-shard dwight /cephfs-dwight/volumes/
-#./cephfs-bal-shard dwight /cephfs-dwight/volumes/_nogroup/
-# mount -oremount,ro /cephfs-dwight
-
 # Flax:
 
 echo Remounting /cephfs-flax rw

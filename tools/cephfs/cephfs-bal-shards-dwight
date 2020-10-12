@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Dwight:
+
+echo Remounting /cephfs-dwight rw
+mount -oremount,rw /cephfs-dwight
+
+echo Pinning /cephfs-dwight/volumes to mds.0
+setfattr -n ceph.dir.pin -v 0 /cephfs-dwight
+setfattr -n ceph.dir.pin -v 0 /cephfs-dwight/volumes
+
+echo Pinning /cephfs-dwight/volumes/_deleting to mds.0
+setfattr -n ceph.dir.pin -v 0 /cephfs-dwight/volumes/_deleting
+
+echo Pinning /cephfs-dwight/volumes/_nogroup to mds.0
+setfattr -n ceph.dir.pin -v 0 /cephfs-dwight/volumes/_nogroup
+
+./cephfs-bal-shard dwight /cephfs-dwight/volumes/_nogroup/
+
+echo Remounting /cephfs-dwight ro
+mount -oremount,ro /cephfs-dwight
