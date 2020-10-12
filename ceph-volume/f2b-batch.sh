@@ -20,9 +20,6 @@ ceph osd set norebalance
 systemctl stop ceph-osd.target
 while ((`pgrep ceph-osd | wc -l` > 0)); do
   sleep 1s
-
-systemctl stop ceph-osd.target
-while ((`pgrep ceph-osd | wc -l` > 0)); do
 done
 
 set +e
