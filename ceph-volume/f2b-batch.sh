@@ -55,11 +55,6 @@ ceph osd ls-tree `hostname -s` | xargs -i ceph osd destroy {} --yes-i-really-mea
 
 for i in ${!SSDS[@]}
 do
-    # if all osds on this are bluestore already, skip this ssd
-    if ((`pvs | grep ${SSDS[$i]} | wc -l` > 0))
-    then
-        continue
-    fi
     BATCH_DEVS=$(printf "/dev/%s\n" "${HDDS[@]:((i*BATCH_SIZE)):BATCH_SIZE}" "${SSDS[$i]}")
     xargs -i printf "( wipefs -a %s; sleep 1; partprobe %s; sleep 1; ceph-volume lvm zap %s --destroy ) &\n" {} {} <<< "$BATCH_DEVS" | sh
     wait
