@@ -15,7 +15,7 @@ for dir in `find . -mindepth 1 -maxdepth 1 -type d`
 do
 
     # wait for health ok
-    until ceph --cluster=${cluster} health | grep -q HEALTH_OK
+    until ceph --cluster=${cluster} health 2>/dev/null | grep -q HEALTH_OK
     do
        echo Waiting 10s for HEALTH_OK...
        sleep 10
