@@ -3,6 +3,7 @@
 set -x
 set -e
 
+kinit -k
 roger update --appstate intervention --message "Reformatting machines to Bluestore" --duration 2d `hostname -s`
 
 readarray -t OSD_IDS < <(ceph osd ls-tree `hostname -s`)
@@ -19,12 +20,22 @@ ceph osd set norebalance
 systemctl stop ceph-osd.target
 while ((`pgrep ceph-osd | wc -l` > 0)); do
   sleep 1s
+
+systemctl stop ceph-osd.target
+while ((`pgrep ceph-osd | wc -l` > 0)); do
 done
+
+set +e
 umount /var/lib/ceph/osd/ceph-*
 rmdir /var/lib/ceph/osd/ceph-*
+set -e
+
 if ((`pvs | wc -l` > 0))
 then
-    yes | vgremove `vgs --no-headings | awk '{print $1}'`
+    if ((`vgs | wc -l` > 0))
+    then
+        yes | vgremove `vgs --no-headings | awk '{print $1}'`
+    fi
     pvremove `pvs --no-headings | awk '{print $1}'`
 fi
 
@@ -48,8 +59,9 @@ ceph osd ls-tree `hostname -s` | xargs -i ceph osd destroy {} --yes-i-really-mea
 for i in ${!SSDS[@]}
 do
     BATCH_DEVS=$(printf "/dev/%s\n" "${HDDS[@]:((i*BATCH_SIZE)):BATCH_SIZE}" "${SSDS[$i]}")
-    xargs -i printf "( wipefs -a %s; ceph-volume lvm zap %s --destroy ) &\n" {} {} <<< "$BATCH_DEVS" | sh
+    xargs -i printf "( wipefs -a %s; sleep 1; partprobe %s; sleep 1; ceph-volume lvm zap %s --destroy ) &\n" {} {} <<< "$BATCH_DEVS" | sh
     wait
+    partprobe
     sleep 10s
     ceph-volume lvm batch --yes $BATCH_DEVS --osd-ids ${OSD_IDS[@]:((i*BATCH_SIZE)):BATCH_SIZE}
 done
