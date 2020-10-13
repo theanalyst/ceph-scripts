@@ -17,8 +17,11 @@ do
     ceph tell mds.* client ls client_metadata.hostname=${S} 2>/dev/null | grep request_load_avg
     echo checking load_avg on ${SS}
     ceph tell mds.* client ls client_metadata.hostname=${SS} 2>/dev/null | grep request_load_avg
-#    echo evicting ${S}
-#    ceph tell mds.* client evict client_metadata.hostname=${S} 2>/dev/null | grep request_load_avg
-#    echo evicting ${SS}
-#    ceph tell mds.* client evict client_metadata.hostname=${SS} 2>/dev/null | grep request_load_avg
+    if [ "$1" == "--evict" ]
+    then
+        echo evicting ${S}
+        ceph tell mds.* client evict client_metadata.hostname=${S} 2>/dev/null | grep request_load_avg
+        echo evicting ${SS}
+        ceph tell mds.* client evict client_metadata.hostname=${SS} 2>/dev/null | grep request_load_avg
+    fi
 done
