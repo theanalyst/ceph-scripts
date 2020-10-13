@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 echo Enabling debug_ms=1 for 10s
 ceph daemon mds.`hostname -s` config set debug_ms 1
 sleep 10
