@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 echo Enabling debug_ms=1 for 10s
 ceph daemon mds.`hostname -s` config set debug_ms 1
 sleep 10
@@ -7,7 +9,7 @@ ceph daemon mds.`hostname -s` config set debug_ms 0/1
 
 echo Checking for Stale fh errors... If positive, re-run with --evict option.
 
-STALE=$(grep Stale /var/log/ceph/ceph-mds.*.log | awk '{print $8}' | sort | uniq | cut -d: -f1 | xargs -n1 host | awk '{print $5}' | sort)
+STALE=$(grep Stale /var/log/ceph/ceph-mds.*.log | awk '{print $8}' | sort | uniq | cut -d: -f1 | xargs -r -n1 host | awk '{print $5}' | sort)
 
 for s in ${STALE}
 do
