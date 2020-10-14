@@ -11,7 +11,7 @@ max_mds=`ceph --cluster ${cluster} fs dump --format json 2>/dev/null | jq .files
 cd $target
 
 # iterate over the subdirs and pin them
-for dir in `find . -mindepth 1 -maxdepth 1 -type d`
+for dir in `find . -mindepth 1 -maxdepth 1 -type d | sort`
 do
 
     # wait for health ok
