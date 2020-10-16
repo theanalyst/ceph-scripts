@@ -95,8 +95,6 @@ fi
 
 DEV=`echo $DEV | sed -e 's/\/dev\///'`
  
-OSD=`lvs -o +devices,tags | grep "/dev/$DEV" | grep -E "type=db" | grep -Eo "osd_id=[0-9]+" | tr -d "[a-z=_]"`
-
 if [[ -z $OSD ]];
 then
     OSD=`ceph device ls | grep $HOSTNAME | grep $DEV | awk 'BEGIN{FS=":"} {print $2}' | tr -d "[a-z.]"`
@@ -104,18 +102,6 @@ fi
   
 echo "mkdir -p /etc/ceph/osd-bak/"
 echo "cp -a /etc/ceph/osd/* /etc/ceph/osd-bak/"
-
-# How many drives per OSD?
-for i in `echo $OSD`;
-do
-    echo "rm -f /etc/ceph/osd/$i-*"
-    NUM=`lvs -o +devices,tags | grep type=db | grep osd_id=$i | grep -oE "/dev/.* " | grep  "dev/sd[a-z]*" -o | wc -l`
-    if [[ $NUM -gt 1 ]];
-    then
-      draw "osd.$i has $NUM drives"
-      echo "echo \"Please note that the OSD was using the following drives: `lvs -o +devices,tags | grep type=block | grep osd_id=$i | grep -oE "/dev/.* " | sed 's/([0-9])//g'`\""
-    fi
-done
 
 draw "$DEV is osd.$OSD"
 ceph osd ok-to-stop $OSD &> /dev/null
