@@ -117,12 +117,12 @@ fi
 echo "ceph osd set noout"
 for i in `echo $OSD`;
 do
-  echo "systemctl stop ceph-osd@$i" | grep -v $BADOSD
+  echo "systemctl stop ceph-osd@$i" 
 done
 
 echo "sleep 5"
 for i in `echo $OSD`;
 do
-  echo "umount /var/lib/ceph/osd/ceph-$i" | grep -v $BADOSD
+  echo "umount /var/lib/ceph/osd/ceph-$i"
 done
 
