@@ -18,13 +18,13 @@ for uid in users:
     info = json.loads(subprocess.getoutput('radosgw-admin --cluster=gabe user info --uid=%s' % uid.strip('\n')))
     if info['user_quota']['max_size_kb'] > 1:
         try:
-            stats = json.loads(subprocess.getoutput('radosgw-admin --cluster=gabe user stats --uid=%s' % uid.strip('\n')))['stats']
+            stats = json.loads(subprocess.getoutput('radosgw-admin --cluster=gabe user stats --uid=%s --sync-stats' % uid.strip('\n')))['stats']
         except:
             stats = {}
-            stats['total_bytes'] = 0
-            stats['total_entries'] = 0
+            stats['size_actual'] = 0
+            stats['num_objects'] = 0
 
         buckets = json.loads(subprocess.getoutput('radosgw-admin --cluster=gabe bucket list --uid=%s' % uid.strip('\n')))
-        percentused = 100*stats['total_bytes']/info['user_quota']['max_size'];
+        percentused = 100*stats['size_actual']/info['user_quota']['max_size'];
 
-        print("%s (%s): %s quota, %s used, %.2f percent full,  %d buckets, %d objects, %d raw_quota, %d raw_used, " % (info['display_name'], uid.strip('\n'), sizeof_fmt(info['user_quota']['max_size']), sizeof_fmt(stats['total_bytes']), percentused, len(buckets), stats['total_entries'], info['user_quota']['max_size'], stats['total_bytes'])) #, info['email'] if info['email'] != '' else 'none' )
+        print("%s (%s): %s quota, %s used, %.2f percent full,  %d buckets, %d objects, %d raw_quota, %d raw_used, " % (info['display_name'], uid.strip('\n'), sizeof_fmt(info['user_quota']['max_size']), sizeof_fmt(stats['size_actual']), percentused, len(buckets), stats['num_objects'], info['user_quota']['max_size'], stats['size_actual'])) #, info['email'] if info['email'] != '' else 'none' )
