@@ -18,7 +18,7 @@ for uid in users:
     info = json.loads(subprocess.getoutput('radosgw-admin --cluster=gabe user info --uid=%s' % uid.strip('\n')))
     if info['user_quota']['max_size_kb'] > 1:
         try:
-            stats = json.loads(subprocess.getoutput('radosgw-admin --cluster=gabe user stats --uid=%s --sync-stats' % uid.strip('\n')))['stats']
+            stats = json.loads(subprocess.getoutput('radosgw-admin --cluster=gabe user stats --uid=%s ' % uid.strip('\n')))['stats']
         except:
             stats = {}
             stats['size_actual'] = 0
