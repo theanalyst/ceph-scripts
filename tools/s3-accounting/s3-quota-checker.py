@@ -28,7 +28,7 @@ for uid in users:
             percentused = 100*stats['total_bytes']/info['user_quota']['max_size'];
 
             if percentused > 95:
-                out+=("Account %s (%s) is reaching its quota (%.2f)\n" % (uid.strip('\n'), info['display_name'], percentused)) #, info['email'] if info['email'] != '' else 'none' )
+                out+=("Account %s (%s) is reaching its quota (%.2f)%s\n" % (uid.strip('\n'), info['display_name'], percentused, (', please contact '+info['email']) if info['email'] != '' else '')) #, info['email'] if info['email'] != '' else 'none' )
     except:
         print(uid)
 
