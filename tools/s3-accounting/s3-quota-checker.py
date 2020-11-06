@@ -12,20 +12,20 @@ def sizeof_fmt(num, suffix='B'):
         num /= 1024.0
     return "%.1f%s%s" % (num, 'Yi', suffix)
 
-users = json.loads(subprocess.getoutput('radosgw-admin user list'))
+users = json.loads(subprocess.getoutput('radosgw-admin --cluster=gabe user list'))
 out = ""
 for uid in users:
     try:
-        info = json.loads(subprocess.getoutput('radosgw-admin  user info --uid=%s' % uid.strip('\n')))
+        info = json.loads(subprocess.getoutput('radosgw-admin --cluster=gabe user info --uid=%s' % uid.strip('\n')))
         if (info['user_quota']['max_size_kb'] > 1) and (info['user_quota']['enabled']):
             try:
-                stats = json.loads(subprocess.getoutput('radosgw-admin user stats --uid=%s' % uid.strip('\n')))['stats']
+                stats = json.loads(subprocess.getoutput('radosgw-admin --cluster=gabe user stats --uid=%s' % uid.strip('\n')))['stats']
             except:
                 stats = {}
-                stats['total_bytes'] = 0
-                stats['total_entries'] = 0
+                stats['size_actual'] = 0
+                stats['num_objects'] = 0
 
-            percentused = 100*stats['total_bytes']/info['user_quota']['max_size'];
+            percentused = 100*stats['size_actual']/info['user_quota']['max_size'];
 
             if percentused > 95:
                 out+=("Account %s (%s) is reaching its quota (%.2f)%s\n" % (uid.strip('\n'), info['display_name'], percentused, (', please contact '+info['email']) if info['email'] != '' else '')) #, info['email'] if info['email'] != '' else 'none' )
