@@ -1,9 +1,10 @@
 #!/usr/bin/python3 -u
 
 from __future__ import division
+from argparse import ArgumentParser
+from email.message import EmailMessage
 
 import json, subprocess, smtplib, sys
-
 
 def sizeof_fmt(num, suffix='B'):
     for unit in ['','Ki','Mi','Gi','Ti','Pi','Ei','Zi']:
@@ -12,14 +13,23 @@ def sizeof_fmt(num, suffix='B'):
         num /= 1024.0
     return "%.1f%s%s" % (num, 'Yi', suffix)
 
-users = json.loads(subprocess.getoutput('radosgw-admin --cluster=gabe user list'))
+
+parser = ArgumentParser()
+parser.add_argument('-s', '--sender', required=True,
+                    help="Value for 'From' header (required)")
+parser.add_argument('-c','--cluster', required=True,
+                    help="Cluster name (required)")
+
+args = parser.parse_args();
+users = json.loads(subprocess.getoutput('radosgw-admin --cluster=%s user list' % (args.cluster)))
 out = ""
+
 for uid in users:
     try:
-        info = json.loads(subprocess.getoutput('radosgw-admin --cluster=gabe user info --uid=%s' % uid.strip('\n')))
+        info = json.loads(subprocess.getoutput('radosgw-admin --cluster=%s user info --uid=%s' % (args.cluster, uid.strip('\n'))))
         if (info['user_quota']['max_size_kb'] > 1) and (info['user_quota']['enabled']):
             try:
-                stats = json.loads(subprocess.getoutput('radosgw-admin --cluster=gabe user stats --uid=%s' % uid.strip('\n')))['stats']
+                stats = json.loads(subprocess.getoutput('radosgw-admin --cluster=%s user stats --uid=%s' % (args.cluster, uid.strip('\n'))))['stats']
             except:
                 stats = {}
                 stats['size_actual'] = 0
@@ -32,6 +42,14 @@ for uid in users:
     except:
         print(uid)
 
-subprocess.run(stdout=subprocess.PIPE,text=True,input=out)
+msg = EmailMessage();
+msg['Subject'] = "S3 Quota checker report"
+msg['From'] = args.sender
+msg['To'] = "julien.collet@cern.ch"
+msg.set_content(out)
 
-~                    
+
+s = smtplib.SMTP('localhost')
+s.send_message(msg)
+s.quit()
+
