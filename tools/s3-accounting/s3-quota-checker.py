@@ -42,14 +42,14 @@ for uid in users:
     except:
         print(uid)
 
-msg = EmailMessage();
-msg['Subject'] = "S3 Quota checker report"
-msg['From'] = args.sender
-msg['To'] = "julien.collet@cern.ch"
-msg.set_content(out)
-
-
-s = smtplib.SMTP('localhost')
-s.send_message(msg)
-s.quit()
+if out != "": 
+  msg = EmailMessage();
+  msg['Subject'] = "S3 Quota checker report"
+  msg['From'] = args.sender
+  msg['To'] = "julien.collet@cern.ch"
+  msg.set_content(out)
+  
+  s = smtplib.SMTP('localhost')
+  s.send_message(msg)
+  s.quit()
 
