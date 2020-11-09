@@ -44,7 +44,7 @@ for uid in users:
 
 if out != "": 
   msg = EmailMessage();
-  msg['Subject'] = "S3 Quota checker report"
+  msg['Subject'] = "S3 Quota checker report for "+args.cluster
   msg['From'] = args.sender
   msg['To'] = "julien.collet@cern.ch"
   msg.set_content(out)
