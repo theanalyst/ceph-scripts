@@ -32,10 +32,10 @@ for uid in users:
                 stats = json.loads(subprocess.getoutput('radosgw-admin --cluster=%s user stats --uid=%s' % (args.cluster, uid.strip('\n'))))['stats']
             except:
                 stats = {}
-                stats['size_actual'] = 0
-                stats['num_objects'] = 0
+                stats['total_bytes'] = 0
+                stats['total_entries'] = 0
 
-            percentused = 100*stats['size_actual']/info['user_quota']['max_size'];
+            percentused = 100*stats['total_bytes']/info['user_quota']['max_size'];
 
             if percentused > 95:
                 out+=("Account %s (%s) is reaching its quota (%.2f)%s\n" % (uid.strip('\n'), info['display_name'], percentused, (', please contact '+info['email']) if info['email'] != '' else '')) #, info['email'] if info['email'] != '' else 'none' )
