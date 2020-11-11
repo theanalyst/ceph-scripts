@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 #
 # DISCLAIMER: THIS SCRIPT COMES WITH NO WARRANTY OR GUARANTEE
 # OF ANY KIND.
