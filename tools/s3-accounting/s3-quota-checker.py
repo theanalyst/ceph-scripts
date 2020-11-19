@@ -39,6 +39,8 @@ for uid in users:
 
             if percentused > 95:
                 out+=("Account %s (%s) is reaching its quota (%.2f)%s\n" % (uid.strip('\n'), info['display_name'], percentused, (', please contact '+info['email']) if info['email'] != '' else '')) #, info['email'] if info['email'] != '' else 'none' )
+        elif (info['user_quota']['max_size_kb'] > 1) and !(info['user_quota']['enabled']):
+            out += 'Account %s (%s) has %s quota but quota is disabled!\n' % ((uid.strip('\n'), info['display_name'], info['user_quota']['max_size_kb'])
     except:
         print(uid)
 
