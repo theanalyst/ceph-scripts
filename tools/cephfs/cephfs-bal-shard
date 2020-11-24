@@ -24,6 +24,11 @@ do
     # do a consistent hash(${dir}) modulo max_mds
     pin=`echo ${dir} | cksum | awk -v m=${max_mds} '{ print $1 % m }'`
 
+    # substitute -1 for 0 -- assuming the parent is already pinned to 0
+    if [ $pin == 0 ]
+    then
+        pin=-1
+    fi
     # pin the dir
     echo Pinning ${dir} to ${pin}
     setfattr -n ceph.dir.pin -v ${pin} ${dir}
