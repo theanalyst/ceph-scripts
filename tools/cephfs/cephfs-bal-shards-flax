@@ -14,6 +14,9 @@ setfattr -n ceph.dir.pin -v 0 /cephfs-flax/volumes/_deleting
 echo Pinning /cephfs-flax/volumes/_nogroup to mds.0
 setfattr -n ceph.dir.pin -v 0 /cephfs-flax/volumes/_nogroup
 
+echo Pinning /cephfs-flax/hpcqcd to mds.0
+setfattr -n ceph.dir.pin -v 0 /cephfs-flax/hpcqcd
+
 ./cephfs-bal-shard flax /cephfs-flax/hpcqcd/user/
 ./cephfs-bal-shard flax /cephfs-flax/volumes/_nogroup/
 
