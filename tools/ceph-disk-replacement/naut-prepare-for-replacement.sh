@@ -22,7 +22,7 @@ then
   exit
 fi
 
-if [[ `cat /etc/motd | grep hostgroup | grep -Eo "ceph/[a-Z0-9/]+" | grep -c erin` -eq 1 ]];
+if [[ `cat /etc/motd | grep hostgroup | grep -Eo "ceph/[a-Z0-9/]+" | grep -c nethub` -eq 1 ]];
 then
   echo "cephnethub intervention ongoing. please retry in a couple of days."
   exit -1
