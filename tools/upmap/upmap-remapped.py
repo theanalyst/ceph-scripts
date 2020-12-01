@@ -38,7 +38,8 @@ from __future__ import print_function
 import json, commands, sys
 
 try:
-  OSDS = commands.getoutput('ceph osd ls -f json')
+  OSDS = json.loads(commands.getoutput('ceph osd ls -f json'))
+  DF = json.loads(commands.getoutput('ceph osd df -f json | jq .nodes'))
 except ValueError:
   eprint('Error loading OSD IDs')
   sys.exit(1)
@@ -46,32 +47,26 @@ except ValueError:
 def eprint(*args, **kwargs):
   print(*args, file=sys.stderr, **kwargs)
 
-def valid_osds(osds):
-  valid = []
-  for osd in osds:
-    if str (osd) in OSDS:
-      valid.append(osd)
-  return valid
+def crush_weight(id):
+  for o in DF:
+    if o['id'] == id:
+      return o['crush_weight']
+  return 0
 
-def gen_upmap_replicated(up, acting):
-  u = set(valid_osds(up))
-  a = set(valid_osds(acting))
-  assert(len(u) == len(a))
-  lhs = u - a
-  rhs = a - u
-  return zip(lhs, rhs)
-
-def gen_upmap_erasure(up, acting):
-  u = valid_osds(up)
-  a = valid_osds(acting)
-  assert(len(u) == len(a))
-  return filter(lambda (p1, p2): p1 != p2, zip(u, a))
+def gen_upmap(up, acting):
+  assert(len(up) == len(acting))
+  pairs = []
+  for p in zip(up, acting):
+    if p[0] != p[1] and p[0] in OSDS and crush_weight(p[1]) > 0:
+      pairs.append(p)
+  return pairs
 
 def upmap_pg_items(pgid, mapping):
-  print('ceph osd pg-upmap-items %s ' % pgid, end='')
-  for pair in mapping:
-    print('%s %s ' % pair, end='')
-  print('&')
+  if len(mapping):
+    print('ceph osd pg-upmap-items %s ' % pgid, end='')
+    for pair in mapping:
+      print('%s %s ' % pair, end='')
+    print('&')
 
 def rm_upmap_pg_items(pgid):
   print('ceph osd rm-pg-upmap-items %s &' % pgid)
@@ -91,8 +86,9 @@ except ValueError:
 try:
   _remapped = remapped['pg_stats']
   remapped = _remapped
-except TypeError:
-  pass
+except KeyError:
+  print("There are no remapped PGs")
+  sys.exit(0)
 
 # discover existing upmaps
 osd_dump_json = commands.getoutput('ceph osd dump -f json')
@@ -139,12 +135,12 @@ for pg in remapped:
   pool = pgid.split('.')[0]
   if pool_type[pool] == 'replicated':
     try:
-      pairs = gen_upmap_replicated(up, acting)
+      pairs = gen_upmap(up, acting)
     except:
       continue
   elif pool_type[pool] == 'erasure':
     try:
-      pairs = gen_upmap_erasure(up, acting)
+      pairs = gen_upmap(up, acting)
     except:
       continue
   else:
