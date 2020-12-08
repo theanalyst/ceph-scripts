@@ -177,7 +177,10 @@ then
     echo "cannot go further"
     exit
   fi
-  echo "ceph osd destroy $OSD --yes-i-really-mean-it"
+  if [[ ! `ceph osd df tree --filter_by=name --filter=osd.$OSD --format=json | jq .nodes[].status -r` == "destroyed" ]]; 
+  then
+    echo "ceph osd destroy $OSD --yes-i-really-mean-it"
+  fi
   echo "pvremove $DEV" 
   echo "pvremove $MOREDEV"
   echo "pvscan --cache"
@@ -189,12 +192,18 @@ else
 
   if [[ -z $DBD ]];
   then
-    echo "ceph osd destroy $OSD --yes-i-really-mean-it"
+    if [[ ! `ceph osd df tree --filter_by=name --filter=osd.$OSD --format=json | jq .nodes[].status -r` == "destroyed" ]]; 
+    then
+      echo "ceph osd destroy $OSD --yes-i-really-mean-it"
+    fi
     echo "ceph-volume lvm batch $DEV --osd-id $OSD --yes"
     echo "ceph osd primary-affinity osd.$OSD 1;"
   else
     echo "ceph-volume lvm zap $DBD"
-    echo "ceph osd destroy $OSD --yes-i-really-mean-it"
+    if [[ ! `ceph osd df tree --filter_by=name --filter=osd.$OSD --format=json | jq .nodes[].status -r` == "destroyed" ]]; 
+    then
+      echo "ceph osd destroy $OSD --yes-i-really-mean-it"
+    fi
     echo "ceph-volume lvm batch $DEV $DBD --yes --osd-id $OSD"
     echo "ceph osd primary-affinity osd.$OSD 1;"
   fi
