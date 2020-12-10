@@ -136,7 +136,7 @@ then
     echo "done;"
     echo "systemctl stop ceph-osd@$OSD"
     echo "if ! \`ceph osd safe-to-destroy osd.$OSD &> /dev/null\`"
-    echo "then echo \"OSD unsafe to destroy, please contact ceph-admins\"; exit -1;"
+    echo "then echo \"OSD unsafe to destroy, please contact ceph-admins\";"
     echo "else"
     echo "umount /var/lib/ceph/osd/ceph-$OSD"
     echo "ceph-volume lvm zap --destroy --osd-id $OSD"
