@@ -137,12 +137,13 @@ then
     echo "systemctl stop ceph-osd@$OSD"
     echo "if \`ceph osd safe-to-destroy osd.$OSD &> /dev/null\`"
     echo "then echo \"OSD unsafe to destroy, please contact ceph-admins\"; exit -1;"
-    echo "fi"
+    echo "else"
     echo "umount /var/lib/ceph/osd/ceph-$OSD"
     echo "ceph-volume lvm zap --destroy --osd-id $OSD"
     echo "touch /root/log.${cluster}.prepare.${HOSTNAME}.${OSD}"
     echo "rm -f /root/log.${cluster}.drain.${HOSTNAME}.${OSD}"
     echo "ceph osd destroy $OSD --yes-i-really-mean-it"
+    echo "fi"
   fi
 else
   echo "echo \"osd.$OSD is already out, draining.\""
