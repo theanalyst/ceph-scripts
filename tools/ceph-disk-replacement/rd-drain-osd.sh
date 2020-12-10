@@ -135,7 +135,7 @@ then
     echo "sleep 300; echo \"Draining in progress... (\`ceph daemon osd.$OSD status | jq .num_pgs -r\`)\";"
     echo "done;"
     echo "systemctl stop ceph-osd@$OSD"
-    echo "if \`ceph osd safe-to-destroy osd.$OSD &> /dev/null\`"
+    echo "if ! \`ceph osd safe-to-destroy osd.$OSD &> /dev/null\`"
     echo "then echo \"OSD unsafe to destroy, please contact ceph-admins\"; exit -1;"
     echo "else"
     echo "umount /var/lib/ceph/osd/ceph-$OSD"
