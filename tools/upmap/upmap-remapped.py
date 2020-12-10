@@ -50,7 +50,7 @@ def eprint(*args, **kwargs):
 def crush_weight(id):
   for o in DF:
     if o['id'] == id:
-      return o['crush_weight']
+      return o['crush_weight'] * o['reweight']
   return 0
 
 def gen_upmap(up, acting):
