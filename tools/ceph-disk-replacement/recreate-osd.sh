@@ -180,6 +180,7 @@ then
   CMDS=`/root/ceph-scripts/ceph-volume/repair-team-striped-osd-prepare.sh $DEV $MOREDEV`
   echo "$CMDS --osd-id $OSD"
   echo "ceph osd primary-affinity osd.$OSD 1;"
+  echo "rm -f /root/log.${cluster}.prepare.${HOSTNAME}.${OSD}"
 else
   echo "ceph-volume lvm zap $DEV"
 
