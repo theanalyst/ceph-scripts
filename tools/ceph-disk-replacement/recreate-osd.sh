@@ -165,7 +165,7 @@ fi
 
 if [[ $CASTOR -eq 1 ]];
 then
-  MOREDEV=`ceph-volume inventory --format=json  | jq '.[] | select(.available == true) | .path' -r | grep -v $DEV`
+  MOREDEV=`ceph-volume inventory --format=json  | jq '.[] | select(.available == true) | .path' -r | grep -v $DEV | head -n 1`
   if [ -z $MOREDEV ]; then
     echo "cannot go further"
     exit
