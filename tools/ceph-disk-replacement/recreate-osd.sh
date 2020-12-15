@@ -123,7 +123,7 @@ fi
 AWKHOST=`echo $HOSTNAME | sed 's/.cern.ch//'`
 if [[ -z $OSD ]];
 then
-    OSD=`ceph osd tree down | awk -v awkhost=$AWKHOST 'BEGIN { out=0 } { if($0 ~ /rack/) {out=0} if(out) {print $0; out=0} if($0 ~ awkhost) {out=1}; }' | grep -Eo "osd\.[0-9]+" | tr -d "[a-z\.]"`
+    OSD=`ceph osd tree destroyed --format=json | jq --arg HOSTNAME "$AWKHOST" '.[][] | select(.type == "host") | select(.name == $HOSTNAME) |  .children | .[0]'`
 fi
 
 if [[ -z $OSD ]];
