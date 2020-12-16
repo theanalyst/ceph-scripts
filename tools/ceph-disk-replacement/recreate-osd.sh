@@ -128,8 +128,12 @@ fi
 
 if [[ -z $OSD ]];
 then
-    echo "echo \"No down OSD found on this host. Contact ceph-admins.\""
-    exit
+    OSD=`ceph osd tree down --format=json | jq --arg HOSTNAME "$AWKHOST" '.[][] | select(.type == "host") | select(.name == $HOSTNAME) |  .children | .[0]'`
+    if [[ -z $OSD ]];
+    then 
+      echo "echo \"No down OSD found on this host. Contact ceph-admins.\""
+      exit
+    fi
 fi
 
 if [[ -z $DBD ]];
