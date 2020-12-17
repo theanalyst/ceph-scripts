@@ -22,6 +22,16 @@ then
   exit
 fi
 
+
+if [[ `cat /etc/motd | grep hostgroup | grep -Eo "ceph/[a-Z0-9/]+" | grep -c erin` -eq 1 ]];
+then
+  echo "ceph/erin disk replacement procedures halted. Contact ceph-admins"
+  exit -1
+fi
+
+
+
+
 INITSTATE=`ceph health`
 FORCEMODE=0;
 VERBOSE=0
