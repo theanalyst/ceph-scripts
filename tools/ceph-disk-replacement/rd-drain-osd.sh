@@ -128,7 +128,7 @@ then
   echo "ceph osd out osd.$OSD;"
   echo "ceph osd primary-affinity osd.$OSD 0;"
   echo "touch /root/log.${cluster}.drain.${HOSTNAME}.${OSD}"
-  echo "while [ \`ceph osd df tree --filter_by=name --filter=osd.$OSD --format=json | jq '.nodes[].pgs'\` --ne 0 ]; do"
+  echo "while [ \`ceph osd df tree --filter_by=name --filter=osd.$OSD --format=json | jq '.nodes[].pgs'\` -ne 0 ]; do"
   echo "sleep 600; echo \"Draining in progress... (\`ceph osd df tree --filter_by=name --filter=osd.$OSD --format=json | jq '.nodes[].pgs'\`)\";"
   echo "done;"
   echo "systemctl stop ceph-osd@$OSD"
