@@ -1,0 +1,7 @@
+This script applies the bufgix at https://github.com/ceph/ceph/pull/38335
+Upstram tracker ticket is at https://tracker.ceph.com/issues/47758 
+
+Procedure:
+  * Apply the fix with `apply.sh`
+  * Create the OSDs with `ceph-volume lvm batch /dev/sd?`
+  * Remove the fix with `revert.sh` to leave a clean installation of the python package
