@@ -9,28 +9,21 @@ do
       continue
    fi
 
-   # disable other scrubs
-#   ceph osd set nodeep-scrub
-#   ceph osd set noscrub
-
-   # bump up osd_max_scrubs
-#   ACTING=$(ceph pg $PG query | jq -r .acting[])
-#   for OSD in $ACTING
-#   do
-#      ceph tell osd.${OSD} injectargs -- --osd_max_scrubs=3 --osd_scrub_during_recovery=true
-#   done
+   # Increase osd_max_scrubs to ensure the repair will start
+   ACTING=$(ceph pg $PG query | jq -r .acting[])
+   for OSD in $ACTING
+   do
+      ceph config set osd.${OSD} osd_max_scrubs 3
+   done
 
    ceph pg repair $PG
 
    sleep 10
 
-#   for OSD in $ACTING
-#   do
-#      ceph tell osd.${OSD} injectargs -- --osd_max_scrubs=1 --osd_scrub_during_recovery=false
-#   done
+   for OSD in $ACTING
+   do
+      ceph config rm osd.${OSD} osd_max_scrubs
+   done
 
-   # disable other scrubs
-#   ceph osd unset nodeep-scrub
-#   ceph osd unset noscrub
 done
 ceph status

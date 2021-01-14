@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 #
 # DISCLAIMER: THIS SCRIPT COMES WITH NO WARRANTY OR GUARANTEE
 # OF ANY KIND.
@@ -34,12 +34,12 @@
 #
 # Hacked by: Dan van der Ster <daniel.vanderster@cern.ch>
 
-from __future__ import print_function
-import json, commands, sys
+
+import json, subprocess, sys
 
 try:
-  OSDS = json.loads(commands.getoutput('ceph osd ls -f json'))
-  DF = json.loads(commands.getoutput('ceph osd df -f json | jq .nodes'))
+  OSDS = json.loads(subprocess.getoutput('ceph osd ls -f json'))
+  DF = json.loads(subprocess.getoutput('ceph osd df -f json | jq .nodes'))
 except ValueError:
   eprint('Error loading OSD IDs')
   sys.exit(1)
@@ -76,7 +76,7 @@ def rm_upmap_pg_items(pgid):
 
 # discover remapped pgs
 try:
-  remapped_json = commands.getoutput('ceph pg ls remapped -f json')
+  remapped_json = subprocess.getoutput('ceph pg ls remapped -f json')
   remapped = json.loads(remapped_json)
 except ValueError:
   eprint('Error loading remapped pgs')
@@ -91,14 +91,14 @@ except KeyError:
   sys.exit(0)
 
 # discover existing upmaps
-osd_dump_json = commands.getoutput('ceph osd dump -f json')
+osd_dump_json = subprocess.getoutput('ceph osd dump -f json')
 osd_dump = json.loads(osd_dump_json)
 upmaps = osd_dump['pg_upmap_items']
 
 # discover pools replicated or erasure
 pool_type = {}
 try:
-  for line in commands.getoutput('ceph osd pool ls detail').split('\n'):
+  for line in subprocess.getoutput('ceph osd pool ls detail').split('\n'):
     if 'pool' in line:
       x = line.split(' ')
       pool_type[x[1]] = x[3]
