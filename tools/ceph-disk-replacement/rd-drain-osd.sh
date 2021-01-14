@@ -132,7 +132,7 @@ then
   echo "sleep 600; echo \"Draining in progress... (\`ceph osd df tree --filter_by=name --filter=osd.$OSD --format=json | jq '.nodes[].pgs'\`)\";"
   echo "done;"
   echo "systemctl stop ceph-osd@$OSD"
-  echo "if ! \`ceph osd safe-to-destroy osd.$OSD &> /dev/null\`"
+  echo "if ! \`ceph health | grep -q \"HEALTH_OK\"\`"
   echo "then echo \"OSD unsafe to destroy, please contact ceph-admins\";"
   echo "else"
   echo "umount /var/lib/ceph/osd/ceph-$OSD"
