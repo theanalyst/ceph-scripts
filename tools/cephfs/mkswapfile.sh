@@ -19,6 +19,12 @@ then
     exit 1
 fi
 
+echo Current swaps:
+cat /proc/swaps
+echo
+
+echo Going to run:
+echo
 echo dd if=/dev/zero of=/swapfile bs=1M count=$((SIZE / 1024))
 echo chmod 600 /swapfile
 echo mkswap /swapfile
@@ -30,9 +36,12 @@ echo
 read -p "Continue with above? (y/n) " choice
 case "$choice" in 
   y|Y ) echo "continuing...";;
-  n|N ) echo "no" && exit 1;;
-  * ) echo "invalid" && exit 1;;
+  n|N ) echo "exiting..." && exit 1;;
+  * ) echo "exiting..." && exit 1;;
 esac
+
+set -e
+set -x
 
 dd if=/dev/zero of=/swapfile bs=1M count=$((SIZE / 1024))
 chmod 600 /swapfile
