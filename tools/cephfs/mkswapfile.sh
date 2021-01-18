@@ -29,9 +29,9 @@ echo "echo /swapfile swap swap defaults 0 0 >> /etc/fstab"
 echo
 read -p "Continue with above? (y/n) " choice
 case "$choice" in 
-  y|Y ) echo "yes";;
-  n|N ) echo "no";;
-  * ) echo "invalid";;
+  y|Y ) echo "continuing...";;
+  n|N ) echo "no" && exit 1;;
+  * ) echo "invalid" && exit 1;;
 esac
 
 dd if=/dev/zero of=/swapfile bs=1M count=$((SIZE / 1024))
