@@ -16,28 +16,34 @@ echo Current FS status:
 ceph status | grep mds:
 
 ceph status -f json > /tmp/status.json
-echo Checking status of rank $RANK
-NAME=`cat /tmp/status.json | jq ".fsmap.by_rank[$RANK] | .name"`
-NAME=`cat /tmp/status.json | jq ".fsmap.by_rank[$RANK] | .status"`
+NAME=`cat /tmp/status.json | jq -r ".fsmap.by_rank[$RANK] | .name"`
+STATUS=`cat /tmp/status.json | jq -r ".fsmap.by_rank[$RANK] | .status"`
 
-echo .. running on $NAME with status $STATUS
+echo Rank $RANK: running on $NAME with status $STATUS
 
-# exit if status is active
-echo $STATUS | grep -q active 
-
+echo
 echo Checking openfiles objects...
+echo
 
 for i in {0..9}
 do
     F="mds${RANK}_openfiles.${i}"
-    rados -p cephfs_metadata stat $F && (
-        echo -n "$F exists with size:"
-        rados -p cephfs_metadata listomapkeys | wc -l
+    rados -p cephfs_metadata stat $F &> /dev/null && (
+        echo -n "$F exists with size: "
+        rados -p cephfs_metadata listomapkeys $F | wc -l
         if [ -z "$RESCUE" ]
         then
-            echo "Use --rescue to remove object named $F"
+            echo "  use --rescue to remove object named $F"
         else
-            echo "rados -p cephfs_metadata_pool rm $F"
+            # exit if status is active
+            if echo $STATUS | grep -q active
+            then
+                echo ERROR: rank $RANK is active, aborting...
+                exit 1
+            else
+                echo "rados -p cephfs_metadata rm $F"
+            fi
         fi
     )
+    echo
 done
