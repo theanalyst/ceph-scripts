@@ -7,7 +7,6 @@ export OS_PROJECT_NAME=Services
 
 OUTFILE="s3-accounting-`date '+%F'`.log"
 FDOFILE="s3-accounting-`date '+%F'`.data"
-PRVFILE="s3-accounting-`date -d "yesterday" '+%F'`.log"
 FILENAME="/tmp/s3-accounting-`date '+%F'`.tmp.log"
 
 THISDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
@@ -38,7 +37,6 @@ do
 done < $FILENAME
 
 s3cmd put $OUTFILE s3://s3-accounting-files
-s3cmd rm s3://s3-accounting-files/$PRVFILE
 
 echo -n "{\"data\": [" > $FDOFILE
 
