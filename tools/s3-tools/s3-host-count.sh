@@ -1,4 +1,4 @@
-#!/usr/bash
+#!/bin/bash
 
 HOSTNAME='s3.cern.ch'
 HOSTCOUNT_THRESHOLD=4
