@@ -10,6 +10,9 @@ FDOFILE="s3-accounting-`date '+%F'`.data"
 PRVFILE="s3-accounting-`date -d "yesterday" '+%F'`.log"
 FILENAME="/tmp/s3-accounting-`date '+%F'`.tmp.log"
 
+THISDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+# Thanks to https://stackoverflow.com/questions/59895/how-can-i-get-the-source-directory-of-a-bash-script-from-within-the-script-itsel
+
 echo -n "" > $OUTFILE
 
 OS_CLOUD=cern openstack project list --domain default --tags-any s3quota --format json | jq '.[].ID' | tr -d "\"" | ssh cephadm /root/ceph-scripts/tools/s3-accounting/get-s3-user-stats.py > $FILENAME
@@ -20,7 +23,7 @@ do
   echo -n $line" " >> $OUTFILE; 
   if [ ! -z $prid ]; 
   then 
-    userinfo=`/afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/s3-user-to-accounting-unit.py $prid`
+    userinfo=`$THISDIR/s3-user-to-accounting-unit.py $prid`
     userid=`echo $userinfo | cut -f1 -d" "`
     userac=`echo $userinfo | sed -s "s/$userid//"`
     if [[ -z $userac ]]; 
@@ -28,9 +31,9 @@ do
       userac="chargegroup: IT, chargerole: default"
     fi
     echo -n "$userac, " >> $OUTFILE
-    /afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/cern-get-accounting-unit.sh --id $userid -f >> $OUTFILE
+    $THISDIR/cern-get-accounting-unit.sh --id $userid -f >> $OUTFILE
   else
-    /afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/cern-get-accounting-unit.sh --id `echo $line | grep  -Eo "[a-z0-9\.-]*@.*$" | tr -d ","` -f >> $OUTFILE
+    $THISDIR/cern-get-accounting-unit.sh --id `echo $line | grep  -Eo "[a-z0-9\.-]*@.*$" | tr -d ","` -f >> $OUTFILE
   fi;
 done < $FILENAME
 
@@ -102,7 +105,7 @@ done < $OUTFILE
 echo -n "{}]}" >> $FDOFILE
 sed -e 's/,{}]/]/' -i $FDOFILE
 
-/afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/convert-accounting-file.sh $FDOFILE > general-accounting.s3.json
+$THISDIR/convert-accounting-file.sh $FDOFILE > general-accounting.s3.json
 
 # publish data to cern.ch/storage/accounting and general
 mv $FDOFILE /eos/project/f/fdo/www/accounting/data.s3.json 
