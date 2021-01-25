@@ -8,14 +8,7 @@ export OS_PROJECT_NAME=Services
 OUTFILE="s3-accounting-`date '+%F'`.log"
 FDOFILE="s3-accounting-`date '+%F'`.data"
 PRVFILE="s3-accounting-`date -d "yesterday" '+%F'`.log"
-TRESHOLD=$1
 FILENAME="/tmp/s3-accounting-`date '+%F'`.tmp.log"
-
-
-if [ -z $TRESHOLD ];
-then 
-  TRESHOLD=85
-fi
 
 echo -n "" > $OUTFILE
 
@@ -42,27 +35,7 @@ do
 done < $FILENAME
 
 s3cmd put $OUTFILE s3://s3-accounting-files
-s3cmd get --force s3://s3-accounting-files/$PRVFILE  
 s3cmd rm s3://s3-accounting-files/$PRVFILE
-
-while read -r line;
-do
-  uid=`echo $line | grep -Eo "\(.*\)"`;
-
-  if [ -z $uid ];
-  then
-    echo "-> $line"
-  else
-    prv=`grep "$uid" $PRVFILE | grep -Eo ", [0-9.]+ percent full" | tr -d "[a-z ,]"`
-    act=`echo $line | grep -E "$uid" | grep -Eo ", [0-9.]+ percent full" | tr -d "[a-z ,]"`
-
-    if (( $(echo "$act > $TRESHOLD" | bc -l) )) && (( $(echo "$prv < $TRESHOLD" | bc -l) ))  ;
-    then
-      echo "`echo $uid | tr -d "()"` usage is $act (was $prv)"
-      echo "User `echo $uid | tr -d "()"` is reaching $act percent of its allowed quota (was $prv)" | mail -s "S3 Account $uid quota treshold reached" ceph-admins@cern.ch
-    fi
-  fi
-done < $OUTFILE
 
 echo -n "{\"data\": [" > $FDOFILE
 
@@ -137,7 +110,6 @@ mv $FDOFILE /eos/project/f/fdo/www/accounting/data.s3.json
 curl -X POST -H "Content-Type: application/json" -H "API-key:`cat /afs/cern.ch/project/ceph/private/s3-accounting.key`"  https://acc-receiver-dev.cern.ch/v2/fe/S3%20Object%20Storage -d "@general-accounting.s3.json" 
 
 # clean
-rm $PRVFILE
 rm $OUTFILE
 rm general-accounting.s3.json
 rm listofchargegroup
