@@ -5,7 +5,7 @@ HOSTCOUNT_THRESHOLD=4
 TIMEOUT=3
 TELEGRAM_SEND='/afs/cern.ch/user/e/ebocchi/.local/bin/telegram-send'
 
-timeout $TIMEOUT fping $HOSTNAME > /dev/null 2>&1
+ping -c 1 $HOSTNAME > /dev/null 2>&1
 RETVAL=$?
 
 if [ $RETVAL -ne 0 ]; then
