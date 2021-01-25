@@ -7,7 +7,7 @@ export OS_PROJECT_NAME=Services
 
 OUTFILE="s3-accounting-`date '+%F'`.log"
 FDOFILE="s3-accounting-`date '+%F'`.data"
-FILENAME="/tmp/s3-accounting-`date '+%F'`.tmp.log"
+FILENAME="s3-accounting-`date '+%F'`.tmp.log"
 
 THISDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 # Thanks to https://stackoverflow.com/questions/59895/how-can-i-get-the-source-directory-of-a-bash-script-from-within-the-script-itsel
@@ -112,5 +112,6 @@ curl -X POST -H "Content-Type: application/json" -H "API-key:`cat /afs/cern.ch/p
 
 # clean
 rm $OUTFILE
+rm $FILENAME
 rm general-accounting.s3.json
 rm listofchargegroup
