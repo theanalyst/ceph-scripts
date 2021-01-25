@@ -48,8 +48,7 @@ if out != "":
   msg = EmailMessage();
   msg['Subject'] = "S3 Quota checker report for "+args.cluster
   msg['From'] = args.sender
-#  msg['To'] = "ceph-admins@cern.ch"
-  msg['To'] = "julien.collet@cern.ch"
+  msg['To'] = "ceph-admins@cern.ch"
   msg.set_content(out)
   
   s = smtplib.SMTP('localhost')

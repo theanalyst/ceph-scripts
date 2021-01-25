@@ -59,7 +59,7 @@ do
     if (( $(echo "$act > $TRESHOLD" | bc -l) )) && (( $(echo "$prv < $TRESHOLD" | bc -l) ))  ;
     then
       echo "`echo $uid | tr -d "()"` usage is $act (was $prv)"
-      echo "User `echo $uid | tr -d "()"` is reaching $act percent of its allowed quota (was $prv)" | mail -s "S3 Account $uid quota treshold reached" julien.collet@cern.ch
+      echo "User `echo $uid | tr -d "()"` is reaching $act percent of its allowed quota (was $prv)" | mail -s "S3 Account $uid quota treshold reached" ceph-admins@cern.ch
     fi
   fi
 done < $OUTFILE
