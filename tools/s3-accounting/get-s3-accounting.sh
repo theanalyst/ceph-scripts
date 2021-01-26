@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-# usage: ./master-script.sh
+# usage: ./get-s3-accounting.sh
 #
 
 export OS_PROJECT_NAME=Services
@@ -14,7 +14,10 @@ THISDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 echo -n "" > $OUTFILE
 
-OS_CLOUD=cern openstack project list --domain default --tags-any s3quota --format json | jq '.[].ID' | tr -d "\"" | ssh -l root cephadm /root/ceph-scripts/tools/s3-accounting/get-s3-user-stats.py > $FILENAME
+OS_PROJECT_NAME=services
+# Alternatively, use a `clouds.yaml file`
+# Docs: https://docs.openstack.org/python-openstackclient/pike/configuration/index.html
+openstack project list --domain default --tags-any s3quota --format json | jq '.[].ID' | tr -d "\"" | ssh -l root cephadm /root/ceph-scripts/tools/s3-accounting/get-s3-user-stats.py > $FILENAME
 
 while read -r line; 
 do 
