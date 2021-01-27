@@ -16,7 +16,7 @@ if len (sys.argv) != 2:
   exit(-1)
 
 cc = cloud_config.OpenStackConfig()
-cloud = cc.get_one_cloud(cloud='cern') # try with 'cern'
+cloud = cc.get_one_cloud() # try with (cloud='cern')
 session = keystone_session.Session(auth=cloud.get_auth())
 
 keystoneclient = keystone_client.Client(session=session)
@@ -31,7 +31,6 @@ outstr=""
 #volume = cinderclient.volumes.get(sys.argv[1])
 project_id = sys.argv[1];# getattr(volume, 'os-vol-tenant-attr:tenant_id')
 try: 
-#try: 
   # openstack project show
   project = keystoneclient.projects.get(project_id)
   accounting_group = getattr(project,'accounting-group')
