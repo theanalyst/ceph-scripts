@@ -5,10 +5,8 @@ HOSTCOUNT_THRESHOLD=4
 TIMEOUT=3
 TELEGRAM_SEND='/afs/cern.ch/user/e/ebocchi/.local/bin/telegram-send'
 
-ping -c 1 $HOSTNAME > /dev/null 2>&1
-RETVAL=$?
-
-if [ $RETVAL -ne 0 ]; then
+timeout $TIMEOUT ping -c 1 $HOSTNAME > /dev/null 2>&1
+if [ $? -ne 0 ]; then
   $TELEGRAM_SEND "Unable to ping $HOSTNAME. Please check!"
 else
   IPv4=$(timeout $TIMEOUT host $HOSTNAME | grep "has address" | wc -l)
