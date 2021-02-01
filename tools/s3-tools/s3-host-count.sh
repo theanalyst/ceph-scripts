@@ -1,8 +1,8 @@
 #!/bin/bash
 
 HOSTNAME='s3.cern.ch'
-HOSTCOUNT_THRESHOLD=4
-TIMEOUT=3
+HOSTCOUNT_THRESHOLD=6
+TIMEOUT=10
 TELEGRAM_SEND='/afs/cern.ch/user/e/ebocchi/.local/bin/telegram-send'
 
 timeout $TIMEOUT ping -c 1 $HOSTNAME > /dev/null 2>&1
