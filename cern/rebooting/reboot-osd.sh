@@ -18,6 +18,7 @@ ceph osd set noin
 
 echo
 echo Disabling no_contact alarm...
+kinit -k
 roger update --nc_alarmed false --duration 30min ${HOSTNAME}
 
 echo
