@@ -8,6 +8,17 @@ TELEGRAM_SEND='/afs/cern.ch/user/e/ebocchi/.local/bin/telegram-send'
 SLACKPOST='/afs/cern.ch/user/e/ebocchi/it-puppet-hostgroup-ceph/code/files/slackpost'
 
 
+# Make sure you have the tooling to send alert messages
+if [ ! -f $TELEGRAM_SEND ]; then
+  echo "ERROR: TelegramSend script not found! ($TELEGRAM_SEND)"
+  exit 1
+fi
+if [ ! -f $SLACKPOST ]; then
+  echo "ERROR: Slackpost script not found! ($SLACKPOST)"
+  exit 1
+fi
+
+
 # Checks with `s3cmd ls`
 failure=0
 for r in $(seq 0 $S3CMD_LS_RETRIES)

@@ -6,6 +6,18 @@ TIMEOUT=10
 TELEGRAM_SEND='/afs/cern.ch/user/e/ebocchi/.local/bin/telegram-send'
 SLACKPOST='/afs/cern.ch/user/e/ebocchi/it-puppet-hostgroup-ceph/code/files/slackpost'
 
+
+# Make sure you have the tooling to send alert messages
+if [ ! -f $TELEGRAM_SEND ]; then
+  echo "ERROR: TelegramSend script not found! ($TELEGRAM_SEND)"
+  exit 1
+fi
+if [ ! -f $SLACKPOST ]; then
+  echo "ERROR: Slackpost script not found! ($SLACKPOST)"
+  exit 1
+fi
+
+
 timeout $TIMEOUT ping -c 1 $HOSTNAME > /dev/null 2>&1
 if [ $? -ne 0 ]; then
   $TELEGRAM_SEND "Unable to ping $HOSTNAME. Please check!"
