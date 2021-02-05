@@ -5,6 +5,7 @@ HOSTNAME='s3.cern.ch'
 TIMEOUT=10
 S3CMD_LS_RETRIES=3
 TELEGRAM_SEND='/afs/cern.ch/user/e/ebocchi/.local/bin/telegram-send'
+SLACKPOST='/afs/cern.ch/user/e/ebocchi/it-puppet-hostgroup-ceph/code/files/slackpost'
 
 
 # Checks with `s3cmd ls`
@@ -28,8 +29,10 @@ if [ $failure -gt 0 ];
 then
   if [ $failure -eq $total_retries ]; then
     $TELEGRAM_SEND "\`s3cmd ls\` failed. S3 service seems down. Please check!"
+    $SLACKPOST 's3cmd_ls' "\`s3cmd ls\` failed. S3 service seems down. Please check!"
   else
     $TELEGRAM_SEND "\`s3cmd ls\` failed $failure times out of $total_retries tested. Please check!"
+    $SLACKPOST 's3cmd_ls' "\`s3cmd ls\` failed $failure times out of $total_retries tested. Please check!"
   fi
 fi
 
@@ -41,6 +44,7 @@ do
   timeout $TIMEOUT curl -s -X GET http://$ip >/dev/null 2>&1
   if [ $? -ne 0 ]; then
     $TELEGRAM_SEND "Unable to \`curl\` S3 via $ip. Please check!"
+    $SLACKPOST 's3_curl' "Unable to \`curl\` S3 via $ip. Please check!"
   fi
 done
 s3_hosts_v6=$(timeout $TIMEOUT host $HOSTNAME | grep "has IPv6 address" | rev | cut -d ' ' -f 1 | rev )
@@ -49,6 +53,7 @@ do
   timeout $TIMEOUT curl -g -6 -X GET http://[$ip] >/dev/null 2>&1
   if [ $? -ne 0 ]; then
     $TELEGRAM_SEND "Unable to \`curl\` S3 via $ip. Please check!"
+    $SLACKPOST 's3_curl' "Unable to \`curl\` S3 via $ip. Please check!"
   fi
 done
 
