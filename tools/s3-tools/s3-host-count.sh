@@ -18,9 +18,10 @@ if [ ! -f $SLACKPOST ]; then
 fi
 
 
-timeout $TIMEOUT ping -c 1 $HOSTNAME > /dev/null 2>&1
+timeout $TIMEOUT ping -c 5 -i 0.2 $HOSTNAME > /dev/null 2>&1
 if [ $? -ne 0 ]; then
   $TELEGRAM_SEND "Unable to ping $HOSTNAME. Please check!"
+  $SLACKPOST 'ceph_ping' "Unable to ping $HOSTNAME. Please check!"
 else
   IPv4=$(timeout $TIMEOUT host $HOSTNAME | grep "has address" | wc -l)
   IPv6=$(timeout $TIMEOUT host $HOSTNAME | grep "has IPv6 address" | wc -l)
