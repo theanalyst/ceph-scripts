@@ -3,8 +3,6 @@
 # usage: ./get-s3-accounting.sh
 #
 
-export OS_PROJECT_NAME=Services
-
 OUTFILE="s3-accounting-`date '+%F'`.log"
 FDOFILE="s3-accounting-`date '+%F'`.data"
 FILENAME="s3-accounting-`date '+%F'`.tmp.log"
@@ -14,9 +12,10 @@ THISDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 echo -n "" > $OUTFILE
 
-OS_PROJECT_NAME=services
 # Alternatively, use a `clouds.yaml file`
 # Docs: https://docs.openstack.org/python-openstackclient/pike/configuration/index.html
+export OS_CLOUD=cern
+export OS_PROJECT_NAME=services
 openstack project list --domain default --tags-any s3quota --format json | jq '.[].ID' | tr -d "\"" | ssh -l root cephadm /root/ceph-scripts/tools/s3-accounting/get-s3-user-stats.py > $FILENAME
 
 while read -r line; 
@@ -39,12 +38,12 @@ do
   fi;
 done < $FILENAME
 
-s3cmd put $OUTFILE s3://s3-accounting-files
+s3cmd --quiet put $OUTFILE s3://s3-accounting-files
 
 echo -n "{\"data\": [" > $FDOFILE
 
 #Download 
-curl -XGET --negotiate -u : https://haggis.cern.ch:8204/chargegroup > listofchargegroup
+curl --silent -XGET --negotiate -u : https://haggis.cern.ch:8204/chargegroup --output listofchargegroup
 
 while read -r line; 
 do 
@@ -108,10 +107,11 @@ sed -e 's/,{}]/]/' -i $FDOFILE
 
 $THISDIR/convert-accounting-file.sh $FDOFILE > general-accounting.s3.json
 
-# publish data to cern.ch/storage/accounting and general
+# Publish data to FDO (now GSS)
 mv $FDOFILE /eos/project/f/fdo/www/accounting/data.s3.json 
 
-curl -X POST -H "Content-Type: application/json" -H "API-key:`cat /afs/cern.ch/project/ceph/private/s3-accounting.key`"  https://acc-receiver-dev.cern.ch/v2/fe/S3%20Object%20Storage -d "@general-accounting.s3.json" 
+# Publish data to general accountingcern.ch/storage/accounting
+curl --silent -X POST -H "Content-Type: application/json" -H "API-key:`cat /afs/cern.ch/project/ceph/private/s3-accounting.key`"  https://acc-receiver-dev.cern.ch/v2/fe/S3%20Object%20Storage -d "@general-accounting.s3.json" 
 
 # clean
 rm $OUTFILE
