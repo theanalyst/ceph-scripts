@@ -15,7 +15,7 @@ import subprocess
 
 
 # Global variables
-scriptsDir = '/afs/cern.ch/user/e/ebocchi/ceph-scripts/tools/s3-accounting/'
+scriptsDir = '/afs/cern.ch/user/c/cephacc/private/ceph-scripts/tools/s3-accounting/'
 userDict = {}
 
 
