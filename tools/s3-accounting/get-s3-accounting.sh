@@ -15,7 +15,16 @@ echo -n "" > $OUTFILE
 # Alternatively, use a `clouds.yaml file`
 # Docs: https://docs.openstack.org/python-openstackclient/pike/configuration/index.html
 #export OS_CLOUD=cern
+export OS_AUTH_TYPE=v3fedkerb
+export OS_AUTH_URL=https://keystone.cern.ch/v3
+export OS_IDENTITY_API_VERSION=3
+export OS_IDENTITY_PROVIDER=sssd
+export OS_MUTUAL_AUTH=disabled
+export OS_PROJECT_DOMAIN_ID=default
 export OS_PROJECT_NAME=services
+export OS_PROTOCOL=kerberos
+export OS_REGION_NAME=cern
+# export OS_VOLUME_API_VERSION=2
 openstack project list --domain default --tags-any s3quota --format json | jq '.[].ID' | tr -d "\"" | ssh -l root cephadm /root/ceph-scripts/tools/s3-accounting/get-s3-user-stats.py > $FILENAME
 
 while read -r line; 
