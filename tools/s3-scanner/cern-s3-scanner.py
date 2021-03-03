@@ -4,21 +4,22 @@
 # 2020
 #
 
-
-from os import path
-
+# Imports
 import argparse
-import sys
-import requests
-import re
 import json
+import os
+import re
+import requests
+import sys
 import subprocess
 
 
-userDict = {} 
+# Global variables
+scriptsDir = '/afs/cern.ch/user/c/cephacc/private/ceph-scripts/tools/s3-accounting/'
+userDict = {}
 
 
-
+# Functions
 def checkBucket(bName, mode='default', outFile=sys.stdout, triesLeft=2):
     """ Simple check using a request, pretty much like in S3scanner if you ask me
     - bName: bucket name """
@@ -26,17 +27,17 @@ def checkBucket(bName, mode='default', outFile=sys.stdout, triesLeft=2):
     if triesLeft == 0:
         return False
 
+    # TODO: Do we really want https?
     bUrl = 'https://'+ bName + '.s3.cern.ch'
-
     try:
         r = requests.head(bUrl)
     except:
-        print('Error requesting the following Url: ',bUrl,file=outFile)
+        print('Error requesting url: ',bUrl,file=outFile)
         return False
 
     if r.status_code == 200:
         bOwnerName = getBucketOwner(bName)
-        #print(bOwnerName,': ',bUrl + ' (',r.status_code,')',file=outFile)
+        ## print(bOwnerName,': ',bUrl + ' (',r.status_code,')',file=outFile)
         if bOwnerName.split(',')[0] in userDict:
           userDict[bOwnerName.split(',')[0]].append(str(bOwnerName.split(',')[1]+": "+bName).strip())
         else:
@@ -62,18 +63,17 @@ def checkBucket(bName, mode='default', outFile=sys.stdout, triesLeft=2):
 
 def getBucketOwner(bName):
     try:
-        info = json.loads(subprocess.getoutput('ssh cephadm radosgw-admin --cluster=gabe metadata get bucket:'+bName))
-        owner = json.loads(subprocess.getoutput('ssh cephadm radosgw-admin --cluster=gabe metadata get user:'+info['data']['owner']))
-        email = subprocess.getoutput('/afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/cern-get-accounting-unit.sh --id '+owner['data']['email'])
+        info = json.loads(subprocess.getoutput('ssh root@cephadm radosgw-admin --cluster=gabe metadata get bucket:'+bName))
+        owner = json.loads(subprocess.getoutput('ssh root@cephadm radosgw-admin --cluster=gabe metadata get user:'+info['data']['owner']))
+        email = subprocess.getoutput(scriptsDir+'cern-get-accounting-unit.sh --id '+owner['data']['email'])
         if email != "":
           return email
         else:
-          ret=subprocess.getoutput('/afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/cern-get-accounting-unit.sh --id `/afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/s3-user-to-accounting-unit.py '+info['data']['owner']+'`')  
+          ret=subprocess.getoutput(scriptsDir+'cern-get-accounting-unit.sh --id `'+scriptsDir+'s3-user-to-accounting-unit.py '+info['data']['owner']+'`')  
           if ret != "unknown, ":
             return ret
           else:  
             return "Unknown, "+owner['data']['email']
-
     except:
         print('Couldn\'t reach cephgabe',file=sys.stdout)
         return 'OwnerNotFound'
@@ -90,6 +90,25 @@ def exploreBucket(bName, mode='default', outFile=sys.stdout):
         if objR.status_code == 200 or mode == 'listopen':   
             print('  [', objR.status_code, '] ' + objString,file=outFile)
 
+'''
+def dumpInfo(userList,outFile=sys.stdout):
+  if outFile == sys.stdout:
+    for bOwner in userList.keys():
+      buckets=[]
+      for bName in userList[bOwner]:
+        if bName.startswith(': '):
+          buckets.append(bName[2:])
+        else:
+          buckets.append(bName)
+      print("%s: %s" % (bOwner, ','.join(buckets)))
+  else:
+    output="{"
+    for bOwner in list(userList):
+      output+=str("\""+bOwner.strip()+"\": "+json.dumps(userList[bOwner])+',');
+    output=output[:-1]
+    output+="}"
+    print(output,file=outFile)
+'''
 def dumpInfo(userList,outFile=sys.stdout):
   output="{"
   for bOwner in list(userList):
@@ -98,62 +117,72 @@ def dumpInfo(userList,outFile=sys.stdout):
   output+="}"
   print(output,file=outFile)
 
-parser = argparse.ArgumentParser(description='# CERN s3 Scanner - simple s3 bucket scanner\n'
-                                             '#\n'
-                                             '# jcollet\n'
-                                             '# CERN IT\n'
-                                             '# 2019\n',
-                                 prog='cern-s3-scanner')
-
-def checkBlackListing(bucket, blackList):
-  if blackList:
-    with open(blackList, 'r') as b:
+def checkBlackListing(bucket, whiteList):
+  if whiteList:
+    with open(whiteList, 'r') as b:
         for l in b:
           ret = re.search (l.rstrip(), bucket)
           if ret:
             return False
   return True 
-# Declare arguments
-parser.add_argument('-o', '--out-file', dest='outFile', default=sys.stdout,
-                    help='Output file. If unset, will print to terminal')
-parser.add_argument('-b', '--black-list', dest='blackList', default='',
-                    help='File containing a list of pattern to black list entries in the list')
+
+
+
+# ---MAIN---
+# Arg parser
+parser = argparse.ArgumentParser(description='# CERN s3 Scanner - simple s3 bucket scanner\n'
+                                             '#\n'
+                                             '# jcollet\n'
+                                             '# CERN IT\n'
+                                             '# 2019\n',
+                                 prog='cern-s3-scanner', formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('-m', '--mode', dest='mode', default='default',
-                    help='Scan mode: instead of printing only publicly accessible resources:  \n - listall, dump everything\n - listopen, dump open buckets and their contents\n - bucketonly, print only bucket, not their content ')
+  help='Scan mode:\n \
+    - \'listall\', print everything\n \
+    - \'listopen\', print open buckets and their content\n \
+    - \'bucketonly\', print only bucket name')
 parser.add_argument('-i', '--input', dest='buckets', default='',
-                    help='Name of text file containing buckets to check, if unset, will contact cephgabe for the list of all buckets')
-
-
+  help='Name of text file containing buckets to check.\n \
+    If unset, will contact cephgabe for the list of all buckets')
+parser.add_argument('-o', '--out-file', dest='outFile', default=sys.stdout,
+  help='Output file. If unset, will print to stdout')
+parser.add_argument('-w', '--white-list', dest='whiteList', default='s3://s3-scanner/blacklist',
+  help='File containing a list of patterns that will whitelist matching bucket names')
 args = parser.parse_args()
 
+# If needed, get the whitelist from s3
+if args.whiteList.startswith('s3://'):
+  localWhiteList = os.getcwd()+'/whitelist.tmp'
+  print("Downloading whitelist from %s..." % args.whiteList)
+  print(subprocess.getoutput("s3cmd --quiet get %s %s --force" % (args.whiteList, localWhiteList)))
+  args.whiteList = localWhiteList
 
-if args.blackList == 's3://s3-scanner/blacklist':
-  print("Downloading blacklist from ",args.blackList)
-  print(subprocess.getoutput("s3cmd get s3://s3-scanner/blacklist /tmp/blacklist --force"))
-  args.blackList = "/tmp/blacklist"
-
+# Crunch the buckets
 if args.buckets == '':
-  print("Getting bucket list from gabe")
-  for line in json.loads(subprocess.getoutput('ssh cephadm radosgw-admin --cluster=gabe bucket list')):
-    if checkBlackListing(line, args.blackList):
+  print("Loading bucket list from cephgabe...")
+  bucketsGabe = json.loads(subprocess.getoutput('ssh root@cephadm radosgw-admin --cluster=gabe bucket list'))
+  print("Processing buckets...")
+  for line in bucketsGabe:
+    if checkBlackListing(line, args.whiteList):
       if checkBucket(line, args.mode): 
         if args.mode != 'bucketonly':
           exploreBucket(line, args.mode)
-
-elif path.isfile(args.buckets):
+elif os.path.isfile(args.buckets):
+  print("Processing buckets list from %s..." % args.buckets)
   with open(args.buckets, 'r') as f:
     for line in f:
-      line = line.rstrip()            # Remove any extra whitespace
-      if checkBlackListing(line, args.blackList):
+      line = line.rstrip()
+      if checkBlackListing(line, args.whiteList):
         if checkBucket(line, args.mode): 
           if args.mode != 'bucketonly':
             exploreBucket(line, args.mode)
-
 else:
+  print("Processing bucket %s" % args.buckets)
   if checkBucket(args.buckets, args.mode): 
     if args.mode != 'bucketonly': 
       exploreBucket(args.buckets, args.mode)
-    
+
+# Report output
 if args.outFile != sys.stdout:
   print(subprocess.getoutput("rm -fv "+args.outFile))
   with open(args.outFile,'x') as f:
@@ -162,6 +191,4 @@ if args.outFile != sys.stdout:
   print(subprocess.getoutput("rm -fv "+args.outFile))
 else:
   dumpInfo(userDict,args.outFile)
-
-
 

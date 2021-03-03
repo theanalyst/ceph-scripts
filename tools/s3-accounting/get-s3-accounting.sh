@@ -1,18 +1,31 @@
 #! /bin/bash
 #
-# usage: ./master-script.sh <quota treshold>
+# usage: ./get-s3-accounting.sh
 #
-
-export OS_PROJECT_NAME=Services
 
 OUTFILE="s3-accounting-`date '+%F'`.log"
 FDOFILE="s3-accounting-`date '+%F'`.data"
-PRVFILE="s3-accounting-`date -d "yesterday" '+%F'`.log"
-FILENAME="/tmp/s3-accounting-`date '+%F'`.tmp.log"
+FILENAME="s3-accounting-`date '+%F'`.tmp.log"
+
+THISDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+# Thanks to https://stackoverflow.com/questions/59895/how-can-i-get-the-source-directory-of-a-bash-script-from-within-the-script-itsel
 
 echo -n "" > $OUTFILE
 
-OS_CLOUD=cern openstack project list --domain default --tags-any s3quota --format json | jq '.[].ID' | tr -d "\"" | ssh cephadm /root/ceph-scripts/tools/s3-accounting/get-s3-user-stats.py > $FILENAME
+# Alternatively, use a `clouds.yaml file`
+# Docs: https://docs.openstack.org/python-openstackclient/pike/configuration/index.html
+#export OS_CLOUD=cern
+export OS_AUTH_TYPE=v3fedkerb
+export OS_AUTH_URL=https://keystone.cern.ch/v3
+export OS_IDENTITY_API_VERSION=3
+export OS_IDENTITY_PROVIDER=sssd
+export OS_MUTUAL_AUTH=disabled
+export OS_PROJECT_DOMAIN_ID=default
+export OS_PROJECT_NAME=services
+export OS_PROTOCOL=kerberos
+export OS_REGION_NAME=cern
+# export OS_VOLUME_API_VERSION=2
+openstack project list --domain default --tags-any s3quota --format json | jq '.[].ID' | tr -d "\"" | ssh -l root cephadm /root/ceph-scripts/tools/s3-accounting/get-s3-user-stats.py > $FILENAME
 
 while read -r line; 
 do 
@@ -20,7 +33,7 @@ do
   echo -n $line" " >> $OUTFILE; 
   if [ ! -z $prid ]; 
   then 
-    userinfo=`/afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/s3-user-to-accounting-unit.py $prid`
+    userinfo=`$THISDIR/s3-user-to-accounting-unit.py $prid`
     userid=`echo $userinfo | cut -f1 -d" "`
     userac=`echo $userinfo | sed -s "s/$userid//"`
     if [[ -z $userac ]]; 
@@ -28,19 +41,18 @@ do
       userac="chargegroup: IT, chargerole: default"
     fi
     echo -n "$userac, " >> $OUTFILE
-    /afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/cern-get-accounting-unit.sh --id $userid -f >> $OUTFILE
+    $THISDIR/cern-get-accounting-unit.sh --id $userid -f >> $OUTFILE
   else
-    /afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/cern-get-accounting-unit.sh --id `echo $line | grep  -Eo "[a-z0-9\.-]*@.*$" | tr -d ","` -f >> $OUTFILE
+    $THISDIR/cern-get-accounting-unit.sh --id `echo $line | grep  -Eo "[a-z0-9\.-]*@.*$" | tr -d ","` -f >> $OUTFILE
   fi;
 done < $FILENAME
 
-s3cmd put $OUTFILE s3://s3-accounting-files
-s3cmd rm s3://s3-accounting-files/$PRVFILE
+s3cmd --quiet put $OUTFILE s3://s3-accounting-files
 
 echo -n "{\"data\": [" > $FDOFILE
 
 #Download 
-curl -XGET --negotiate -u : https://haggis.cern.ch:8204/chargegroup > listofchargegroup
+curl --silent -XGET --negotiate -u : https://haggis.cern.ch:8204/chargegroup --output listofchargegroup
 
 while read -r line; 
 do 
@@ -102,14 +114,16 @@ done < $OUTFILE
 echo -n "{}]}" >> $FDOFILE
 sed -e 's/,{}]/]/' -i $FDOFILE
 
-/afs/cern.ch/user/j/jcollet/ceph-scripts/tools/s3-accounting/convert-accounting-file.sh $FDOFILE > general-accounting.s3.json
+$THISDIR/convert-accounting-file.sh $FDOFILE > general-accounting.s3.json
 
-# publish data to cern.ch/storage/accounting and general
+# Publish data to FDO (now GSS)
 mv $FDOFILE /eos/project/f/fdo/www/accounting/data.s3.json 
 
-curl -X POST -H "Content-Type: application/json" -H "API-key:`cat /afs/cern.ch/project/ceph/private/s3-accounting.key`"  https://acc-receiver-dev.cern.ch/v2/fe/S3%20Object%20Storage -d "@general-accounting.s3.json" 
+# Publish data to general accountingcern.ch/storage/accounting
+curl --silent -X POST -H "Content-Type: application/json" -H "API-key:`cat /afs/cern.ch/project/ceph/private/s3-accounting.key`"  https://acc-receiver-dev.cern.ch/v2/fe/S3%20Object%20Storage -d "@general-accounting.s3.json" 
 
 # clean
 rm $OUTFILE
+rm $FILENAME
 rm general-accounting.s3.json
 rm listofchargegroup
