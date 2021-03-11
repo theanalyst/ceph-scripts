@@ -1,3 +1,3 @@
 #!/bin/bash
 
-ceph-volume lvm batch /dev/sd[c-p]
+ceph-volume lvm batch --no-auto /dev/sd[c-p]
