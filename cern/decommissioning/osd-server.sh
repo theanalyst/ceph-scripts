@@ -30,6 +30,7 @@ fi
 
 # Destroy all secrets, disable puppet
 puppet agent --disable "HW Decommissioning"
+umount -Af /var/lib/ceph/osd/* &> /dev/null || true
 rm -rf /etc/ceph/ /var/lib/ceph/
 
 echo `hostname -s` has been removed from the cluster. Now do:
