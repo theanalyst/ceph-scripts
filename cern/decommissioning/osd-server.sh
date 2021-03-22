@@ -34,5 +34,7 @@ umount -Af /var/lib/ceph/osd/* &> /dev/null || true
 rm -rf /etc/ceph/ /var/lib/ceph/
 
 echo `hostname -s` has been removed from the cluster. Now do:
-echo ai-foreman updatehost -c ceph/decommissioning `hostname -s`
-echo ai-disownhost `hostname -s`
+echo "   " ai-foreman updatehost -c ceph/decommissioning `hostname -s`
+echo then run puppet. Next:
+echo "   " ai-disownhost `hostname -s`
+echo then run puppet one final time.
