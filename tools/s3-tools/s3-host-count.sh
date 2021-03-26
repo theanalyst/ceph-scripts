@@ -32,6 +32,6 @@ else
   fi
   if [ $IPv6 -le $HOSTCOUNT_THRESHOLD ]; then
     $TELEGRAM_SEND "$HOSTNAME has only $IPv6 IPv6 addresses in the alias!"
-    $SLACKPOST 'ceph_hostcount' "$HOSTNAME has only $IPv4 IPv6 addresses in the alias!"
+    $SLACKPOST 'ceph_hostcount' "$HOSTNAME has only $IPv6 IPv6 addresses in the alias!"
   fi
 fi
