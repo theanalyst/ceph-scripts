@@ -1,6 +1,7 @@
 #! /bin/bash
 
 
+PROBE=$(hostname -s)
 HOSTNAME='s3.cern.ch'
 TIMEOUT=10
 S3CMD_LS_RETRIES=3
@@ -39,11 +40,11 @@ total_retries=$((S3CMD_LS_RETRIES+1))
 if [ $failure -gt 0 ];
 then
   if [ $failure -eq $total_retries ]; then
-    $TELEGRAM_SEND "\`s3cmd ls\` failed. S3 service seems down. Please check!"
-    $SLACKPOST 's3cmd_ls' "\`s3cmd ls\` failed. S3 service seems down. Please check!"
+    $TELEGRAM_SEND "\`s3cmd ls\` failed from $PROBE. S3 service seems down. Please check!"
+    $SLACKPOST 's3cmd_ls' "\`s3cmd ls\` failed from $PROBE. S3 service seems down. Please check!"
   else
-    $TELEGRAM_SEND "\`s3cmd ls\` failed $failure times out of $total_retries tested. Please check!"
-    $SLACKPOST 's3cmd_ls' "\`s3cmd ls\` failed $failure times out of $total_retries tested. Please check!"
+    $TELEGRAM_SEND "\`s3cmd ls\` failed $failure times out of $total_retries from $PROBE. Please check!"
+    $SLACKPOST 's3cmd_ls' "\`s3cmd ls\` failed $failure times out of $total_retries from $PROBE. Please check!"
   fi
 fi
 
@@ -54,8 +55,8 @@ for ip in $s3_hosts_v4
 do
   timeout $TIMEOUT curl -s -X GET http://$ip >/dev/null 2>&1
   if [ $? -ne 0 ]; then
-    $TELEGRAM_SEND "Unable to \`curl\` S3 via $ip. Please check!"
-    $SLACKPOST 's3_curl' "Unable to \`curl\` S3 via $ip. Please check!"
+    $TELEGRAM_SEND "Unable to \`curl\` S3 via $ip from $PROBE. Please check!"
+    $SLACKPOST 's3_curl' "Unable to \`curl\` S3 via $ip from $PROBE. Please check!"
   fi
 done
 s3_hosts_v6=$(timeout $TIMEOUT host $HOSTNAME | grep "has IPv6 address" | rev | cut -d ' ' -f 1 | rev )
@@ -63,8 +64,8 @@ for ip in $s3_hosts_v6
 do
   timeout $TIMEOUT curl -g -6 -X GET http://[$ip] >/dev/null 2>&1
   if [ $? -ne 0 ]; then
-    $TELEGRAM_SEND "Unable to \`curl\` S3 via $ip. Please check!"
-    $SLACKPOST 's3_curl' "Unable to \`curl\` S3 via $ip. Please check!"
+    $TELEGRAM_SEND "Unable to \`curl\` S3 via $ip from $PROBE. Please check!"
+    $SLACKPOST 's3_curl' "Unable to \`curl\` S3 via $ip from $PROBE. Please check!"
   fi
 done
 
