@@ -5,6 +5,11 @@
 
 import json, subprocess, sys
 
+
+def eprint(*args, **kwargs):
+  print(*args, file=sys.stderr, **kwargs)
+
+
 osd_dump_json = subprocess.getoutput('ceph osd dump -f json')
 osd_dump = json.loads(osd_dump_json)
 upmaps = osd_dump['pg_upmap_items']
@@ -51,15 +56,37 @@ def lookup_parent_id(osd, nodes, _type="host"):
         parent = nodes[parent['parent']]
     return parent['id']
 
+# discover pools replicated or erasure
+pool_type = {}
+try:
+  for line in subprocess.getoutput('ceph osd pool ls detail').split('\n'):
+    if 'pool' in line:
+      x = line.split(' ')
+      pool_type[x[1]] = x[3]
+except:
+  eprint('Error parsing pool types')
+  sys.exit(1)
+
 for pg in upmaps:
   pgid = str(pg['pgid'])
+  pool = pgid.split('.')[0]
+  if pool_type[pool] == 'replicated':
+    replicated = True
+    erasure = False
+  elif pool_type[pool] == 'erasure':
+    replicated = False
+    erasure = True
+  else:
+    eprint('unknown pool type for %s' % pgid)
+    sys.exit(1)
+
   rm = False
   f = [x['from'] for x in pg['mappings']]
   t = [x['to'] for x in pg['mappings']]
   if len(f) != len(set(f)) or len(t) != len(set(t)):
     print(pgid, 'upmap has osds duplicated in the from or to set', pg['mappings'])
     rm = True
-  if len(f+t) != len(set(f+t)):
+  if replicated and len(f+t) != len(set(f+t)):
     print(pgid, 'upmap has osds duplicated:', pg['mappings'])
     rm = True
   for x in pg['mappings']:
