@@ -32,8 +32,7 @@ then
     ceph osd crush rm `hostname -s`
 fi
 
-# Destroy all secrets, disable puppet
-puppet agent --disable "HW Decommissioning"
+# Destroy all secrets
 umount -Af /var/lib/ceph/osd/* &> /dev/null || true
 rm -rf /etc/ceph/ /var/lib/ceph/
 
