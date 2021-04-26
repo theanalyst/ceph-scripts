@@ -1,7 +1,7 @@
-#! /usr/bin/python2 -u
+#! /usr/bin/python3 -u
 
 import os
-from os_client_config import config as cloud_config
+from openstack import config as cloud_config
 from keystoneauth1 import session as keystone_session
 
 from keystoneclient.v3 import client as keystone_client
@@ -12,7 +12,7 @@ from manilaclient import api_versions as manila_api_versions
 import sys
 
 if len (sys.argv) != 2:
-  print "No project_id given"
+  print ("No project_id given")
   exit(-1)
 
 cc = cloud_config.OpenStackConfig()
@@ -23,13 +23,11 @@ keystoneclient = keystone_client.Client(session=session)
 cinderclient = cinder_client.Client(session=session)
 manilaclient = manila_client.Client(
                 api_version=manila_api_versions.APIVersion('2.39'),
-                            session=session)
+                session=session)
 
 outstr=""
 
-# openstack volume show
-#volume = cinderclient.volumes.get(sys.argv[1])
-project_id = sys.argv[1];# getattr(volume, 'os-vol-tenant-attr:tenant_id')
+project_id = sys.argv[1];
 try: 
   # openstack project show
   project = keystoneclient.projects.get(project_id)
@@ -57,4 +55,4 @@ try:
 except:
   username = "Unknown"
 
-print username+" "+outstr 
+print (username+" "+outstr )
