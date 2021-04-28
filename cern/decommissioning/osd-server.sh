@@ -4,7 +4,7 @@ set -e
 set -x
 
 ceph balancer off
-ceph pg ls | grep -vq backfilling
+ceph pg ls | grep -q backfilling && exit
 
 # If there are OSDs here, check that they are already drained.
 OSDS=$(ceph osd crush ls `hostname -s`)
