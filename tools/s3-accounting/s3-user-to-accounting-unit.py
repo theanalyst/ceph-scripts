@@ -1,9 +1,9 @@
-#! /usr/bin/python3 -u
+#! /usr/bin/python2 -u
 
 import os
-from openstack import config as cloud_config
+#from openstack import config as cloud_config        # For C8 and python3
+from os_client_config import config as cloud_config # For CC7 and python2
 from keystoneauth1 import session as keystone_session
-
 from keystoneclient.v3 import client as keystone_client
 from cinderclient.v3 import client as cinder_client
 from manilaclient.v2 import client as manila_client
@@ -15,6 +15,10 @@ if len (sys.argv) != 2:
   print ("No project_id given")
   exit(-1)
 
+project_id = sys.argv[1];
+outstr=""
+
+
 cc = cloud_config.OpenStackConfig()
 cloud = cc.get_one_cloud() # try with (cloud='cern')
 session = keystone_session.Session(auth=cloud.get_auth())
@@ -25,11 +29,7 @@ manilaclient = manila_client.Client(
                 api_version=manila_api_versions.APIVersion('2.39'),
                 session=session)
 
-outstr=""
-
-project_id = sys.argv[1];
 try: 
-  # openstack project show
   project = keystoneclient.projects.get(project_id)
   accounting_group = getattr(project,'accounting-group')
 
@@ -55,4 +55,4 @@ try:
 except:
   username = "Unknown"
 
-print (username+" "+outstr )
+print (username+" "+outstr)
