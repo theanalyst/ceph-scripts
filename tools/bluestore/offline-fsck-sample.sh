@@ -13,9 +13,10 @@ do
   ceph osd ok-to-stop ${ID}
   systemctl stop ceph-osd@${ID}
   sleep 10
-  ceph-bluestore-tool fsck --path $OSD &> /var/log/ceph/fsck.${ID}.log
+  ceph-bluestore-tool fsck --path $OSD 2>&1 | tee /var/log/ceph/fsck.${ID}.log
   sleep 5
   systemctl start ceph-osd@${ID}
+  break
 done
 ceph osd unset noout
 ceph osd unset noin
