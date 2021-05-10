@@ -3,6 +3,7 @@
 set -e
 set -x
 
+kinit -k
 roger update --appstate=intervention --message="BlueStore FSCK OSDs"
 
 ceph osd set noout
