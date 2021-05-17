@@ -38,6 +38,7 @@ rm -rf /etc/ceph/ /var/lib/ceph/
 
 echo `hostname -s` has been removed from the cluster. Now do:
 echo "   " ai-foreman updatehost -c ceph/decommissioning `hostname -s`
+echo "   " roger update --all_alarms=false `hostname -s`
 echo then run puppet. Next:
 echo "   " ai-disownhost `hostname -s`
 echo then run puppet one final time.
