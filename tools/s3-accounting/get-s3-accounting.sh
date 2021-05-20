@@ -28,9 +28,9 @@ MAPPING_OPENSTACK_GAR="https://gar.cern.ch/public/list_full"
 MAPPING_OPENSTACK_FILE="$SUBDIR/s3accounting-$DATE-mapping-openstack.json"
 
 TARGET_ACCOUNTING_GSS="/eos/project/f/fdo/www/accounting/data.s3.json"
-TARGET_ACCOUNTING_CENTRAL="https://acc-receiver-dev.cern.ch/v3/fe"
-#TODO: Production endpoint
-#TARGET_ACCOUNTING_CENTRAL="https://accounting-receiver.cern.ch/v3/fe"
+TARGET_ACCOUNTING_CENTRAL="https://accounting-receiver.cern.ch/v3/fe"
+# Development and testing endpoint
+# TARGET_ACCOUNTING_CENTRAL="https://acc-receiver-dev.cern.ch/v3/fe"
 
 ARCHIVE="s3accounting-$DATE.tar.gz"
 ARCHIVE_S3="s3://s3-accounting-files/data/$ARCHIVE"
@@ -235,8 +235,7 @@ create_json_for_gss_reporting "$ACCOUNTING_OPENSTACK" "$REPORTING_OPENSTACK_GSS"
 jq -c -s 'map(.data) | flatten | {data: .}' $REPORTING_LOCAL_GSS $REPORTING_OPENSTACK_GSS > $REPORTING_ALL_GSS
 
 ## Publish the overall reporting to to FDO project on EOS
-#cp $REPORTING_GSS /eos/project/f/fdo/www/accounting/data.s3.json
-cp -v $REPORTING_GSS /eos/project/f/fdo/www/accounting/data.s3.json
+cp -v $REPORTING_ALL_GSS $TARGET_ACCOUNTING_GSS
 
 
 
@@ -253,7 +252,7 @@ $THISDIR/convert-report-gss-to-central.py $REPORTING_ALL_GSS
 
 ## Publish reporting to central accounting receiver
 send_to_accounting_receiver $REPORTING_ALL_GSS-reporting-central-quota.json
-#send_to_accounting_receiver $REPORTING_ALL_GSS-reporting-central-usage.json    # Disable as suggested by Jan
+#send_to_accounting_receiver $REPORTING_ALL_GSS-reporting-central-usage.json    # Do no ship actual usage as suggested by Jan
 
 
 
