@@ -1,8 +1,8 @@
-#! /usr/bin/python2 -u
+#! /usr/bin/python3 -u
 
 import os
-#from openstack import config as cloud_config        # For C8 and python3
-from os_client_config import config as cloud_config # For CC7 and python2
+from openstack import config as cloud_config        # For C8 and python3
+#from os_client_config import config as cloud_config # For CC7 and python2
 from keystoneauth1 import session as keystone_session
 from keystoneclient.v3 import client as keystone_client
 from cinderclient.v3 import client as cinder_client
