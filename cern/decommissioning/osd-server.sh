@@ -3,7 +3,6 @@
 set -e
 set -x
 
-ceph balancer off
 ceph pg ls | grep -q backfilling && exit
 
 # If there are OSDs here, check that they are already drained.
@@ -12,6 +11,7 @@ if [ "${OSDS}" ]
 then
     ceph osd ok-to-stop ${OSDS}
     ceph osd safe-to-destroy ${OSDS}
+    ceph balancer off
     ceph osd out ${OSDS}
 fi
 
