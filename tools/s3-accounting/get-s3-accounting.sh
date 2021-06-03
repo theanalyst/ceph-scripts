@@ -31,6 +31,7 @@ TARGET_ACCOUNTING_GSS="/eos/project/f/fdo/www/accounting/data.s3.json"
 TARGET_ACCOUNTING_CENTRAL="https://accounting-receiver.cern.ch/v3/fe"
 # Development and testing endpoint
 # TARGET_ACCOUNTING_CENTRAL="https://acc-receiver-dev.cern.ch/v3/fe"
+CENTRAL_ACCOUNTING_KEY="/afs/cern.ch/user/c/cephacc/private/s3-accounting.key"
 
 ARCHIVE="s3accounting-$DATE.tar.gz"
 ARCHIVE_S3="s3://s3-accounting-files/data/$ARCHIVE"
@@ -44,12 +45,12 @@ send_to_accounting_receiver () {
   JSON="$1"
 
   #curl --silent \
-   curl \
-    -H "Content-Type: application/json" \
-    -H "API-key:$(cat /afs/cern.ch/project/ceph/private/s3-accounting.key)" \
-    -d "@$JSON"  \
-    -X POST \
-    $TARGET_ACCOUNTING_CENTRAL
+  curl \
+   -H "Content-Type: application/json" \
+   -H "API-key:$(cat $CENTRAL_ACCOUNTING_KEY)" \
+   -d "@$JSON"  \
+   -X POST \
+   $TARGET_ACCOUNTING_CENTRAL
 }
 
 
