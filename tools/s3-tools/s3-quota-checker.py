@@ -16,8 +16,6 @@ def sizeof_fmt(num, suffix='B'):
 
 
 parser = ArgumentParser()
-parser.add_argument('-c','--cluster', required=True,
-                    help="Cluster name (required)")
 parser.add_argument('-t','--quota-threshold', required=False, type=int, default=90,
                     help="Quota threshold above which alarm is raised")
 parser.add_argument('-q','--include-quota-disabled', required=False, action='store_true',
@@ -28,18 +26,20 @@ parser.add_argument('-r', '--recipient', required=False, default='ceph-admins@ce
                     help="Recipient email address")
 parser.add_argument('-s', '--sender', required=False, default='root@cephadm.cern.ch',
                     help="Sender email address")
+parser.add_argument('-c','--cluster', required=False,
+                    help="Cluster name for email subject")
 args = parser.parse_args();
 
 
 out = ""
-users = json.loads(subprocess.getoutput('radosgw-admin --cluster=%s user list' % (args.cluster)))
+users = json.loads(subprocess.getoutput('radosgw-admin user list'))
 for uid in users:
     try:
-        info = json.loads(subprocess.getoutput('radosgw-admin --cluster=%s user info --uid=%s' % (args.cluster, uid.strip('\n'))))
+        info = json.loads(subprocess.getoutput('radosgw-admin user info --uid=%s' % (uid.strip('\n'))))
         if (info['user_quota']['max_size_kb'] > 1):
             if (info['user_quota']['enabled']):
                 try:
-                    stats = json.loads(subprocess.getoutput('radosgw-admin --cluster=%s user stats --uid=%s' % (args.cluster, uid.strip('\n'))))['stats']
+                    stats = json.loads(subprocess.getoutput('radosgw-admin user stats --uid=%s' % (uid.strip('\n'))))['stats']
                 except:
                     stats = {}
                     stats['total_bytes'] = 0
@@ -57,8 +57,12 @@ if out != "":
   if (args.display_only):
     print (out)
   else:
+    subject = "S3 Quota checker report"
+    if args.cluster:
+      subject = "S3 Quota checker report for "+args.cluster
+
     msg = EmailMessage();
-    msg['Subject'] = "S3 Quota checker report for "+args.cluster
+    msg['Subject'] = subject
     msg['From'] = args.sender
     msg['To'] = args.recipient
     msg.set_content(out)
