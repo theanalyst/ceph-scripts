@@ -36,6 +36,8 @@ fi
 umount -Af /var/lib/ceph/osd/* &> /dev/null || true
 rm -rf /etc/ceph/ /var/lib/ceph/
 
+set +x
+
 echo `hostname -s` has been removed from the cluster. Now do:
 echo "   " ai-foreman updatehost -c ceph/decommissioning `hostname -s`
 echo "   " roger update --all_alarms=false `hostname -s`
