@@ -29,7 +29,7 @@ def send(line):
     for s, p in SERVERS:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect((socket.gethostbyname(s), p))
-        sock.send(line+'\n')
+        sock.send(line.encode('utf-8'))
         sock.close()
 
 
