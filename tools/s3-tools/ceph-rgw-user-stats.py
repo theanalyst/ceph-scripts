@@ -8,7 +8,7 @@ import sys
 # Carbon servers for reporting
 SERVERS = [
   ('filer-carbon.cern.ch', 2003),
-  ('cephmonitd.cern.ch', 2003)
+  ('metrictank-carbon.cern.ch', 2003)
 ]
 
 
