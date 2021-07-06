@@ -28,7 +28,7 @@ def send(data):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect((socket.gethostbyname(s), p))
         for line in data:
-            sock.sendall(line.encode('utf-8'))
+            sock.sendall((line+'\n').encode('utf-8'))
         sock.close()
 
 
