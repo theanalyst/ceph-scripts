@@ -3,8 +3,6 @@
 from argparse import ArgumentParser
 import json, re, socket, subprocess, time
 
-import sys
-
 # Carbon servers for reporting
 SERVERS = [
   ('filer-carbon.cern.ch', 2003),
@@ -49,9 +47,6 @@ for user in user_list:
         user_data.append(report_usage_template % (cluster, 'user', rm_symbols.sub("_", user), metric, value, timestamp))
 send(user_data)
 
-if cluster == "gabe":
-    user_list.remove('rvalverd') # Remove rvalverd
-    user_list.append('rvalverd') # Put rvalverd at the end (in case we have time)
 
 # Scan the buckets now
 for user in user_list:
