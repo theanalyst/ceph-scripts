@@ -25,18 +25,20 @@ cluster=args.cluster
 
 
 # Helper function to send to carbon cache
-def send(line):
+def send(data):
     for s, p in SERVERS:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect((socket.gethostbyname(s), p))
-        sock.send(line.encode('utf-8'))
+        for line in data:
+            sock.sendall(line.encode('utf-8'))
         sock.close()
 
 
 # Get the list of local users
-user_list = json.loads(subprocess.getoutput('radosgw-admin user list'))
+user_list = json.loads(subprocess.getoutput('timeout 360 radosgw-admin user list'))
 
 # Scan all the users first
+user_data = []
 for user in user_list:
     timestamp = int(time.time())
     try:
@@ -44,8 +46,8 @@ for user in user_list:
     except:
         continue
     for metric, value in res["stats"].items():
-        data = report_usage_template % (cluster, 'user', rm_symbols.sub("_", user), metric, value, timestamp)
-        send(data)
+        user_data.append(report_usage_template % (cluster, 'user', rm_symbols.sub("_", user), metric, value, timestamp))
+send(user_data)
 
 if cluster == "gabe":
     user_list.remove('rvalverd') # Remove rvalverd
@@ -58,10 +60,11 @@ for user in user_list:
         res = json.loads(subprocess.getoutput("timeout 7140 radosgw-admin bucket stats --uid=%s" % (user)))
     except:
         continue
+    bucket_data = []
     for bucket in res:
         bucket_name = bucket["bucket"]
         if "rgw.main" in bucket["usage"]:
             for metric, value in bucket["usage"]["rgw.main"].items():
-                data = report_usage_template % (cluster, 'bucket', rm_symbols.sub("_", bucket_name), metric, value, timestamp)
-                send(data)
+                bucket_data.append(report_usage_template % (cluster, 'bucket', rm_symbols.sub("_", bucket_name), metric, value, timestamp))
+    send(bucket_data)
 
