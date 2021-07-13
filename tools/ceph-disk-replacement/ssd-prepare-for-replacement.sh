@@ -100,9 +100,6 @@ then
     OSD=`ceph device ls | grep $HOSTNAME | grep $DEV | awk 'BEGIN{FS=":"} {print $2}' | tr -d "[a-z.]"`
 fi 
   
-echo "mkdir -p /etc/ceph/osd-bak/"
-echo "cp -a /etc/ceph/osd/* /etc/ceph/osd-bak/"
-
 draw "$DEV is osd.$OSD"
 ceph osd ok-to-stop $OSD &> /dev/null
 retval=`echo $?`
