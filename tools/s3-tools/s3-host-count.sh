@@ -28,11 +28,11 @@ else
   IPv6=$(timeout $TIMEOUT host $HOSTNAME | grep "has IPv6 address" | wc -l)
 
   if [ $IPv4 -le $HOSTCOUNT_THRESHOLD ]; then
-    $TELEGRAM_SEND "$HOSTNAME has only $IPv4 IPv4 addresses in the alias!"
-    $SLACKPOST 'ceph_hostcount' "$HOSTNAME has only $IPv4 IPv4 addresses in the alias!"
+    $TELEGRAM_SEND "$HOSTNAME has only $IPv4 IPv4 addresses (from $PROBE) in the alias!"
+    $SLACKPOST 'ceph_hostcount' "$HOSTNAME has only $IPv4 IPv4 addresses (from $PROBE) in the alias!"
   fi
   if [ $IPv6 -le $HOSTCOUNT_THRESHOLD ]; then
-    $TELEGRAM_SEND "$HOSTNAME has only $IPv6 IPv6 addresses in the alias!"
-    $SLACKPOST 'ceph_hostcount' "$HOSTNAME has only $IPv6 IPv6 addresses in the alias!"
+    $TELEGRAM_SEND "$HOSTNAME has only $IPv6 IPv6 addresses (from $PROBE) in the alias!"
+    $SLACKPOST 'ceph_hostcount' "$HOSTNAME has only $IPv6 IPv6 addresses (from $PROBE) in the alias!"
   fi
 fi
