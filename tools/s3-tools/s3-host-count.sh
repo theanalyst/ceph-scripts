@@ -18,7 +18,8 @@ if [ ! -f $SLACKPOST ]; then
   exit 1
 fi
 if ! which host &> /dev/null; then
-  echo "ERROR: /usr/bin/host not found on $PROBE"
+  $TELEGRAM_SEND "ERROR: /usr/bin/host not found on $PROBE"
+  $SLACKPOST 'ceph_bot' "ERROR: /usr/bin/host not found on $PROBE"
   exit 1
 fi
 
