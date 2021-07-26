@@ -10,11 +10,15 @@ SLACKPOST='/afs/cern.ch/user/e/ebocchi/it-puppet-hostgroup-ceph/code/files/slack
 
 # Make sure you have the tooling to send alert messages
 if [ ! -f $TELEGRAM_SEND ]; then
-  echo "ERROR: TelegramSend script not found! ($TELEGRAM_SEND)"
+  echo "ERROR: TelegramSend script not found! ($TELEGRAM_SEND) on $PROBE"
   exit 1
 fi
 if [ ! -f $SLACKPOST ]; then
-  echo "ERROR: Slackpost script not found! ($SLACKPOST)"
+  echo "ERROR: Slackpost script not found! ($SLACKPOST) on $PROBE"
+  exit 1
+fi
+if ! which host &> /dev/null; then
+  echo "ERROR: /usr/bin/host not found on $PROBE"
   exit 1
 fi
 
