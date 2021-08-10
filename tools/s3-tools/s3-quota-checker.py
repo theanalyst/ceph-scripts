@@ -22,7 +22,7 @@ parser.add_argument('-q','--include-quota-disabled', required=False, action='sto
                     help="Include in the report users for which no quota limit is enforced")
 parser.add_argument('-d','--display-only', required=False, action='store_true',
                     help="Show report on screen without sending the email")
-parser.add_argument('-r', '--recipient', required=False, default='ceph-admins@cern.ch',
+parser.add_argument('-r', '--recipient', required=False, default='ceph-botmail@cern.ch',
                     help="Recipient email address")
 parser.add_argument('-s', '--sender', required=False, default='root@cephadm.cern.ch',
                     help="Sender email address")
