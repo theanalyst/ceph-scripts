@@ -9,4 +9,8 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-ceph pg ls undersized 2>/dev/null | grep undersized | grep ${FILTER} | awk '{print $1}' | xargs -n1 echo ceph pg repeer
+if [ x$FILTER = x"" ]; then
+  ceph pg ls undersized 2>/dev/null | grep undersized | awk '{print $1}' | xargs -n1 echo ceph pg repeer
+else
+  ceph pg ls undersized 2>/dev/null | grep undersized | grep ${FILTER} | awk '{print $1}' | xargs -n1 echo ceph pg repeer
+fi
