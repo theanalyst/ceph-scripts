@@ -53,7 +53,7 @@ fi
 s3_hosts_v4=$(timeout $TIMEOUT host $HOSTNAME | grep "has address" | rev | cut -d ' ' -f 1 | rev )
 for ip in $s3_hosts_v4
 do
-  error=$(timeout $TIMEOUT curl -sS -X GET http://$ip 2>&1 >/dev/null)
+  error=$(curl -m $TIMEOUT -sS -X GET http://$ip 2>&1 >/dev/null)
   if [ $? -ne 0 ]; then
     $TELEGRAM_SEND "Unable to \`curl\` S3 via $ip from $PROBE: $error"
     $SLACKPOST 's3_curl' "Unable to \`curl\` S3 via $ip from $PROBE: $error"
@@ -62,7 +62,7 @@ done
 s3_hosts_v6=$(timeout $TIMEOUT host $HOSTNAME | grep "has IPv6 address" | rev | cut -d ' ' -f 1 | rev )
 for ip in $s3_hosts_v6
 do
-  error=$(timeout $TIMEOUT curl -sS -g -6 -X GET http://[$ip] 2>&1 >/dev/null)
+  error=$(curl -m $TIMEOUT -sS -g -6 -X GET http://[$ip] 2>&1 >/dev/null)
   if [ $? -ne 0 ]; then
     $TELEGRAM_SEND "Unable to \`curl\` S3 via $ip from $PROBE: $error"
     $SLACKPOST 's3_curl' "Unable to \`curl\` S3 via $ip from $PROBE: $error"
