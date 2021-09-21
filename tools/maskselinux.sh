@@ -18,6 +18,6 @@ fi
 
 if [ "$1" == "--unmask" ]
 then
-    echo Restoring backup /usr/bin/selinuxenabled
-    mv -f /usr/sbin/selinuxenabled.orig /usr/bin/selinuxenabled
+    echo Restoring backup /usr/sbin/selinuxenabled
+    mv -f /usr/sbin/selinuxenabled.orig /usr/sbin/selinuxenabled
 fi
