@@ -12,7 +12,7 @@ fi
 if [ "$1" == "--mask" ]
 then
     echo Linking to /bin/false
-    mv -f /usr/sbin/selinuxenabled /usr/bin/selinuxenabled.orig
+    mv -f /usr/sbin/selinuxenabled /usr/sbin/selinuxenabled.orig
     ln -s /bin/false /usr/sbin/selinuxenabled
 fi
 
