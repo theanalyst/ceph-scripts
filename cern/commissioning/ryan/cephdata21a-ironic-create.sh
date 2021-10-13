@@ -1,7 +1,15 @@
 ## 
 # This is for the HW delivery in January 2021
 #
-# See CEPH-1043 (https://its.cern.ch/jira/browse/CEPH-1043)
+# See:
+#  - CEPH-1043 (https://its.cern.ch/jira/browse/CEPH-1043)
+#  - CEPH-1230 (https://its.cern.ch/jira/browse/CEPH-1230)
+#
+# Once created, ai-install with software raid1 on system disk
+#    eval $(ai-rc "IT Ceph Ironic")
+#    ai-foreman updatehost -e production -p 'Ceph (EFI,SSD+JBOD)' -o 'CentOS Stream 8' -m CentOSStream8 $HOST
+#    ai-installhost --mode=uefi $HOST
+#    openstack server reboot --hard $HOST
 ##
 
 #!/bin/bash -x
@@ -18,12 +26,7 @@ if [ $? != "0" ] ; then
 fi
 
 PREFIX='cephdata21a-'
-
-## # Extend existing Beesly
-## FLAVOR='p1.dl8330179.S513-C-IP501'
-
-# Critical Power (barn) nodes -- BeeslyPrime
-FLAVOR='p1.dl8330179.S513-A-IP250'
+FLAVOR='p1.dl8330179.S513-C-IP501'
 
 ai-bs     --landb-mainuser ceph-admins \
           --landb-responsible ceph-admins \
