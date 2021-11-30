@@ -40,11 +40,23 @@ for uid in users:
             if (info['user_quota']['enabled']):
                 try:
                     stats = json.loads(subprocess.getoutput('radosgw-admin user stats --uid=%s' % (uid.strip('\n'))))['stats']
+                    # `user stats` output changed in Nautilus to Octopus
+                    if ('total_bytes' in stats.keys()):
+                      total_bytes = stats['total_bytes']
+                    elif ('size' in stats.keys()):
+                      total_bytes = stats['size']
+                    else:
+                      total_bytes = 0
+                    if ('total_entries' in stats.keys()):
+                      total_entries = stats['total_entries']
+                    elif ('num_objects' in stats.keys()):
+                      total_entries = stats['num_objects']
+                    else:
+                      total_entries = 0
                 except:
-                    stats = {}
-                    stats['total_bytes'] = 0
-                    stats['total_entries'] = 0
-                percentused = 100*stats['total_bytes']/info['user_quota']['max_size'];
+                  total_bytes = 0
+                  total_entries = 0
+                percentused = 100*total_bytes/info['user_quota']['max_size'];
                 if percentused > args.quota_threshold:
                     out+=("Account %s (%s) is reaching its quota (%.2f)%s\n" % (uid.strip('\n'), info['display_name'], percentused, (', please contact '+info['email']) if info['email'] != '' else '')) #, info['email'] if info['email'] != '' else 'none' )
             elif args.include_quota_disabled and not (info['user_quota']['enabled']):
