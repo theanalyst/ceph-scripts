@@ -21,10 +21,20 @@
 # --> do you want to proceed? (yes/no)
 #
 
+echo
 echo This tool is in beta testing. Double check output before running the suggested command.
 echo
 
 set -e
+
+HEALTH=$(ceph health)
+if [ "$HEALTH" != 'HEALTH_OK' ]
+then
+    echo Ceph is not healthy... please try again later.
+    echo
+    echo "${HEALTH}"
+    exit 1
+fi
 
 HOST=$(hostname -s)
 OSDS=$(ceph osd tree-from $HOST destroyed | grep osd\. | awk '{print $1}' | xargs echo)
