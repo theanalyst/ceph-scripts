@@ -6,6 +6,9 @@
 # take an inventory of all usable devices. Finally, it suggests a ceph-volume
 # command to be used to recreate missing OSDs.
 
+echo This tool is in beta testing. Double check output before running the suggested command.
+echo
+
 set -e
 
 HOST=$(hostname -s)
@@ -13,15 +16,17 @@ OSDS=$(ceph osd tree-from $HOST destroyed | grep osd\. | awk '{print $1}' | xarg
 
 if [ -z "$OSDS" ]
 then
-      echo ERROR: Could not find ID of destroyed OSDs on $HOST, exiting...
+      echo "ERROR: Could not find any destroyed OSDs on localhost (${HOST}), exiting..."
       exit 1
 fi
 
-DEVS=$(ceph-volume inventory --format json --filter-for-batch | jq -r .[].path | xargs echo)
+echo -n Found OSDs $OSDS to be recreated. Checking device inventory ...
 
-echo This tool is in beta testing. Double check output before running the suggested command.
+DEVS=$(ceph-volume inventory --format json --filter-for-batch | jq -r .[].path | xargs echo)
+echo done
 echo
-echo Found OSDs $OSDS to be recreated. Use this command:
+
+echo Run this command to recreate OSDs:
 echo
 echo ceph-volume batch $DEVS --osd-id $OSDS
 
