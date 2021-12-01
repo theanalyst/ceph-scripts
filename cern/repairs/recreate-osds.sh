@@ -20,13 +20,13 @@ then
       exit 1
 fi
 
-echo -n Found OSDs $OSDS to be recreated. Checking device inventory ...
+echo -n "Found OSD(s) ${OSDS} to be recreated. Checking device inventory ... "
 
 DEVS=$(ceph-volume inventory --format json --filter-for-batch | jq -r .[].path | xargs echo)
 echo done
 echo
 
-echo Run this command to recreate OSDs:
+echo "Please use this command to recreate OSDs. Check the planned changes and type 'yes' if it looks correct:"
 echo
-echo ceph-volume batch $DEVS --osd-id $OSDS
+echo ceph-volume lvm batch ${DEVS} --osd-id ${OSDS}
 
