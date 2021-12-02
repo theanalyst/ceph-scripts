@@ -1,9 +1,9 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 try: import simplejson as json
 except ImportError: import json
 
-import commands
+import subprocess
 import time
 import argparse
 import rados
@@ -25,34 +25,34 @@ CONF = args.CONF
 try:
   cluster = rados.Rados(conffile=CONF)
 except TypeError as e:
-  print 'Argument validation error: ', e
+  print('Argument validation error: ', e)
   raise e
 
 try:
   cluster.connect()
 except Exception as e:
-  print "connection error: ", e
+  print("connection error: ", e)
   raise e
 
 while(True):
 
-  print "Dumping pg info."
+  print("Dumping pg info.")
 
   cmd = {'prefix': 'pg dump', 'format': 'json'}
   ret, buf, out = cluster.mon_command(json.dumps(cmd), b'', timeout=5)
 
-  print "Loading pg stats json."
+  print("Loading pg stats json.")
   pg_dump = json.loads(buf)
   pg_stats = pg_dump['pg_map']['pg_stats']
 
   # Which PGs are scrubbing?
   pgs_scrubbing = [ pg for pg in pg_stats if 'scrubbing' in pg['state'] ]
   pgs_scrubbing.sort(key=lambda k: k['pgid'])
-  print
-  print "PGs Scrubbing:"
+  print()
+  print("PGs Scrubbing:")
   for pg in pgs_scrubbing:
-    print '  ', pg['pgid'], 'last scrubbed', pg['last_scrub_stamp'],
-    print 'on osds', ' '.join(str(o) for o in pg['acting'])
+    print('  ', pg['pgid'], 'last scrubbed', pg['last_scrub_stamp'], end=' ')
+    print('on osds', ' '.join(str(o) for o in pg['acting']))
 
   n_scrubbing = len(pgs_scrubbing)
 
@@ -65,10 +65,10 @@ while(True):
       except KeyError:
         osds_scrubbing[osd] = 1
 
-  print
-  print "OSDs scrubbing (%s in total): " % len(osds_scrubbing.keys())
-  print '  ',
-  print ', '.join(str(o) for o in sorted(osds_scrubbing.keys()))
+  print()
+  print("OSDs scrubbing (%s in total): " % len(list(osds_scrubbing.keys())))
+  print('  ', end=' ')
+  print(', '.join(str(o) for o in sorted(osds_scrubbing.keys())))
 
   #for osd, n in osds_scrubbing.iteritems():
   #  print '  ', osd, '(%d scrubs)' % n
@@ -78,18 +78,18 @@ while(True):
   pgs_scrubbing_next = [pg for pg in pg_stats if 'scrubbing' not in pg['state'] ][:10]
   pgids_scrubbing_next = [pg['pgid'] for pg in pgs_scrubbing_next]
 
-  print
-  print "PGs next to be scrubbed:"
-  print "   (PGs scheduled after now - osd_scrub_min_interval will wait until then.)"
-  print "   (PGs scheduled before now - osd_scrub_min_interval are blocked by osd_max_scrubs or waiting for loadavg < osd_scrub_load_threshold)"
-  print
+  print()
+  print("PGs next to be scrubbed:")
+  print("   (PGs scheduled after now - osd_scrub_min_interval will wait until then.)")
+  print("   (PGs scheduled before now - osd_scrub_min_interval are blocked by osd_max_scrubs or waiting for loadavg < osd_scrub_load_threshold)")
+  print()
   for pg in pgs_scrubbing_next:
-    print '  ', pg['pgid'], 'last scrubbed', pg['last_scrub_stamp'],
-    print 'on osds', ' '.join(str(o) for o in pg['acting']),
+    print('  ', pg['pgid'], 'last scrubbed', pg['last_scrub_stamp'], end=' ')
+    print('on osds', ' '.join(str(o) for o in pg['acting']), end=' ')
     for osd in pg['acting']:
-      if osd in osds_scrubbing.keys():
-        print '(blocked by OSD', osd, ')',
-    print
+      if osd in list(osds_scrubbing.keys()):
+        print('(blocked by OSD', osd, ')', end=' ')
+    print()
 
 
   # Which PGs have not been deep scrubbed the longest?
@@ -100,34 +100,34 @@ while(True):
 
   i = 0
   n_triggered = 0
-  print
-  print "Should trigger %d deep scrubs" % n_to_trigger
-  print
-  print "PGs least recently deep scrubbed:"
+  print()
+  print("Should trigger %d deep scrubs" % n_to_trigger)
+  print()
+  print("PGs least recently deep scrubbed:")
   for pg in pgs_scrubbing_stale:
     i += 1
-    print '  ', pg['pgid'], 'last deep scrubbed', pg['last_deep_scrub_stamp'],
-    print 'last scrubbed', pg['last_scrub_stamp'],
+    print('  ', pg['pgid'], 'last deep scrubbed', pg['last_deep_scrub_stamp'], end=' ')
+    print('last scrubbed', pg['last_scrub_stamp'], end=' ')
     blocked = False
     for osd in pg['acting']:
-      if osd in osds_scrubbing.keys():
-        print '(blocked by OSD', osd, ')',
+      if osd in list(osds_scrubbing.keys()):
+        print('(blocked by OSD', osd, ')', end=' ')
         blocked = True
     if not blocked and n_to_trigger > 0:
-      output = commands.getoutput('ceph pg deep-scrub %s' % pg['pgid'])
-      print output,
+      output = subprocess.getoutput('ceph pg deep-scrub %s' % pg['pgid'])
+      print(output, end=' ')
       n_triggered += 1
       if n_triggered == n_to_trigger:
         break
-    print
+    print()
     if n_to_trigger < 1 and i == 10:
       break
 
   if SLEEP:
-    print
-    print "Sleeping %d seconds..." % SLEEP
+    print()
+    print("Sleeping %d seconds..." % SLEEP)
     time.sleep(SLEEP)
-    print
+    print()
   else:
     break
 
