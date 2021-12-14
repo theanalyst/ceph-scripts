@@ -54,7 +54,8 @@ rand_export_pin () {
       echo rand_export_pin: pinning $DIR to $PIN ...
       setfattr -n ceph.dir.pin -v $PIN $DIR
     done
-done
+  done
+}
 
 trim () {
   while true
