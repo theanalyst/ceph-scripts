@@ -61,8 +61,8 @@ trim () {
   while true
   do
     sleep $(shuf -i 0-20 -n 1)
-    echo trim: trimming files more than 5m old...
-    find /cephfs/stressfs/ -type f -mmin +60 -delete &> /dev/null
+    echo trim: trimming files more than 120m old...
+    find /cephfs/stressfs/ -type f -mmin +120 -delete &> /dev/null
     echo trim: done
   done
 }
