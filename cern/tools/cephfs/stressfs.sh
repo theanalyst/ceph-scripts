@@ -34,7 +34,7 @@ loadgen () {
 toggle_maxmds () {
   while true
   do
-    sleep $(shuf -i 30-60 -n 1)
+    sleep $(shuf -i 60-120 -n 1)
     MAXMDS=$(ceph fs dump -f json 2>/dev/null | jq -r .filesystems[0].mdsmap.max_mds)
     if [ "${MAXMDS}" == "1" ]
     then
