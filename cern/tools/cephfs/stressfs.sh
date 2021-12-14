@@ -70,8 +70,8 @@ trim () {
 stat () {
   while true
   do
-    echo stat: walking all files...
-    find /cephfs/stressfs/ &> /dev/null
+    echo stat: long listing all files...
+    ls -lR /cephfs/stressfs/ &> /dev/null
     echo stat: done
   done
 }
