@@ -43,15 +43,18 @@ rand_maxmds () {
 }
 
 rand_export_pin () {
+  setfattr -n ceph.dir.pin -v -1 /cephfs/stressfs
   while true
   do
     sleep $(shuf -i 30-60 -n 1)
-    PIN=$(shuf -i 0-2 -n 1)
-    echo rand_export_pin: pinning to $PIN ...
-    setfattr -n ceph.dir.pin -v $PIN /cephfs/stressfs
-    echo rand_export_pin: pinned to $PIN
-  done
-}
+    cd /cephfs/stressfs
+    for DIR in `find . -mindepth 1 -maxdepth 1 -type d | sort`
+    do
+      PIN=$(shuf -i 0-2 -n 1)
+      echo rand_export_pin: pinning $DIR to $PIN ...
+      setfattr -n ceph.dir.pin -v $PIN $DIR
+    done
+done
 
 trim () {
   while true
