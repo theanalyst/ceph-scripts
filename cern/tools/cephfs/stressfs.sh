@@ -38,7 +38,7 @@ rand_maxmds () {
     MAX=$(shuf -i 1-3 -n 1)
     echo rand_maxmds: setting max_mds $MAX
     ceph fs set cephfs max_mds $MAX
-    echo toggle_maxmds: done
+    echo rand_maxmds: done
   done
 }
 
@@ -74,10 +74,15 @@ stat () {
 
 init
 loadgen &
-rand_maxmds &
-rand_export_pin &
 trim &
 stat &
+
+RANK=$(ceph daemon mds.`hostname -s` status | jq -r .whoami)
+if [ "$RANK" == "0" ]
+then
+  rand_maxmds &
+  rand_export_pin &
+fi
 
 trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
 wait
