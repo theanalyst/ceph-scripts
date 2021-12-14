@@ -31,19 +31,13 @@ loadgen () {
   done
 }
 
-toggle_maxmds () {
+rand_maxmds () {
   while true
   do
     sleep $(shuf -i 60-120 -n 1)
-    MAXMDS=$(ceph fs dump -f json 2>/dev/null | jq -r .filesystems[0].mdsmap.max_mds)
-    if [ "${MAXMDS}" == "1" ]
-    then
-      echo toggle_maxmds: setting max_mds 2
-      ceph fs set cephfs max_mds 2
-    else
-      echo toggle_maxmds: setting max_mds 1
-      ceph fs set cephfs max_mds 1
-    fi
+    MAX=$(shuf -i 1-3 -n 1)
+    echo rand_maxmds: setting max_mds $MAX
+    ceph fs set cephfs max_mds $MAX
     echo toggle_maxmds: done
   done
 }
@@ -52,7 +46,7 @@ rand_export_pin () {
   while true
   do
     sleep $(shuf -i 30-60 -n 1)
-    PIN=$(shuf -i 0-1 -n 1)
+    PIN=$(shuf -i 0-2 -n 1)
     echo rand_export_pin: pinning to $PIN ...
     setfattr -n ceph.dir.pin -v $PIN /cephfs/stressfs
     echo rand_export_pin: pinned to $PIN
@@ -80,7 +74,7 @@ stat () {
 
 init
 loadgen &
-toggle_maxmds &
+rand_maxmds &
 rand_export_pin &
 trim &
 stat &
