@@ -21,8 +21,8 @@ loadgen () {
   while true
   do
     f=$(uuid -v4)
-    mkdir -p ${f::2}
-    touch ${f::2}/${f}
+    mkdir -p ${f::3}
+    touch ${f::3}/${f}
     i=$((i+1))
     if [ "$(($i % 1000))" == "0" ]
     then
@@ -63,6 +63,7 @@ trim () {
     sleep $(shuf -i 0-20 -n 1)
     echo trim: trimming files more than 120m old...
     find /cephfs/stressfs/ -type f -mmin +120 -delete &> /dev/null
+    find /cephfs/stressfs/ -type d -empty -delete &> /dev/null
     echo trim: done
   done
 }
