@@ -46,7 +46,7 @@ rand_export_pin () {
   setfattr -n ceph.dir.pin -v -1 /cephfs/stressfs
   while true
   do
-    sleep $(shuf -i 30-60 -n 1)
+    sleep $(shuf -i 300-600 -n 1)
     cd /cephfs/stressfs
     for DIR in `find . -mindepth 1 -maxdepth 1 -type d | sort`
     do
