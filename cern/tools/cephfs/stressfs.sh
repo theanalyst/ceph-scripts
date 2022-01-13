@@ -34,7 +34,7 @@ loadgen () {
 rand_maxmds () {
   while true
   do
-    sleep $(shuf -i 60-120 -n 1)
+    sleep $(shuf -i 180-360 -n 1)
     MAX=$(shuf -i 1-3 -n 1)
     echo rand_maxmds: setting max_mds $MAX
     ceph fs set cephfs max_mds $MAX
@@ -85,6 +85,7 @@ stat &
 RANK=$(ceph daemon mds.`hostname -s` status | jq -r .whoami)
 if [ "$RANK" == "0" ]
 then
+  echo "I am rank 0. Running rand_maxmds rand_export_pin"
   rand_maxmds &
   rand_export_pin &
 fi
