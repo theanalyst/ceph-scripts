@@ -55,3 +55,6 @@ echo "Please use this command to recreate OSDs. Check the planned changes and ty
 echo
 echo ceph-volume lvm batch ${DEVS} --osd-id ${OSDS}
 
+echo "Once the OSDs are recreated, set their primary affinity to 1 with the following command(s)"
+echo
+echo $OSDS | xargs -n1 echo | awk '{print "ceph osd primary-affinity "$0" 1"}'
