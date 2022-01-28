@@ -3,7 +3,7 @@
 # ceph-gentle-drain
 # Author: Dan van der Ster <daniel.vanderster@cern.ch>
 #
-# Slowly drain a list of OSDs causing minimal impact in a ceph cluster.
+# Slowly drain a list of OSDs or an entire host causing minimal impact in a ceph cluster.
 #
 
 import sys
@@ -78,6 +78,33 @@ def update_osd_tree():
     print "update_osd_tree: done"
 
 
+def get_children(host):
+    global osd_tree
+    osds = []
+
+    print ("get_children: loading children for %s" % (host))
+    for node in osd_tree['nodes']:
+        if node['name'] == host:
+            osds = list("osd.%s" % (i) for i in node['children'])
+    print ("get_children: done")
+    return osds
+
+
+def check_device_class(host, osds):
+    global osd_tree
+    classes = set()
+
+    print ("check_device_class: Checking %s has only one device class" % (host))
+    for node in osd_tree['nodes']:
+        if node['name'] in osds:
+            classes.add(node['device_class'])
+    if len(classes) > 1:
+        print ("check_device_class: Multiple classes detected on %s: %s" % (host, ','.join(sorted(classes))))
+        print ("check_device_class: Reweighting a subtree with different classes is typically wrong.")
+        sys.exit(0)
+    print ("check_device_class: done")
+
+
 def get_crush_weight(osd):
     global osd_tree
     for node in osd_tree['nodes']:
@@ -99,7 +126,8 @@ def measure_latency(pool):
 
 
 def get_num_backfilling():
-    cmd = "ceph health detail | grep pg | grep -v stuck | grep backfilling | wc -l"
+    #cmd = "ceph health detail | grep pg | grep -v stuck | grep backfilling | wc -l"
+    cmd = "ceph pg ls backfilling | wc -l"
     out = commands.getoutput(cmd)
     n = int(out)
     print "get_num_backfilling: PGs currently backfilling: %s" % n
@@ -113,20 +141,39 @@ def crush_reweight(osd, weight):
     print "crush_reweight: %s" % out
 
 
-def drain(osds, max_pgs_backfilling, max_latency, max_delta_weight, bench_pool):
+def crush_reweight_subtree(host, weight):
+    cmd = "ceph osd crush reweight-subtree %s %s" % (host, weight)
+    print "crush_reweight_subtree: calling %s" % cmd
+    out = commands.getoutput(cmd)
+    print "crush_reweight: %s" % out
+
+
+def all_done(bench_pool):
+    print "All done"
+    cleanup(bench_pool)
+    sys.exit(0)
+
+
+def drain(osds, host, max_pgs_backfilling, max_latency, max_delta_weight, bench_pool):
 
     # check if there is any work to do:
     update_osd_tree()
     total_weight = 0
-    for osd in osds:
-        total_weight += get_crush_weight(osd)
+    osd_list = []
 
+    if osds:
+        osd_list = osds
+    elif host:
+        osd_list = get_children(host)
+        check_device_class(host, osd_list)
+
+    # check total weight is greater than 0
+    for osd in osd_list:
+        total_weight += get_crush_weight(osd)
     if total_weight == 0:
         print "drain: no work to do, exiting"
         cleanup(bench_pool)
         sys.exit(0)
-
-    print "drain: draining total weight %s" % total_weight
 
     # check num pgs backfilling
     npgs = get_num_backfilling()
@@ -140,27 +187,51 @@ def drain(osds, max_pgs_backfilling, max_latency, max_delta_weight, bench_pool):
         print "drain: latency is too high, trying again later"
         return
 
-    total_delta_weight = 0
+    # there is some work to do
+    print "drain: draining total weight %s" % total_weight
 
-    for osd in osds:
-        if total_delta_weight > max_delta_weight:
-            print "drain: reached max delta weight this round: %s" % total_delta_weight
-            return
+    if osds:
+        # Reduce the weight of osds to 0 (unless exceeding max_delta_weight for the run)
+        delta_weight = 0
+        for osd in osd_list:
+            if delta_weight > max_delta_weight:
+                print "drain: reached max delta weight this round: %s" % delta_weight
+                return
 
-        weight = get_crush_weight(osd)
-        if weight <= 0:
-            print "drain: skipping %s with weight %s" % (osd, weight)
-            continue
+            weight = get_crush_weight(osd)
+            if weight <= 0:
+                print "drain: skipping %s with weight %s" % (osd, weight)
+                continue
 
-        new_weight = 0
-        print "drain: %s new weight will be %s" % (osd, new_weight)
-        crush_reweight(osd, new_weight)
-        total_delta_weight += weight
+            new_weight = 0
+            print "drain: %s new weight will be %s" % (osd, new_weight)
+            crush_reweight(osd, new_weight)
+            delta_weight += weight
+        if delta_weight == 0:
+            all_done(bench_pool)
 
-    if total_delta_weight == 0:
-        print "All done"
-        cleanup(bench_pool)
-        sys.exit(0)
+    elif host:
+        # Reduce the weight of the host by weight_reduction_factor (default 0.1)
+        #   - unless higher than max_delta_weight*number_of_osds
+        #       in this case, reduce by max_delta_weight*number_of_osds
+        #   - or lower than 0.1*number_of_osds
+        #       in this case, reduce by the weight of the subtree
+        weight_reduction_factor = 0.1
+        weight_reduction = weight_reduction_factor * total_weight
+        if weight_reduction > max_delta_weight * len(osd_list):
+            weight_reduction = max_delta_weight * len(osd_list)
+        elif weight_reduction < 0.1 * len(osd_list):
+            weight_reduction = total_weight
+
+        new_weight = total_weight - weight_reduction
+        if new_weight < 0:
+            new_weight = 0
+
+        per_osd_weight = new_weight / len(osd_list)
+        print "drain: %s new weight will be %s (osd weight: %s)" % (host, new_weight, per_osd_weight)
+        crush_reweight_subtree(host, per_osd_weight)
+        if new_weight == 0:
+            all_done(bench_pool)
 
 
 def usage(code=0):
@@ -169,19 +240,22 @@ def usage(code=0):
 
         OPTIONS
         -o/--osds <osd>[,<osd>,...]    Comma separated OSDs to drain
+        -s/--host <host>               Host to drain
         -l/--latency <N>               Max lantency ms, default 50
         -b/--backfills <N>             Max PGs backfilling, default 20
-        -w/--weight <N>                Max incremental weight, default 2
+        -w/--weight <N>                Max decremental weight, default 2
         --bench-pool <POOL>            Pool used to measure latency, default 'test'
 
         Example:
         ceph-gentle-drain -o osd.0
+        ceph-gentle-drain -s cephdata...
         """)
     sys.exit(code)
 
 
 def main(argv):
     drain_osds = []
+    drain_host = None
     max_latency = 50
     max_pgs_backfilling = 20
     max_delta_weight = 2
@@ -190,8 +264,8 @@ def main(argv):
     try:
         opts, args = getopt.getopt(
             argv,
-            "ho:l:b:w:",
-            ["osds=", "latency=", "backfills=", "weight=", "bench-pool="])
+            "ho:s:l:b:w:",
+            ["osds=", "host=", "latency=", "backfills=", "weight=", "bench-pool="])
     except getopt.GetoptError:
         usage(2)
 
@@ -200,6 +274,8 @@ def main(argv):
             usage()
         elif opt in ("-o", "--osds"):
             drain_osds = arg.split(',')
+        elif opt in ("-s", "--host"):
+            drain_host = arg
         elif opt in ("-l", "--latency"):
             max_latency = int(arg)
         elif opt in ("-b", "--backfills"):
@@ -211,21 +287,24 @@ def main(argv):
         else:
             print("unknow option: %s" % opt)
 
-    if not drain_osds:
+    if not drain_osds and not drain_host:
         usage(2)
 
     print('==============================================================')
-    print('OSDs to drain: %s' % drain_osds)
+    if drain_osds:
+      print('OSDs to drain: %s' % drain_osds)
+    elif drain_host:
+      print('Subtree to drain: %s' % drain_host)
+    print('Max delta weight: %f' % max_delta_weight)
     print('Max latency (ms): %d' % max_latency)
     print('Max PGs backfilling: %d' % max_pgs_backfilling)
-    print('Max delta weight: %f' % max_delta_weight)
     print('Benchmark pool: %s' % bench_pool)
     print('==============================================================')
 
     prepare(bench_pool)
 
     while(True):
-        drain(drain_osds, max_pgs_backfilling, max_latency, max_delta_weight,
+        drain(drain_osds, drain_host, max_pgs_backfilling, max_latency, max_delta_weight,
               bench_pool)
         print "main: sleeping 60s"
         time.sleep(60)
