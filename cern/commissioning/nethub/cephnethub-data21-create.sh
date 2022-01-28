@@ -26,7 +26,7 @@ FLAVOR='p1.dl8642293.S773-C-IP180'
 ai-bs     --landb-mainuser ceph-admins \
           --landb-responsible ceph-admins \
           --nova-flavor $FLAVOR \
-          --c8 \
+          --cs8 \
           --foreman-environment 'production' \
           --foreman-hostgroup 'ceph/spare' \
           --prefix $PREFIX
