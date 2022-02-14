@@ -6,7 +6,6 @@ import json, re, socket, subprocess, time
 # Carbon servers for reporting
 SERVERS = [
   ('filer-carbon.cern.ch', 2003),
-  ('metrictank-carbon.cern.ch', 2003)
 ]
 
 
