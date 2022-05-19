@@ -4,6 +4,25 @@
 # See 
 #   - CEPH-1193 (https://its.cern.ch/jira/browse/CEPH-1193)
 #   - DCRUN32021-2320 (https://its.cern.ch/jira/browse/DCRUN32021-2320)
+#
+#
+# ** WARNING **
+# These machines came with the following fast devices:
+#   [N:0:4:1]    disk    SAMSUNG MZ1LB3T8HMLA-00007__1              /dev/nvme0n1
+#   [N:1:1:1]    disk    Micron_7300_MTFDHBE3T8TDF__1               /dev/nvme1n1
+#   [N:2:1:1]    disk    Micron_7300_MTFDHBE3T8TDF__1               /dev/nvme2n1
+#   [N:3:1:1]    disk    KCD6XLUL1T92__1                            /dev/nvme3n1
+#   [N:4:1:1]    disk    KCD6XLUL1T92__1                            /dev/nvme4n1
+#
+# Just by instantiating the machine via Openstack Ironic, the /dev/nvme3n1 will
+# be used for the system disk as it is the first one in alphabetical order.
+#
+# Once created, ai-install with the system disk on the right device:
+#    eval $(ai-rc "IT Ceph Ironic")
+#    ai-foreman updatehost -e production -p 'Ceph (EFI,data22)' -o 'CentOS Stream 8' -m CentOSStream $HOST
+#    ai-installhost --mode=uefi $HOST
+#    openstack server reboot --hard $HOST
+#
 ##
 
 #!/bin/bash -x
