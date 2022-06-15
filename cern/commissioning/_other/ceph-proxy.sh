@@ -15,7 +15,7 @@ if [ $? != "0" ] ; then
   exit
 fi
 
-PREFIX='cephtelemetry-proxy-'
+PREFIX='ceph-proxy-'
 FLAVOR='m2.small'
 #VM_ZONE="cern-geneva-a"
 #VM_ZONE="cern-geneva-b"
@@ -27,5 +27,5 @@ ai-bs     --landb-mainuser ceph-admins \
           --nova-flavor $FLAVOR \
           --cs8 \
           --foreman-environment 'production' \
-          --foreman-hostgroup 'ceph/telemetry_proxy' \
+          --foreman-hostgroup 'ceph/proxy' \
           --prefix $PREFIX
