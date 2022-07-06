@@ -4,6 +4,7 @@
 set -e
 set -x
 
+kinit -k
 roger update --appstate=intervention --message="Compacting OSDs"
 
 ceph osd set noout
