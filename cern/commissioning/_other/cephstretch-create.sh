@@ -1,5 +1,8 @@
 ##
 # This is to create a Ceph stretch cluster for testing
+#
+# Also look into the Terraform-managed part:
+#   https://gitlab.cern.ch/ceph/terraform/terraform-ceph/-/tree/main/cluster/stretch
 ##
 
 #!/bin/bash -x
@@ -25,7 +28,7 @@ create_volume () {
 
   openstack volume create \
 	  --size 100 \
-	  --type standard \
+	  --type io2 \
 	  --availability-zone $AZ \
 	  $VOLUME_NAME
 }
@@ -49,6 +52,7 @@ create_vm $NAME_PREFIX-a-2 cern-geneva-a
 create_vm $NAME_PREFIX-a-3 cern-geneva-a
 create_vm $NAME_PREFIX-b-1 cern-geneva-b
 create_vm $NAME_PREFIX-b-2 cern-geneva-b
+create_vm $NAME_PREFIX-b-3 cern-geneva-b
 create_vm $NAME_PREFIX-c-1 cern-geneva-c
 
 create_volume $NAME_PREFIX-a-1 ceph-geneva-1
