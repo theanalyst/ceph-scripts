@@ -32,8 +32,7 @@ VM_FLAVOR="m2.xlarge"    # 8 CPUs, 16GB, 80GB
 #VM_FLAVOR="r4.2xlarge"  # 20 CPUs, 64GB, 320GB
 
 # OS
-OS="c8"   # CentOS 8
-#OS="cs8"  # CentOS Stream 8
+OS="cs8"  # CentOS Stream 8
 
 # Define VM availability zone
 VM_ZONE="cern-geneva-a"
