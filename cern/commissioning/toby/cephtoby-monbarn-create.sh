@@ -20,11 +20,12 @@ fi
 
 PREFIX='cephtoby-mon-'
 FLAVOR='m2.large'
+RHEL_ID='68b56d3a-2910-4cdb-8bf5-28b358f9b865'
 
 ai-bs     --landb-mainuser ceph-admins \
           --landb-responsible ceph-admins \
           --nova-flavor $FLAVOR \
-          --cs8 \
+          -i $RHEL_ID \
           --foreman-environment 'production' \
           --foreman-hostgroup 'ceph/toby/mon' \
           --prefix $PREFIX
