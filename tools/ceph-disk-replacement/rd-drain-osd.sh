@@ -119,7 +119,6 @@ if [[ `ceph osd ok-to-stop osd.$OSD &> /dev/null` -eq 0 ]];
 then
   echo "ceph osd out osd.$OSD;"
   echo "ceph osd primary-affinity osd.$OSD 0;"
-  echo "touch /root/log.${cluster}.drain.${HOSTNAME}.${OSD}"
   echo "while [ \`ceph osd df tree --filter_by=name --filter=osd.$OSD --format=json | jq '.nodes[].pgs'\` -ne 0 ]; do"
   echo "sleep 600; echo \"Draining in progress... (\`ceph osd df tree --filter_by=name --filter=osd.$OSD --format=json | jq '.nodes[].pgs'\`)\";"
   echo "done;"
@@ -129,8 +128,6 @@ then
   echo "else"
   echo "umount /var/lib/ceph/osd/ceph-$OSD"
   echo "ceph-volume lvm zap --destroy --osd-id $OSD"
-  echo "touch /root/log.${cluster}.prepare.${HOSTNAME}.${OSD}"
-  echo "rm -f /root/log.${cluster}.drain.${HOSTNAME}.${OSD}"
   echo "ceph osd destroy $OSD --yes-i-really-mean-it"
   echo "fi"
 fi

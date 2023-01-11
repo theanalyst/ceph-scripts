@@ -184,7 +184,6 @@ then
   CMDS=`/root/ceph-scripts/ceph-volume/repair-team-striped-osd-prepare.sh $DEV $MOREDEV`
   echo "$CMDS --osd-id $OSD"
   echo "ceph osd primary-affinity osd.$OSD 1;"
-  echo "rm -f /root/log.${cluster}.prepare.${HOSTNAME}.${OSD}"
 else
   echo "ceph-volume lvm zap $DEV"
 
@@ -205,14 +204,4 @@ else
     echo "ceph-volume lvm batch $DEV $DBD --yes --osd-id $OSD"
     echo "ceph osd primary-affinity osd.$OSD 1;"
   fi
-  echo "rm -f /root/log.${cluster}.prepare.${HOSTNAME}.${OSD}"
 fi
-
-## TODO
-#
-# Auto discover osd to be replaced (grep on ceph osd tree down to find down osd on the host)
-# Auto find if 2-disk OSDs are used
-
-
-#  awk 'BEGIN { out=0 } { if($0 ~ /rack/) {out=0} if(out) {print $0} if($0 ~ /RJ55/) {out=1}; } '
-
