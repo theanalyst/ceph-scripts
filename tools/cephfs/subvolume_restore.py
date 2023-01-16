@@ -96,13 +96,21 @@ if __name__ == "__main__":
   parser = argparse.ArgumentParser(description="CephFS Subvolume Dump")
   parser.add_argument("-c", "--cluster", help="Cluster name", required=True, default=None)
   parser.add_argument("-i", "--input", help="File containing previous dump to restore to", required=True)
-  parser.add_argument("-m", "--mount", help="Local mountpoint to manipulate subvolume attributes")
+  parser.add_argument("-m", "--mount", help="Local mountpoint to manipulate subvolume attributes (via chown / chmod)")
+  parser.add_argument("-f", "--force", help="Restore attributes according to input file without checking current state (saves time querying the current state)", default=False, action="store_true")
   parser.add_argument("-n", "--list-new", help="Print list of subvolumes for which historic data is unknown", default=False, action="store_true")
   args = parser.parse_args()
 
   # Load the json file with the previous dump
   old_json = load_json(args.input)
   old_subvols = load_subvols(old_json)
+
+  # If forcing restore, chown / chmod according to imput file
+  if args.force:
+    for old_subvol in old_subvols.values():
+      old_subvol.fix_owner(mount=args.mount)
+      old_subvol.fix_mode(mount=args.mount)
+    sys.exit()
 
   # Get the current properties of each subvolume and compare
   new = []
