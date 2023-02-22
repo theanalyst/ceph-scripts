@@ -79,9 +79,6 @@ if [[ -z $POOL || -z $NAMESPACE || -z $CLIENT_ID || -z $SIZE ]]; then
   exit 1
 fi
 
-# Generate a uuid for the RBD image
-RBD_IMAGE=$(uuidgen)
-
 # Check the namespace
 NAMESPACE_CREATE=false
 if rbd --pool $POOL namespace ls | grep -q $NAMESPACE; then
@@ -99,17 +96,26 @@ else
 fi
 
 # Check the RBD image
-#   The RBD_IMAGE is given by uuidgen. It is very much impossible to have conflicting names
+#   The RBD_IMAGE is given by uuidgen. It is very much impossible to have conflicting names, but we check anyway
+RBD_IMAGE=$(uuidgen)
 RBD_CREATE=false
-if rbd --pool $POOL --namespace $NAMESPACE ls | grep -q $RBD_IMAGE; then
-  echo "Warning: RBD image $RBD_IMAGE already exists"
-else
+if $NAMESPACE_CREATE; then
   RBD_CREATE=true
+else
+  if rbd --pool $POOL --namespace $NAMESPACE ls | grep -q $RBD_IMAGE; then
+    echo "Warning: RBD image $RBD_IMAGE already exists"
+  else
+    RBD_CREATE=true
+  fi
 fi
+echo ""
+echo "You are about to create:"
+echo "  - RBD image: $RBD_IMAGE in namespace $NAMESPACE (pool $POOL)"
+echo "  - Client accessing the namespace: $CLIENT_ID"
 
 
 echo ""
-echo "Check and execute these commands:"
+echo "To proceed with creation, check and execute these commands:"
 if $NAMESPACE_CREATE; then
   echo "  rbd --pool $POOL namespace create --namespace $NAMESPACE"
 fi
@@ -119,4 +125,3 @@ fi
 if $RBD_CREATE; then
   echo "  rbd --pool $POOL --namespace $NAMESPACE create $RBD_IMAGE --size $SIZE"
 fi
-
