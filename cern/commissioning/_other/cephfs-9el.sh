@@ -11,7 +11,7 @@ if [ $? != "0" ] ; then
   exit
 fi
 
-PREFIX='cephfs-testel9-'
+PREFIX='cephfs-test9el-'
 FLAVOR='m2.medium'
 
 ai-bs     --landb-mainuser ceph-admins \

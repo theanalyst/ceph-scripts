@@ -1,8 +1,3 @@
-## 
-# This is to create a VM to test krbd
-#
-##
-
 #!/bin/bash -x
 
 unset OS_PROJECT_ID;
@@ -16,14 +11,13 @@ if [ $? != "0" ] ; then
   exit
 fi
 
-PREFIX='cephkrbd-testcs8-'
-FLAVOR='m2.small'
+PREFIX='cephfs-test9al-'
+FLAVOR='m2.medium'
 
 ai-bs     --landb-mainuser ceph-admins \
           --landb-responsible ceph-admins \
-	  --nova-flavor $FLAVOR \
-	  --cs8 \
-	  --nova-sshkey 'ebocchi' \
+          --nova-flavor $FLAVOR \
+          --nova-image 168d97d6-52b7-475d-8fa4-8fb32e35a31b \
           --foreman-environment 'qa' \
-          --foreman-hostgroup 'ceph/test/krbd' \
+          --foreman-hostgroup 'ceph/test/cephfs' \
           --prefix $PREFIX

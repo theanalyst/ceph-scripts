@@ -11,13 +11,13 @@ if [ $? != "0" ] ; then
   exit
 fi
 
-PREFIX='cephfs-testel8-'
+PREFIX='cephfs-test8al-'
 FLAVOR='m2.medium'
 
 ai-bs     --landb-mainuser ceph-admins \
           --landb-responsible ceph-admins \
           --nova-flavor $FLAVOR \
-          --nova-image f453ecdd-1428-4e5c-a776-b0779724ab76 \
+          --nova-image 1d98132f-a85f-453e-8c3e-607fc28116d2 \
           --foreman-environment 'qa' \
           --foreman-hostgroup 'ceph/test/cephfs' \
           --prefix $PREFIX
