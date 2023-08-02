@@ -22,7 +22,7 @@ FLAVOR='m2.small'
 ai-bs     --landb-mainuser ceph-admins \
           --landb-responsible ceph-admins \
 	  --nova-flavor $FLAVOR \
-	  --cs8 \
+	  --alma8 \
 	  --nova-sshkey 'ebocchi' \
           --foreman-environment 'qa' \
           --foreman-hostgroup 'ceph/test/krbd' \
