@@ -19,6 +19,12 @@
 #   'root_device': {'model': 'SAMSUNG MZ1LB3T8HMLA-00007'}}
 #   ```
 #
+# Also, if there is a need to reinstall with a different OS, proceed as follows:
+# To reinstall with RHEL 9 without killing the instance and re-creating:
+#   eval $(ai-rc "IT Ceph Ironic")
+#   ai-foreman updatehost -e production -p 'Ceph (EFI,data22)' --operatingsystem "RHEL 9.2" -m RedHatCERN $HOST
+#   ai-installhost --mode=uefi $HOST
+#   openstack server reboot --hard $HOST
 ##
 
 #!/bin/bash -x
@@ -42,7 +48,7 @@ FLAVOR='p1.dl9262616.S513-C-IP840'  # and other 12 of these
 ai-bs     --landb-mainuser ceph-admins \
           --landb-responsible ceph-admins \
           --nova-flavor $FLAVOR \
-          --alma9 \
+          --rhel9 \
           --foreman-environment 'production' \
           --foreman-hostgroup 'ceph/spare' \
           --prefix $PREFIX
