@@ -15,8 +15,8 @@ then
     ceph osd out ${OSDS}
 fi
 
-# Stop Ceph daemons
-systemctl stop ceph.target
+# Stop Ceph OSD daemons
+systemctl stop ceph-osd.target
 
 # Wipe all disks and destroy all osds
 for OSD in ${OSDS}
@@ -32,15 +32,19 @@ then
     ceph osd crush rm `hostname -s`
 fi
 
-# Destroy all secrets
+# Unmount the osd LVs
 umount -Af /var/lib/ceph/osd/* &> /dev/null || true
-rm -rf /etc/ceph/ /var/lib/ceph/
+
+# Destroy all secrets
+## Not doing for now, other daemons may be colocated
+## rm -rf /etc/ceph/ /var/lib/ceph/
 
 set +x
 
 echo `hostname -s` has been removed from the cluster. Now do:
 echo "   " ai-foreman updatehost -c ceph/decommissioning `hostname -s`
 echo "   " roger update --all_alarms=false `hostname -s`
+echo "   " rm -rf /etc/ceph/ /var/lib/ceph/
 echo then run puppet. Next:
 echo "   " ai-disownhost `hostname -s`
 echo then run puppet one final time.
