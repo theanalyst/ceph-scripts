@@ -16,13 +16,13 @@ if [ $? != "0" ] ; then
   exit
 fi
 
-PREFIX='cephpoc-mon-'
+PREFIX='cephpoc-mds-'
 FLAVOR='m2.large'
 
 ai-bs     --landb-mainuser ceph-admins \
           --landb-responsible ceph-admins \
           --nova-flavor $FLAVOR \
-          --rhel8 \
+          --rhel9 \
           --foreman-environment 'production' \
-          --foreman-hostgroup 'ceph/poc/mon' \
+          --foreman-hostgroup 'ceph/poc/mds' \
           --prefix $PREFIX
