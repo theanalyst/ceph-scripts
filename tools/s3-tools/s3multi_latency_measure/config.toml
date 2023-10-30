@@ -1,0 +1,7 @@
+access_key = "<the-access-key>"
+secret_key = "<the-secret-key>"
+bucket = "<the-bucket-name>"
+endpoint_a = "s3-stanley-meyrin.cern.ch"
+endpoint_b = "s3-stanley-nethub.cern.ch"
+grafana_host = "filer-carbon.cern.ch"
+grafana_port = 2003
