@@ -50,8 +50,8 @@ if bucket_a is None or bucket_b is None:
     print(f"failed to find {config['bucket']} on supplied hosts with supplied keypair.")
     exit()
 
-# create test object(s) in bucket on A and verify it has been created successfully.
 def cycle_process():
+    # create test object(s) in bucket on A and verify it has been created successfully.
     data_payload = urandom(data_size)
     put_a_start = timer()
     key = s3_add_object(conn_a, config['bucket'], data_payload)
@@ -60,39 +60,52 @@ def cycle_process():
         print(f"failed to put object onto {config['endpoint_a']}. connection problem?")
         exit()
     put_a_success = timer()
+    upload_time = put_a_success - put_a_start
+    print(f"upload time to A: {upload_time}")
 
-    # start checking Host B for new object, then download once availible
+    # start checking on B for new object to measure replication latency
     while True:
         obj = s3_find_object(conn_b, config['bucket'], key, "head")
         if obj is not None:
             break
         time.sleep(args.poll_rate)
     head_b_success = timer()
+    replication_latency = head_b_success - put_a_success
     print(f"replication hit for {key}")
+    print(f"replication latency: {replication_latency}")
+
+    # pull object from B to validate checksum
+    get_b_start = timer()
     file = s3_find_object(conn_b, config['bucket'], key, "get")
     get_b_success = timer()
+    download_time = get_b_success - get_b_start
+    print(f"download time from B: {download_time}")
     replica_hash = sha256(file['Body'].read()).hexdigest()
     if key == replica_hash: # because the key is a product of hashing the object body, we can compare directly like this
-        print(f"object body hash match from [A] {key} to [B] {replica_hash}")  
+        print(f"hash ok: [A] {key}, [B] {replica_hash}")
     else:
-        print("object body hash mismatch from [A] {key} to [B] {replica_hash}!")  
+        print(f"hash NOT ok: [A] {key}, [B] {replica_hash}")
 
-    # perform an inverse check for deletion started on b and propagated to a.
-    del_b_start = timer()
-    s3_del_object(conn_b, config['bucket'], key)
+    # delete from A and measure delete propagation time on B
+    #   Note: This was changes on 31/10/23 to let B operate in read-only mode instead of rw
+    del_a_start = timer()
+    s3_del_object(conn_a, config['bucket'], key)
     while True:
-        obj = s3_find_object(conn_a, config['bucket'], key, "head")
+        obj = s3_find_object(conn_b, config['bucket'], key, "head")
         if obj is None:
             break
         time.sleep(args.poll_rate)
-    head_a_success = timer()
+    head_b_success = timer()
+    dereplication_latency = head_b_success - del_a_start
     print(f"dereplication hit for {key}")
+    print(f"dereplication latency: {dereplication_latency}")
+
     # push our stats for the cycle into filer-carbon or whichever grafana upstream we want
     print(f"Pushing stats to {config['grafana_host']}:{config['grafana_port']} WARNING: this may fail if you are using a version of netcat that doesn't support the -N (EOF) flag!")
-    subprocess.run(f"echo test.s3-mu.{args.object_size}.file-upload-time {put_a_success - put_a_start} $(date +%s) | netcat {config['grafana_host']} {config['grafana_port']} -N", shell=True)
-    subprocess.run(f"echo test.s3-mu.{args.object_size}.file-replication-latency {head_b_success - put_a_success} $(date +%s) | netcat {config['grafana_host']} {config['grafana_port']} -N", shell=True)
-    subprocess.run(f"echo test.s3-mu.{args.object_size}.file-download-time {get_b_success - head_b_success} $(date +%s) | netcat {config['grafana_host']} {config['grafana_port']} -N", shell=True)
-    subprocess.run(f"echo test.s3-mu.{args.object_size}.file-dereplication-latency {head_a_success - del_b_start} $(date +%s) | netcat {config['grafana_host']} {config['grafana_port']} -N", shell=True)
+    subprocess.run(f"echo test.s3-mu.{args.object_size}.file-upload-time {upload_time} $(date +%s) | netcat {config['grafana_host']} {config['grafana_port']} -N", shell=True)
+    subprocess.run(f"echo test.s3-mu.{args.object_size}.file-replication-latency {replication_latency} $(date +%s) | netcat {config['grafana_host']} {config['grafana_port']} -N", shell=True)
+    subprocess.run(f"echo test.s3-mu.{args.object_size}.file-download-time {download_time} $(date +%s) | netcat {config['grafana_host']} {config['grafana_port']} -N", shell=True)
+    subprocess.run(f"echo test.s3-mu.{args.object_size}.file-dereplication-latency {dereplication_latency} $(date +%s) | netcat {config['grafana_host']} {config['grafana_port']} -N", shell=True)
     subprocess.run(f"echo test.s3-mu.{args.object_size}.poll-rate {args.poll_rate} $(date +%s) | netcat {config['grafana_host']} {config['grafana_port']} -N", shell=True)
 
 
