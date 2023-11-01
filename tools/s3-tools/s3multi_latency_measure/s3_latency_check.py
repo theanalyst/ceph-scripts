@@ -1,4 +1,6 @@
-import subprocess, time
+import socket
+import subprocess
+import time
 import yaml
 from argparse import ArgumentParser
 from hashlib import sha256
@@ -35,6 +37,8 @@ elif data_size < 4096:  # 4KB in B
     print(f"supplied object size ({sizeof_su(data_size)}) does not meet 4KB minimum.")
     exit()
 
+# time reference -- will be sent to grafana
+time_ref = int(time.time())
 
 # set up our connections and bucket objects
 args.grafana_host = validate_hostname(config['grafana_host'], url=False)
@@ -101,12 +105,28 @@ def cycle_process():
     print(f"dereplication latency: {dereplication_latency}")
 
     # push our stats for the cycle into filer-carbon or whichever grafana upstream we want
-    print(f"Pushing stats to {config['grafana_host']}:{config['grafana_port']} WARNING: this may fail if you are using a version of netcat that doesn't support the -N (EOF) flag!")
-    subprocess.run(f"echo test.s3-mu.{args.object_size}.file-upload-time {upload_time} $(date +%s) | netcat {config['grafana_host']} {config['grafana_port']} -N", shell=True)
-    subprocess.run(f"echo test.s3-mu.{args.object_size}.file-replication-latency {replication_latency} $(date +%s) | netcat {config['grafana_host']} {config['grafana_port']} -N", shell=True)
-    subprocess.run(f"echo test.s3-mu.{args.object_size}.file-download-time {download_time} $(date +%s) | netcat {config['grafana_host']} {config['grafana_port']} -N", shell=True)
-    subprocess.run(f"echo test.s3-mu.{args.object_size}.file-dereplication-latency {dereplication_latency} $(date +%s) | netcat {config['grafana_host']} {config['grafana_port']} -N", shell=True)
-    subprocess.run(f"echo test.s3-mu.{args.object_size}.poll-rate {args.poll_rate} $(date +%s) | netcat {config['grafana_host']} {config['grafana_port']} -N", shell=True)
+    print(f"Pushing stats to {config['grafana_host']}:{config['grafana_port']}")
+    lines = []
+    prefix = 'test.s3-mu'
+    lines.append("%s.%s.%s %s %d" % (prefix, args.object_size, 'file-upload-time', upload_time, time_ref))
+    lines.append("%s.%s.%s %s %d" % (prefix, args.object_size, 'file-replication-latency', replication_latency, time_ref))
+    lines.append("%s.%s.%s %s %d" % (prefix, args.object_size, 'file-download-time', download_time, time_ref))
+    lines.append("%s.%s.%s %s %d" % (prefix, args.object_size, 'file-dereplication-latency', dereplication_latency, time_ref))
+    lines.append("%s.%s.%s %s %d" % (prefix, args.object_size, 'poll-rate', args.poll_rate, time_ref))
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect((socket.gethostbyname(config['grafana_host']), config['grafana_port']))
+    for line in lines:
+      st = line+'\n'
+      byt = st.encode()
+      sock.send(byt)
+    sock.close()
+
+    #WARNING: this may fail if you are using a version of netcat that doesn't support the -N (EOF) flag!")
+    #subprocess.run(f"echo test.s3-mu.{args.object_size}.file-upload-time {upload_time} $(date +%s) | netcat {config['grafana_host']} {config['grafana_port']} -N", shell=True)
+    #subprocess.run(f"echo test.s3-mu.{args.object_size}.file-replication-latency {replication_latency} $(date +%s) | netcat {config['grafana_host']} {config['grafana_port']} -N", shell=True)
+    #subprocess.run(f"echo test.s3-mu.{args.object_size}.file-download-time {download_time} $(date +%s) | netcat {config['grafana_host']} {config['grafana_port']} -N", shell=True)
+    #subprocess.run(f"echo test.s3-mu.{args.object_size}.file-dereplication-latency {dereplication_latency} $(date +%s) | netcat {config['grafana_host']} {config['grafana_port']} -N", shell=True)
+    #subprocess.run(f"echo test.s3-mu.{args.object_size}.poll-rate {args.poll_rate} $(date +%s) | netcat {config['grafana_host']} {config['grafana_port']} -N", shell=True)
 
 
 # define two cycle process methods to use and run one based on the supplied flags.
