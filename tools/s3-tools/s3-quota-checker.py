@@ -4,7 +4,7 @@ from __future__ import division
 from argparse import ArgumentParser
 from email.message import EmailMessage
 
-import json, subprocess, smtplib, sys
+import json, re, subprocess, smtplib, sys
 
 
 def sizeof_fmt(num, suffix='B'):
@@ -18,6 +18,8 @@ def sizeof_fmt(num, suffix='B'):
 parser = ArgumentParser()
 parser.add_argument('-t','--quota-threshold', required=False, type=int, default=90,
                     help="Quota threshold above which alarm is raised")
+parser.add_argument('-p', '--include-openstack-users', required=False, action='store_true',
+                    help="Include in the report users with names resambling OpenStack UUIDs")
 parser.add_argument('-q','--include-quota-disabled', required=False, action='store_true',
                     help="Include in the report users for which no quota limit is enforced")
 parser.add_argument('-d','--display-only', required=False, action='store_true',
@@ -32,8 +34,24 @@ args = parser.parse_args();
 
 
 out = ""
+openstack_users = []
+local_users = []
 users = json.loads(subprocess.getoutput('radosgw-admin user list'))
 for uid in users:
+    # openstack users look like 'fe26cc2b-cfba-4e4f-8169-9e4220beccc0'
+    match = re.search(r'([a-z]|[0-9]){8}-(([a-z]|[0-9]){4}-){3}([a-z]|[0-9]){12}', uid)
+    if match:
+        openstack_users.append(uid)
+    else:
+        local_users.append(uid)
+
+# We always check quota for the local users
+users_to_check = local_users
+# ...and check OpenStack ones on demand
+if args.include_openstack_users:
+    users_to_check.extend(openstack_users)
+
+for uid in users_to_check:
     try:
         info = json.loads(subprocess.getoutput('radosgw-admin user info --uid=%s' % (uid.strip('\n'))))
         if (info['user_quota']['max_size_kb'] > 1):
@@ -64,7 +82,6 @@ for uid in users:
     except:
         print("Warning: User %s does not exist but it part of users list" % (uid))
 
-
 if out != "":
   if (args.display_only):
     print (out)
@@ -78,7 +95,7 @@ if out != "":
     msg['From'] = args.sender
     msg['To'] = args.recipient
     msg.set_content(out)
-    
+
     s = smtplib.SMTP('localhost')
     s.send_message(msg)
     s.quit()
