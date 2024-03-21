@@ -20,7 +20,6 @@ if ceph fs status | grep "$hostname" | grep -q "active"; then
   
   for inode in $inodes
   do
-    echo "found inode: ${inode}" >> /root/evict-timestamped.log
     # Find the path from the inode
     dump_inode=$(ceph daemon mds.`hostname -s` dump inode $inode)
     fullpath=$(echo $dump_inode | jq -r .path)
