@@ -3,7 +3,7 @@
 #
 # See 
 # dcrun32023 https://its.cern.ch/jira/browse/DCRUN32023-3121
-# ceph-1483  https://its.cern.ch/jira/browse/CEPH-1483?
+# ceph-1483  https://its.cern.ch/jira/browse/CEPH-1483
 ##
 
 #!/bin/bash -x
