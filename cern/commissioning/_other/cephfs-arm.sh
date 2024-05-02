@@ -17,9 +17,15 @@ if [ $? != "0" ] ; then
   exit
 fi
 
-PREFIX='cephfs-testcs8-arm-'
 FLAVOR='a1.small'
-IMAGE='c6fe6547-af62-44ab-8840-4397ab15166e'
+
+## Alma 8
+#PREFIX='cephfs-testal8-arm-'
+#IMAGE='3be27fcc-3935-45eb-86c8-4ab8d65ea85f'
+
+# Alma 9
+PREFIX='cephfs-testal9-arm-'
+IMAGE='be750991-9a66-461d-b6ba-8b0e1b56d5b7'
 
 ai-bs     --landb-mainuser ceph-admins \
           --landb-responsible ceph-admins \
@@ -27,5 +33,5 @@ ai-bs     --landb-mainuser ceph-admins \
 	  --nova-image $IMAGE \
 	  --nova-sshkey 'ebocchi_arm' \
           --foreman-environment 'qa' \
-          --foreman-hostgroup 'ceph/test/cephfs' \
+          --foreman-hostgroup 'ceph/test/cephfs/watchers' \
           --prefix $PREFIX
