@@ -35,25 +35,30 @@ VM_FLAVOR="m4.xlarge"    # 8 CPUs, 32GB, 80GB
 OS="rhel9"  # RHEL 9
 
 # Availability zones are not available in PDC.
-# Let's use anti-affinity to make sure the VMs do not land on the same hypervisor
-#                                                                               
-#   $ openstack server group create \
-#     --policy anti-affinity \
-#     --rule scope=zone \
-#     --rule max_server_per_host=1
-#     different_racks
+# Let's use soft-anti-affinity to make sure the VMs do not land on the same hypervisor
 #
-#   +------------+---------------------------------------+
-#   | Field      | Value                                 |
-#   +------------+---------------------------------------+
-#   | id         | d14c8e28-6983-48e1-b0cb-7b2aea9881f3  |
-#   | members    |                                       |
-#   | name       | different_racks                       |
-#   | policy     | anti-affinity                         |
-#   | project_id | 5d8ea54e-697d-446f-98f3-da1ce8f8b833  |
-#   | rules      | max_server_per_host='1', scope='zone' |
-#   | user_id    | ebocchi                               |
-#   +------------+---------------------------------------+
+# Affinity and anti-affinity filters extended with zone (rack) and location (room)
+#   – soft vs hard (cloud prefers soft as it gives them more leeway if they need to migrate VMs)
+#   – scope: Host, Zone (rack), Location (room)
+#   – max_server_per_scope
+#
+#   $ openstack server group create \
+#       --policy soft-anti-affinity \
+#       --rule scope=zone \
+#       --rule max_server_per_scope=1 \
+#       one_per_rack
+#
+#   +------------+----------------------------------------+
+#   | Field      | Value                                  |
+#   +------------+----------------------------------------+
+#   | id         | 310ffccf-5e18-4374-b840-61ad38f29253   |
+#   | members    |                                        |
+#   | name       | one_per_rack                           |
+#   | policy     | soft-anti-affinity                     |
+#   | project_id | 5d8ea54e-697d-446f-98f3-da1ce8f8b833   |
+#   | rules      | max_server_per_scope='1', scope='zone' |
+#   | user_id    | ebocchi                                |
+#   +------------+----------------------------------------+
 #
 
 # Create the VM
@@ -62,9 +67,8 @@ ai-bs     --landb-mainuser CEPH-ADMINS \
           --landb-ipv6ready \
           --$OS \
           --nova-flavor $VM_FLAVOR \
-	  --nova-hint 'group=d14c8e28-6983-48e1-b0cb-7b2aea9881f3' \
+	  --nova-hint 'group=310ffccf-5e18-4374-b840-61ad38f29253' \
           --foreman-hostgroup $VM_HOSTGROUP \
 	  --foreman-environment $VM_ENVIRONMENT \
   	  --roger-appstate 'build' \
           --prefix $VM_NAME_PREFIX
-
