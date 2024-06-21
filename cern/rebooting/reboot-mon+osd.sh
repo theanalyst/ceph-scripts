@@ -9,8 +9,8 @@ OSDS=$(ceph osd crush ls ${HOSTNAME})
 ceph osd ok-to-stop ${OSDS}
 ceph mon ok-to-stop mon.${HOSTNAME}
 
-if [[ $cluster =~ "gabe" ]]
-        echo "$cluster will incurr slowops on mon restart"
+if [[ $CLUSTER =~ "gabe" ]]; then
+        echo "$CLUSTER will incurr slowops on mon restart"
         echo "use ceph-scripts/cern/rebooting/slow-ops-reboot/ instead."
         exit
 fi
