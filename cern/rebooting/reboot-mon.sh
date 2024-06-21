@@ -3,7 +3,15 @@
 set -e
 
 echo Checking if it is OK to stop
+CLUSTER=$(facter --json | jq .hostgroup_1 | xargs)
 HOSTNAME=$(hostname -s)
+
+if [[ $cluster =~ "gabe" ]]
+	echo "$cluster will incurr slowops on mon restart"
+	echo "use ceph-scripts/cern/rebooting/slow-ops-reboot/ instead."
+	exit 
+fi
+
 ceph mon ok-to-stop mon.`hostname -s`
 
 if facter -p is_virtual | grep -q false
